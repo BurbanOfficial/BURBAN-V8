@@ -52,6 +52,23 @@ document.addEventListener('DOMContentLoaded', () => {
         currentGender = gender;
     }
     
+    // Load categories from localStorage
+    const categories = JSON.parse(localStorage.getItem('adminCategories')) || [
+        { id: 1, name: 'T-shirts', slug: 't-shirts' },
+        { id: 2, name: 'Hoodies', slug: 'hoodies' },
+        { id: 3, name: 'Pantalons', slug: 'pants' },
+        { id: 4, name: 'Accessoires', slug: 'accessories' }
+    ];
+    
+    const filtersContainer = document.getElementById('categoryFilters');
+    categories.forEach(cat => {
+        const btn = document.createElement('button');
+        btn.className = 'filter-btn';
+        btn.dataset.category = cat.slug;
+        btn.textContent = cat.name;
+        filtersContainer.appendChild(btn);
+    });
+    
     displayProducts();
     
     document.querySelectorAll('.filter-btn').forEach(btn => {
