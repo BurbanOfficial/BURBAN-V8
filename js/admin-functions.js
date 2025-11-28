@@ -306,6 +306,13 @@ function deleteSizeGuide(id) {
     }
 }
 
+// Modal close handlers
+document.querySelectorAll('.modal-close').forEach(btn => {
+    btn.addEventListener('click', function() {
+        this.closest('.modal').classList.remove('active');
+    });
+});
+
 // Charger les catégories au démarrage
 if (document.getElementById('productCategory')) {
     loadCategories();

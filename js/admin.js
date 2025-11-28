@@ -162,6 +162,7 @@ function loadDashboard() {
     loadProducts();
     loadOrders();
     loadUsers();
+    if (typeof loadSizeGuides === 'function') loadSizeGuides();
 }
 
 // Products Management
