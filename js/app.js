@@ -345,42 +345,59 @@ function showSizeGuide(sizeGuideId) {
     const guides = JSON.parse(localStorage.getItem('sizeGuides')) || [];
     const guide = guides.find(g => g.id === sizeGuideId);
     
-    let content = `
-        <table style="width: 100%; border-collapse: collapse; margin-bottom: 24px; text-align: left;">
-            <thead>
-                <tr style="border-bottom: 1px solid var(--border);">
-                    <th style="padding: 12px;">Taille</th>
-                    <th style="padding: 12px;">Poitrine (cm)</th>
-                    <th style="padding: 12px;">Longueur (cm)</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr style="border-bottom: 1px solid var(--border);">
-                    <td style="padding: 12px;">S</td>
-                    <td style="padding: 12px;">94-98</td>
-                    <td style="padding: 12px;">68</td>
-                </tr>
-                <tr style="border-bottom: 1px solid var(--border);">
-                    <td style="padding: 12px;">M</td>
-                    <td style="padding: 12px;">98-102</td>
-                    <td style="padding: 12px;">70</td>
-                </tr>
-                <tr style="border-bottom: 1px solid var(--border);">
-                    <td style="padding: 12px;">L</td>
-                    <td style="padding: 12px;">102-106</td>
-                    <td style="padding: 12px;">72</td>
-                </tr>
-                <tr>
-                    <td style="padding: 12px;">XL</td>
-                    <td style="padding: 12px;">106-110</td>
-                    <td style="padding: 12px;">74</td>
-                </tr>
-            </tbody>
-        </table>
-    `;
+    let content;
     
-    if (guide) {
-        content = guide.content;
+    if (guide && guide.columns && guide.rows) {
+        content = `
+            <table style="width: 100%; border-collapse: collapse; margin-bottom: 24px; text-align: left;">
+                <thead>
+                    <tr style="border-bottom: 1px solid var(--border);">
+                        ${guide.columns.map(col => `<th style="padding: 12px;">${col}</th>`).join('')}
+                    </tr>
+                </thead>
+                <tbody>
+                    ${guide.rows.map((row, index) => `
+                        <tr style="${index < guide.rows.length - 1 ? 'border-bottom: 1px solid var(--border);' : ''}">
+                            ${row.map(cell => `<td style="padding: 12px;">${cell}</td>`).join('')}
+                        </tr>
+                    `).join('')}
+                </tbody>
+            </table>
+        `;
+    } else {
+        content = `
+            <table style="width: 100%; border-collapse: collapse; margin-bottom: 24px; text-align: left;">
+                <thead>
+                    <tr style="border-bottom: 1px solid var(--border);">
+                        <th style="padding: 12px;">Taille</th>
+                        <th style="padding: 12px;">Poitrine (cm)</th>
+                        <th style="padding: 12px;">Longueur (cm)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr style="border-bottom: 1px solid var(--border);">
+                        <td style="padding: 12px;">S</td>
+                        <td style="padding: 12px;">94-98</td>
+                        <td style="padding: 12px;">68</td>
+                    </tr>
+                    <tr style="border-bottom: 1px solid var(--border);">
+                        <td style="padding: 12px;">M</td>
+                        <td style="padding: 12px;">98-102</td>
+                        <td style="padding: 12px;">70</td>
+                    </tr>
+                    <tr style="border-bottom: 1px solid var(--border);">
+                        <td style="padding: 12px;">L</td>
+                        <td style="padding: 12px;">102-106</td>
+                        <td style="padding: 12px;">72</td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 12px;">XL</td>
+                        <td style="padding: 12px;">106-110</td>
+                        <td style="padding: 12px;">74</td>
+                    </tr>
+                </tbody>
+            </table>
+        `;
     }
     
     document.body.classList.add('modal-open');

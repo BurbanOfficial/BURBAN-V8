@@ -254,10 +254,45 @@ function loadSizeGuides() {
     }
 }
 
+let sizeGuideRowsData = [];
+
+function renderSizeGuideRows() {
+    const container = document.getElementById('sizeGuideRows');
+    const columns = document.getElementById('sizeGuideColumns').value.split(',').map(c => c.trim()).filter(c => c);
+    
+    container.innerHTML = sizeGuideRowsData.map((row, index) => `
+        <div style="display: flex; gap: 8px; margin-bottom: 8px; align-items: center;">
+            ${columns.map((col, colIndex) => `
+                <input type="text" placeholder="${col}" value="${row[colIndex] || ''}" 
+                    onchange="sizeGuideRowsData[${index}][${colIndex}] = this.value" 
+                    style="flex: 1;">
+            `).join('')}
+            <button type="button" onclick="removeSizeGuideRow(${index})" style="background: none; color: var(--gray); padding: 8px;">✕</button>
+        </div>
+    `).join('');
+}
+
+function removeSizeGuideRow(index) {
+    sizeGuideRowsData.splice(index, 1);
+    renderSizeGuideRows();
+}
+
+document.getElementById('sizeGuideColumns')?.addEventListener('input', () => {
+    renderSizeGuideRows();
+});
+
+document.getElementById('addRowBtn')?.addEventListener('click', () => {
+    const columns = document.getElementById('sizeGuideColumns').value.split(',').map(c => c.trim()).filter(c => c);
+    sizeGuideRowsData.push(new Array(columns.length).fill(''));
+    renderSizeGuideRows();
+});
+
 document.getElementById('addSizeGuideBtn')?.addEventListener('click', () => {
     document.getElementById('sizeGuideModalTitle').textContent = 'Ajouter un guide des tailles';
     document.getElementById('sizeGuideForm').reset();
     document.getElementById('sizeGuideId').value = '';
+    sizeGuideRowsData = [];
+    document.getElementById('sizeGuideRows').innerHTML = '';
     document.getElementById('sizeGuideModal').classList.add('active');
 });
 
@@ -266,10 +301,13 @@ document.getElementById('sizeGuideForm')?.addEventListener('submit', (e) => {
     const guides = JSON.parse(localStorage.getItem('sizeGuides')) || [];
     const id = document.getElementById('sizeGuideId').value;
     
+    const columns = document.getElementById('sizeGuideColumns').value.split(',').map(c => c.trim()).filter(c => c);
+    
     const guide = {
         id: id ? parseInt(id) : Date.now(),
         name: document.getElementById('sizeGuideName').value,
-        content: document.getElementById('sizeGuideContent').value
+        columns: columns,
+        rows: sizeGuideRowsData
     };
     
     if (id) {
@@ -292,7 +330,9 @@ function editSizeGuide(id) {
         document.getElementById('sizeGuideModalTitle').textContent = 'Modifier le guide';
         document.getElementById('sizeGuideId').value = guide.id;
         document.getElementById('sizeGuideName').value = guide.name;
-        document.getElementById('sizeGuideContent').value = guide.content;
+        document.getElementById('sizeGuideColumns').value = guide.columns ? guide.columns.join(', ') : 'Taille, Poitrine (cm), Longueur (cm)';
+        sizeGuideRowsData = guide.rows || [];
+        renderSizeGuideRows();
         document.getElementById('sizeGuideModal').classList.add('active');
     }
 }
