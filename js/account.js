@@ -1,15 +1,19 @@
 document.addEventListener('DOMContentLoaded', () => {
     const authSection = document.getElementById('authSection');
     const accountSection = document.getElementById('accountSection');
+    const { onAuthStateChanged } = window.firebaseModules;
+    const auth = window.firebaseAuth;
     
-    if (currentUser) {
-        authSection.style.display = 'none';
-        accountSection.style.display = 'block';
-        loadAccountData();
-    } else {
-        authSection.style.display = 'block';
-        accountSection.style.display = 'none';
-    }
+    onAuthStateChanged(auth, (user) => {
+        if (user) {
+            authSection.style.display = 'none';
+            accountSection.style.display = 'block';
+            loadAccountData(user);
+        } else {
+            authSection.style.display = 'block';
+            accountSection.style.display = 'none';
+        }
+    });
     
     // Auth tabs
     document.querySelectorAll('.auth-tab').forEach(tab => {
@@ -22,32 +26,45 @@ document.addEventListener('DOMContentLoaded', () => {
     });
     
     // Login
-    document.getElementById('loginFormElement').addEventListener('submit', (e) => {
+    document.getElementById('loginFormElement').addEventListener('submit', async (e) => {
         e.preventDefault();
         const email = e.target[0].value;
         const password = e.target[1].value;
+        const { signInWithEmailAndPassword } = window.firebaseModules;
         
-        if (login(email, password)) {
-            window.location.reload();
-        } else {
+        try {
+            await signInWithEmailAndPassword(auth, email, password);
+        } catch (error) {
             alert('Email ou mot de passe incorrect');
         }
     });
     
     // Register
-    document.getElementById('registerFormElement').addEventListener('submit', (e) => {
+    document.getElementById('registerFormElement').addEventListener('submit', async (e) => {
         e.preventDefault();
-        const userData = {
-            firstName: e.target[0].value,
-            lastName: e.target[1].value,
-            email: e.target[2].value,
-            password: e.target[3].value
-        };
+        const firstName = e.target[0].value;
+        const lastName = e.target[1].value;
+        const email = e.target[2].value;
+        const password = e.target[3].value;
+        const { createUserWithEmailAndPassword, updateProfile, doc, setDoc } = window.firebaseModules;
+        const db = window.firebaseDb;
         
-        if (register(userData)) {
-            window.location.reload();
-        } else {
-            alert('Cet email est déjà utilisé');
+        try {
+            const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+            await updateProfile(userCredential.user, {
+                displayName: `${firstName} ${lastName}`
+            });
+            await setDoc(doc(db, 'users', userCredential.user.uid), {
+                firstName,
+                lastName,
+                email,
+                phone: '',
+                addresses: [],
+                orders: [],
+                createdAt: new Date().toISOString()
+            });
+        } catch (error) {
+            alert('Erreur lors de l\'inscription: ' + error.message);
         }
     });
     
@@ -63,24 +80,28 @@ document.addEventListener('DOMContentLoaded', () => {
     });
     
     // Logout
-    document.getElementById('logoutBtn')?.addEventListener('click', (e) => {
+    document.getElementById('logoutBtn')?.addEventListener('click', async (e) => {
         e.preventDefault();
-        logout();
+        const { signOut } = window.firebaseModules;
+        await signOut(auth);
         window.location.href = 'index.html';
     });
     
     // Profile form
-    document.getElementById('profileForm')?.addEventListener('submit', (e) => {
+    document.getElementById('profileForm')?.addEventListener('submit', async (e) => {
         e.preventDefault();
-        const userData = {
-            firstName: document.getElementById('firstName').value,
-            lastName: document.getElementById('lastName').value,
-            email: document.getElementById('email').value,
-            phone: document.getElementById('phone').value
-        };
+        const { doc, updateDoc } = window.firebaseModules;
+        const db = window.firebaseDb;
         
-        if (updateUser(userData)) {
+        try {
+            await updateDoc(doc(db, 'users', auth.currentUser.uid), {
+                firstName: document.getElementById('firstName').value,
+                lastName: document.getElementById('lastName').value,
+                phone: document.getElementById('phone').value
+            });
             alert('Profil mis à jour');
+        } catch (error) {
+            alert('Erreur: ' + error.message);
         }
     });
     
@@ -94,8 +115,11 @@ document.addEventListener('DOMContentLoaded', () => {
         modal.classList.remove('active');
     });
     
-    document.getElementById('addressForm')?.addEventListener('submit', (e) => {
+    document.getElementById('addressForm')?.addEventListener('submit', async (e) => {
         e.preventDefault();
+        const { doc, getDoc, updateDoc } = window.firebaseModules;
+        const db = window.firebaseDb;
+        
         const address = {
             name: e.target[0].value,
             address: e.target[1].value,
@@ -106,31 +130,44 @@ document.addEventListener('DOMContentLoaded', () => {
             phone: e.target[6].value
         };
         
-        const addresses = currentUser.addresses || [];
-        addresses.push(address);
-        updateUser({ addresses });
-        modal.classList.remove('active');
-        loadAddresses();
-        e.target.reset();
+        try {
+            const userDoc = await getDoc(doc(db, 'users', auth.currentUser.uid));
+            const addresses = userDoc.data().addresses || [];
+            addresses.push(address);
+            await updateDoc(doc(db, 'users', auth.currentUser.uid), { addresses });
+            modal.classList.remove('active');
+            loadAccountData(auth.currentUser);
+            e.target.reset();
+        } catch (error) {
+            alert('Erreur: ' + error.message);
+        }
     });
 });
 
-function loadAccountData() {
-    if (!currentUser) return;
+async function loadAccountData(user) {
+    if (!user) return;
+    const { doc, getDoc } = window.firebaseModules;
+    const db = window.firebaseDb;
     
-    document.getElementById('userName').textContent = `${currentUser.firstName || ''} ${currentUser.lastName || ''}`.trim() || 'Mon Compte';
-    document.getElementById('firstName').value = currentUser.firstName || '';
-    document.getElementById('lastName').value = currentUser.lastName || '';
-    document.getElementById('email').value = currentUser.email || '';
-    document.getElementById('phone').value = currentUser.phone || '';
-    
-    loadOrders();
-    loadAddresses();
+    try {
+        const userDoc = await getDoc(doc(db, 'users', user.uid));
+        const userData = userDoc.data();
+        
+        document.getElementById('userName').textContent = user.displayName || 'Mon Compte';
+        document.getElementById('firstName').value = userData?.firstName || '';
+        document.getElementById('lastName').value = userData?.lastName || '';
+        document.getElementById('email').value = user.email || '';
+        document.getElementById('phone').value = userData?.phone || '';
+        
+        loadOrders(userData?.orders || []);
+        loadAddresses(userData?.addresses || []);
+    } catch (error) {
+        console.error('Erreur:', error);
+    }
 }
 
-function loadOrders() {
+function loadOrders(orders = []) {
     const ordersList = document.getElementById('ordersList');
-    const orders = currentUser.orders || [];
     
     if (orders.length === 0) {
         ordersList.innerHTML = '<p class="empty-state">Aucune commande pour le moment</p>';
@@ -158,9 +195,8 @@ function loadOrders() {
     `).join('');
 }
 
-function loadAddresses() {
+function loadAddresses(addresses = []) {
     const addressesList = document.getElementById('addressesList');
-    const addresses = currentUser.addresses || [];
     
     if (addresses.length === 0) {
         addressesList.innerHTML = '<p class="empty-state">Aucune adresse enregistrée</p>';
@@ -180,9 +216,20 @@ function loadAddresses() {
     `).join('');
 }
 
-function deleteAddress(index) {
-    const addresses = currentUser.addresses || [];
-    addresses.splice(index, 1);
-    updateUser({ addresses });
-    loadAddresses();
+async function deleteAddress(index) {
+    const { doc, getDoc, updateDoc } = window.firebaseModules;
+    const auth = window.firebaseAuth;
+    const db = window.firebaseDb;
+    
+    try {
+        const userDoc = await getDoc(doc(db, 'users', auth.currentUser.uid));
+        const addresses = userDoc.data().addresses || [];
+        addresses.splice(index, 1);
+        await updateDoc(doc(db, 'users', auth.currentUser.uid), { addresses });
+        loadAccountData(auth.currentUser);
+    } catch (error) {
+        alert('Erreur: ' + error.message);
+    }
 }
+
+window.deleteAddress = deleteAddress;
