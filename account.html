@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mon Compte - BURBAN</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <nav class="nav">
+        <div class="nav-container">
+            <a href="index.html" class="logo"><img src="https://i.imgur.com/Kl9kTBg.png" alt="BURBAN"></a>
+            <div class="nav-links">
+                <a href="products.html?category=men" data-text="Men"><span class="link-text">Men</span></a>
+                <a href="products.html?category=women" data-text="Women"><span class="link-text">Women</span></a>
+                <a href="contact.html" data-text="Contact Us"><span class="link-text">Contact Us</span></a>
+                <span class="nav-separator"></span>
+                <a href="account.html" id="accountLink" data-text="Account"><span class="link-text">Account</span></a>
+                <a href="cart.html" class="cart-link" data-text="Cart"><span class="link-text">Cart</span> <span class="cart-count">0</span></a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Login/Register Forms -->
+    <section class="auth-section" id="authSection">
+        <div class="container-small">
+            <div class="auth-tabs">
+                <button class="auth-tab active" data-tab="login">Connexion</button>
+                <button class="auth-tab" data-tab="register">Inscription</button>
+            </div>
+
+            <div class="auth-form active" id="loginForm">
+                <h2>Connexion</h2>
+                <form id="loginFormElement">
+                    <input type="email" placeholder="Email" required>
+                    <input type="password" placeholder="Mot de passe" required>
+                    <button type="submit" class="btn-primary">Se connecter</button>
+                </form>
+            </div>
+
+            <div class="auth-form" id="registerForm">
+                <h2>Inscription</h2>
+                <form id="registerFormElement">
+                    <input type="text" placeholder="Prénom" required>
+                    <input type="text" placeholder="Nom" required>
+                    <input type="email" placeholder="Email" required>
+                    <input type="password" placeholder="Mot de passe" required>
+                    <button type="submit" class="btn-primary">S'inscrire</button>
+                </form>
+            </div>
+        </div>
+    </section>
+
+    <!-- Account Dashboard -->
+    <section class="account-section" id="accountSection" style="display: none;">
+        <div class="container">
+            <div class="account-layout">
+                <aside class="account-sidebar">
+                    <h2 id="userName">Mon Compte</h2>
+                    <nav class="account-nav">
+                        <a href="#" class="account-nav-link active" data-section="profile">Profil</a>
+                        <a href="#" class="account-nav-link" data-section="orders">Commandes</a>
+                        <a href="#" class="account-nav-link" data-section="addresses">Adresses</a>
+                        <a href="#" class="account-nav-link" data-section="settings">Paramètres</a>
+                        <a href="#" id="logoutBtn">Déconnexion</a>
+                    </nav>
+                </aside>
+
+                <div class="account-content">
+                    <!-- Profile Section -->
+                    <div class="account-panel active" id="profilePanel">
+                        <h3>Profil</h3>
+                        <form id="profileForm">
+                            <div class="form-row">
+                                <input type="text" id="firstName" placeholder="Prénom" required>
+                                <input type="text" id="lastName" placeholder="Nom" required>
+                            </div>
+                            <input type="email" id="email" placeholder="Email" required>
+                            <input type="tel" id="phone" placeholder="Téléphone">
+                            <button type="submit" class="btn-primary">Enregistrer</button>
+                        </form>
+                    </div>
+
+                    <!-- Orders Section -->
+                    <div class="account-panel" id="ordersPanel">
+                        <h3>Mes Commandes</h3>
+                        <div id="ordersList">
+                            <p class="empty-state">Aucune commande pour le moment</p>
+                        </div>
+                    </div>
+
+                    <!-- Addresses Section -->
+                    <div class="account-panel" id="addressesPanel">
+                        <h3>Mes Adresses</h3>
+                        <button class="btn-secondary" id="addAddressBtn">Ajouter une adresse</button>
+                        <div id="addressesList"></div>
+                    </div>
+
+                    <!-- Settings Section -->
+                    <div class="account-panel" id="settingsPanel">
+                        <h3>Paramètres</h3>
+                        <form id="passwordForm">
+                            <h4>Changer le mot de passe</h4>
+                            <input type="password" placeholder="Mot de passe actuel" required>
+                            <input type="password" placeholder="Nouveau mot de passe" required>
+                            <input type="password" placeholder="Confirmer le mot de passe" required>
+                            <button type="submit" class="btn-primary">Mettre à jour</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Add Address Modal -->
+    <div class="modal" id="addressModal">
+        <div class="modal-content">
+            <span class="modal-close">&times;</span>
+            <h3>Ajouter une adresse</h3>
+            <form id="addressForm">
+                <input type="text" placeholder="Nom complet" required>
+                <input type="text" placeholder="Adresse" required>
+                <input type="text" placeholder="Complément d'adresse">
+                <div class="form-row">
+                    <input type="text" placeholder="Code postal" required>
+                    <input type="text" placeholder="Ville" required>
+                </div>
+                <input type="text" placeholder="Pays" value="France" required>
+                <input type="tel" placeholder="Téléphone" required>
+                <button type="submit" class="btn-primary">Enregistrer</button>
+            </form>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-col">
+                    <h3>BURBAN</h3>
+                    <p>Streetwear minimaliste</p>
+                </div>
+                <div class="footer-col">
+                    <h4>Liens</h4>
+                    <a href="products.html">Collection</a>
+                    <a href="#">À propos</a>
+                    <a href="#">Contact</a>
+                </div>
+                <div class="footer-col">
+                    <h4>Légal</h4>
+                    <a href="#">CGV</a>
+                    <a href="#">Mentions légales</a>
+                    <a href="#">Confidentialité</a>
+                </div>
+            </div>
+            <p class="footer-copy">&copy; 2024 BURBAN. Tous droits réservés.</p>
+        </div>
+    </footer>
+
+    <script src="js/app.js"></script>
+    <script src="js/account.js"></script>
+</body>
+</html>
