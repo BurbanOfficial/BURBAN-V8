@@ -10,6 +10,85 @@ document.addEventListener('DOMContentLoaded', () => {
         
         console.log('Firebase chargé, initialisation compte...');
         
+        // Phone formatting
+        const phoneFormats = {
+            '+213': { placeholder: '551 23 45 67', format: (v) => v.replace(/\D/g, '').replace(/(\d{3})(\d{2})(\d{2})(\d{2})/, '$1 $2 $3 $4') },
+            '+49': { placeholder: '151 23456789', format: (v) => v.replace(/\D/g, '').replace(/(\d{3})(\d{8})/, '$1 $2') },
+            '+966': { placeholder: '50 123 4567', format: (v) => v.replace(/\D/g, '').replace(/(\d{2})(\d{3})(\d{4})/, '$1 $2 $3') },
+            '+61': { placeholder: '412 345 678', format: (v) => v.replace(/\D/g, '').replace(/(\d{3})(\d{3})(\d{3})/, '$1 $2 $3') },
+            '+43': { placeholder: '664 123456', format: (v) => v.replace(/\D/g, '').replace(/(\d{3})(\d{6})/, '$1 $2') },
+            '+32': { placeholder: '470 12 34 56', format: (v) => v.replace(/\D/g, '').replace(/(\d{3})(\d{2})(\d{2})(\d{2})/, '$1 $2 $3 $4') },
+            '+55': { placeholder: '(11) 91234-5678', format: (v) => v.replace(/\D/g, '').replace(/(\d{2})(\d{5})(\d{4})/, '($1) $2-$3') },
+            '+1': { placeholder: '(555) 123-4567', format: (v) => v.replace(/\D/g, '').replace(/(\d{3})(\d{3})(\d{4})/, '($1) $2-$3') },
+            '+86': { placeholder: '138 0013 8000', format: (v) => v.replace(/\D/g, '').replace(/(\d{3})(\d{4})(\d{4})/, '$1 $2 $3') },
+            '+82': { placeholder: '010-1234-5678', format: (v) => v.replace(/\D/g, '').replace(/(\d{3})(\d{4})(\d{4})/, '$1-$2-$3') },
+            '+45': { placeholder: '20 12 34 56', format: (v) => v.replace(/\D/g, '').replace(/(\d{2})(\d{2})(\d{2})(\d{2})/, '$1 $2 $3 $4') },
+            '+20': { placeholder: '100 123 4567', format: (v) => v.replace(/\D/g, '').replace(/(\d{3})(\d{3})(\d{4})/, '$1 $2 $3') },
+            '+971': { placeholder: '50 123 4567', format: (v) => v.replace(/\D/g, '').replace(/(\d{2})(\d{3})(\d{4})/, '$1 $2 $3') },
+            '+34': { placeholder: '612 34 56 78', format: (v) => v.replace(/\D/g, '').replace(/(\d{3})(\d{2})(\d{2})(\d{2})/, '$1 $2 $3 $4') },
+            '+358': { placeholder: '041 234 5678', format: (v) => v.replace(/\D/g, '').replace(/(\d{3})(\d{3})(\d{4})/, '$1 $2 $3') },
+            '+33': { placeholder: '6 12 34 56 78', format: (v) => v.replace(/\D/g, '').replace(/(\d{1})(\d{2})(\d{2})(\d{2})(\d{2})/, '$1 $2 $3 $4 $5') },
+            '+30': { placeholder: '691 234 5678', format: (v) => v.replace(/\D/g, '').replace(/(\d{3})(\d{3})(\d{4})/, '$1 $2 $3') },
+            '+36': { placeholder: '20 123 4567', format: (v) => v.replace(/\D/g, '').replace(/(\d{2})(\d{3})(\d{4})/, '$1 $2 $3') },
+            '+91': { placeholder: '81234 56789', format: (v) => v.replace(/\D/g, '').replace(/(\d{5})(\d{5})/, '$1 $2') },
+            '+62': { placeholder: '812-3456-7890', format: (v) => v.replace(/\D/g, '').replace(/(\d{3})(\d{4})(\d{4})/, '$1-$2-$3') },
+            '+353': { placeholder: '085 123 4567', format: (v) => v.replace(/\D/g, '').replace(/(\d{3})(\d{3})(\d{4})/, '$1 $2 $3') },
+            '+39': { placeholder: '312 345 6789', format: (v) => v.replace(/\D/g, '').replace(/(\d{3})(\d{3})(\d{4})/, '$1 $2 $3') },
+            '+81': { placeholder: '90-1234-5678', format: (v) => v.replace(/\D/g, '').replace(/(\d{2})(\d{4})(\d{4})/, '$1-$2-$3') },
+            '+352': { placeholder: '628 123 456', format: (v) => v.replace(/\D/g, '').replace(/(\d{3})(\d{3})(\d{3})/, '$1 $2 $3') },
+            '+60': { placeholder: '12-345 6789', format: (v) => v.replace(/\D/g, '').replace(/(\d{2})(\d{3})(\d{4})/, '$1-$2 $3') },
+            '+212': { placeholder: '650-123456', format: (v) => v.replace(/\D/g, '').replace(/(\d{3})(\d{6})/, '$1-$2') },
+            '+52': { placeholder: '222 123 4567', format: (v) => v.replace(/\D/g, '').replace(/(\d{3})(\d{3})(\d{4})/, '$1 $2 $3') },
+            '+47': { placeholder: '406 12 345', format: (v) => v.replace(/\D/g, '').replace(/(\d{3})(\d{2})(\d{3})/, '$1 $2 $3') },
+            '+64': { placeholder: '021 123 4567', format: (v) => v.replace(/\D/g, '').replace(/(\d{3})(\d{3})(\d{4})/, '$1 $2 $3') },
+            '+31': { placeholder: '6 12345678', format: (v) => v.replace(/\D/g, '').replace(/(\d{1})(\d{8})/, '$1 $2') },
+            '+63': { placeholder: '905 123 4567', format: (v) => v.replace(/\D/g, '').replace(/(\d{3})(\d{3})(\d{4})/, '$1 $2 $3') },
+            '+48': { placeholder: '512 345 678', format: (v) => v.replace(/\D/g, '').replace(/(\d{3})(\d{3})(\d{3})/, '$1 $2 $3') },
+            '+351': { placeholder: '912 345 678', format: (v) => v.replace(/\D/g, '').replace(/(\d{3})(\d{3})(\d{3})/, '$1 $2 $3') },
+            '+420': { placeholder: '601 123 456', format: (v) => v.replace(/\D/g, '').replace(/(\d{3})(\d{3})(\d{3})/, '$1 $2 $3') },
+            '+40': { placeholder: '712 345 678', format: (v) => v.replace(/\D/g, '').replace(/(\d{3})(\d{3})(\d{3})/, '$1 $2 $3') },
+            '+44': { placeholder: '7400 123456', format: (v) => v.replace(/\D/g, '').replace(/(\d{4})(\d{6})/, '$1 $2') },
+            '+7': { placeholder: '912 345-67-89', format: (v) => v.replace(/\D/g, '').replace(/(\d{3})(\d{3})(\d{2})(\d{2})/, '$1 $2-$3-$4') },
+            '+65': { placeholder: '8123 4567', format: (v) => v.replace(/\D/g, '').replace(/(\d{4})(\d{4})/, '$1 $2') },
+            '+46': { placeholder: '70-123 45 67', format: (v) => v.replace(/\D/g, '').replace(/(\d{2})(\d{3})(\d{2})(\d{2})/, '$1-$2 $3 $4') },
+            '+41': { placeholder: '78 123 45 67', format: (v) => v.replace(/\D/g, '').replace(/(\d{2})(\d{3})(\d{2})(\d{2})/, '$1 $2 $3 $4') },
+            '+66': { placeholder: '081 234 5678', format: (v) => v.replace(/\D/g, '').replace(/(\d{3})(\d{3})(\d{4})/, '$1 $2 $3') },
+            '+216': { placeholder: '20 123 456', format: (v) => v.replace(/\D/g, '').replace(/(\d{2})(\d{3})(\d{3})/, '$1 $2 $3') },
+            '+90': { placeholder: '501 234 5678', format: (v) => v.replace(/\D/g, '').replace(/(\d{3})(\d{3})(\d{4})/, '$1 $2 $3') },
+            '+84': { placeholder: '091 234 5678', format: (v) => v.replace(/\D/g, '').replace(/(\d{3})(\d{3})(\d{4})/, '$1 $2 $3') },
+            '+27': { placeholder: '071 123 4567', format: (v) => v.replace(/\D/g, '').replace(/(\d{3})(\d{3})(\d{4})/, '$1 $2 $3') },
+        };
+        
+        const phoneCodeSelect = document.getElementById('regPhoneCode');
+        const phoneInput = document.getElementById('regPhone');
+        
+        function updatePhoneFormat() {
+            const code = phoneCodeSelect.value;
+            const format = phoneFormats[code];
+            if (format) {
+                phoneInput.placeholder = format.placeholder;
+            }
+        }
+        
+        phoneCodeSelect?.addEventListener('change', () => {
+            phoneInput.value = '';
+            updatePhoneFormat();
+        });
+        
+        phoneInput?.addEventListener('input', (e) => {
+            const code = phoneCodeSelect.value;
+            const format = phoneFormats[code];
+            if (format) {
+                const cursorPos = e.target.selectionStart;
+                const oldLength = e.target.value.length;
+                e.target.value = format.format(e.target.value);
+                const newLength = e.target.value.length;
+                e.target.setSelectionRange(cursorPos + (newLength - oldLength), cursorPos + (newLength - oldLength));
+            }
+        });
+        
+        updatePhoneFormat();
+        
         onAuthStateChanged(auth, (user) => {
             console.log('Auth state changed:', user ? 'Connecté' : 'Déconnecté');
         if (user) {
@@ -35,7 +114,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Login
     document.getElementById('loginFormElement').addEventListener('submit', async (e) => {
         e.preventDefault();
-        const email = e.target[0].value;
+        const email = document.getElementById('loginEmail').value;
         const password = e.target[1].value;
         const { signInWithEmailAndPassword } = window.firebaseModules;
         
@@ -44,26 +123,109 @@ document.addEventListener('DOMContentLoaded', () => {
         } catch (error) {
             console.error('Erreur de connexion:', error);
             if (error.code === 'auth/user-not-found') {
-                alert('Aucun compte trouvé avec cet email. Veuillez vous inscrire.');
+                showMessage('Aucun compte trouvé avec cet email. Veuillez vous inscrire.');
             } else if (error.code === 'auth/wrong-password') {
-                alert('Mot de passe incorrect');
+                showMessage('Mot de passe incorrect');
             } else if (error.code === 'auth/invalid-email') {
-                alert('Email invalide');
+                showMessage('Email invalide');
             } else if (error.code === 'auth/invalid-credential') {
-                alert('Email ou mot de passe incorrect');
+                showMessage('Email ou mot de passe incorrect');
             } else {
-                alert('Erreur de connexion: ' + error.message);
+                showMessage('Erreur de connexion: ' + error.message);
             }
         }
     });
     
+    // Forgot Password
+    document.getElementById('forgotPasswordBtn')?.addEventListener('click', async () => {
+        let email = document.getElementById('loginEmail').value;
+        
+        if (!email) {
+            showPrompt('Entrez votre adresse email :', async (inputEmail) => {
+                if (inputEmail) {
+                    await sendResetEmail(inputEmail);
+                }
+            });
+        } else {
+            showConfirm(`Envoyer un email de réinitialisation à : ${email} ?`, async () => {
+                await sendResetEmail(email);
+            });
+        }
+    });
+    
+    async function sendResetEmail(email) {
+        const { sendPasswordResetEmail } = window.firebaseModules;
+        const auth = window.firebaseAuth;
+        try {
+            await sendPasswordResetEmail(auth, email);
+            showMessage('Email de réinitialisation envoyé ! Vérifiez votre boîte mail.');
+        } catch (error) {
+            console.error('Erreur:', error);
+            if (error.code === 'auth/user-not-found') {
+                showMessage('Aucun compte trouvé avec cet email.');
+            } else if (error.code === 'auth/invalid-email') {
+                showMessage('Adresse email invalide.');
+            } else {
+                showMessage('Erreur: ' + error.message);
+            }
+        }
+    }
+    
+    function showPrompt(message, callback) {
+        document.body.classList.add('modal-open');
+        const modal = document.createElement('div');
+        modal.className = 'custom-modal active';
+        modal.innerHTML = `
+            <div class="custom-modal-content">
+                <p>${message}</p>
+                <input type="email" id="promptInput" style="width: 100%; margin: 16px 0; padding: 12px; border: 1px solid var(--border);" placeholder="Email">
+                <div style="display: flex; gap: 12px;">
+                    <button class="btn-secondary" style="flex: 1;" onclick="document.body.classList.remove('modal-open'); this.closest('.custom-modal').remove()">Annuler</button>
+                    <button class="btn-primary" style="flex: 1;" id="promptOk">OK</button>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(modal);
+        const input = modal.querySelector('#promptInput');
+        input.focus();
+        modal.querySelector('#promptOk').onclick = () => {
+            callback(input.value);
+            document.body.classList.remove('modal-open');
+            modal.remove();
+        };
+    }
+    
+    function showConfirm(message, callback) {
+        document.body.classList.add('modal-open');
+        const modal = document.createElement('div');
+        modal.className = 'custom-modal active';
+        modal.innerHTML = `
+            <div class="custom-modal-content">
+                <p>${message}</p>
+                <div style="display: flex; gap: 12px; margin-top: 24px;">
+                    <button class="btn-secondary" style="flex: 1;" onclick="document.body.classList.remove('modal-open'); this.closest('.custom-modal').remove()">Annuler</button>
+                    <button class="btn-primary" style="flex: 1;" id="confirmOk">Confirmer</button>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(modal);
+        modal.querySelector('#confirmOk').onclick = () => {
+            callback();
+            document.body.classList.remove('modal-open');
+            modal.remove();
+        };
+    }
+    
     // Register
     document.getElementById('registerFormElement').addEventListener('submit', async (e) => {
         e.preventDefault();
-        const firstName = e.target[0].value;
-        const lastName = e.target[1].value;
-        const email = e.target[2].value;
-        const password = e.target[3].value;
+        const firstName = document.getElementById('regFirstName').value;
+        const lastName = document.getElementById('regLastName').value;
+        const email = document.getElementById('regEmail').value;
+        const password = document.getElementById('regPassword').value;
+        const phoneCode = document.getElementById('regPhoneCode').value;
+        const phoneNumber = document.getElementById('regPhone').value;
+        const birthday = document.getElementById('regBirthday').value;
         const { createUserWithEmailAndPassword, updateProfile, doc, setDoc } = window.firebaseModules;
         const db = window.firebaseDb;
         
@@ -72,24 +234,37 @@ document.addEventListener('DOMContentLoaded', () => {
             await updateProfile(userCredential.user, {
                 displayName: `${firstName} ${lastName}`
             });
+            const { arrayUnion } = window.firebaseModules;
             await setDoc(doc(db, 'users', userCredential.user.uid), {
-                firstName,
-                lastName,
+                firstname: firstName,
+                lastname: lastName,
                 email,
-                phone: '',
+                phone: phoneNumber ? `${phoneCode}${phoneNumber}` : '',
+                birthday,
+                country: 'France',
+                newsletter: false,
+                favorites: [],
+                points: 100,
+                pointsHistory: [
+                    {
+                        points: 100,
+                        description: 'Bonus d\'inscription',
+                        date: new Date().toISOString()
+                    }
+                ],
                 addresses: [],
                 orders: [],
-                createdAt: new Date().toISOString()
+                createdAt: new Date()
             });
-            alert('Compte créé avec succès !');
+            showMessage('Compte créé avec succès ! Vous avez reçu 100 points de bienvenue.');
         } catch (error) {
             console.error('Erreur inscription:', error);
             if (error.code === 'auth/email-already-in-use') {
-                alert('Cet email est déjà utilisé');
+                showMessage('Cet email est déjà utilisé');
             } else if (error.code === 'auth/weak-password') {
-                alert('Le mot de passe doit contenir au moins 6 caractères');
+                showMessage('Le mot de passe doit contenir au moins 6 caractères');
             } else {
-                alert('Erreur lors de l\'inscription: ' + error.message);
+                showMessage('Erreur lors de l\'inscription: ' + error.message);
             }
         }
     });
@@ -121,13 +296,13 @@ document.addEventListener('DOMContentLoaded', () => {
         
         try {
             await updateDoc(doc(db, 'users', auth.currentUser.uid), {
-                firstName: document.getElementById('firstName').value,
-                lastName: document.getElementById('lastName').value,
+                firstname: document.getElementById('firstName').value,
+                lastname: document.getElementById('lastName').value,
                 phone: document.getElementById('phone').value
             });
-            alert('Profil mis à jour');
+            showMessage('Profil mis à jour');
         } catch (error) {
-            alert('Erreur: ' + error.message);
+            showMessage('Erreur: ' + error.message);
         }
     });
     
@@ -148,12 +323,15 @@ document.addEventListener('DOMContentLoaded', () => {
         
         const address = {
             name: e.target[0].value,
-            address: e.target[1].value,
-            address2: e.target[2].value,
-            postal: e.target[3].value,
-            city: e.target[4].value,
-            country: e.target[5].value,
-            phone: e.target[6].value
+            firstName: e.target[1].value,
+            lastName: e.target[2].value,
+            email: e.target[3].value,
+            phone: e.target[4].value,
+            address: e.target[5].value,
+            address2: e.target[6].value,
+            postal: e.target[7].value,
+            city: e.target[8].value,
+            country: e.target[9].value
         };
         
         try {
@@ -165,7 +343,7 @@ document.addEventListener('DOMContentLoaded', () => {
             loadAccountData(auth.currentUser);
             e.target.reset();
         } catch (error) {
-            alert('Erreur: ' + error.message);
+            showMessage('Erreur: ' + error.message);
         }
         });
     }, 100);
@@ -181,11 +359,12 @@ async function loadAccountData(user) {
         const userData = userDoc.data();
         
         document.getElementById('userName').textContent = user.displayName || 'Mon Compte';
-        document.getElementById('firstName').value = userData?.firstName || '';
-        document.getElementById('lastName').value = userData?.lastName || '';
+        document.getElementById('firstName').value = userData?.firstname || '';
+        document.getElementById('lastName').value = userData?.lastname || '';
         document.getElementById('email').value = user.email || '';
         document.getElementById('phone').value = userData?.phone || '';
         
+        loadLoyalty(userData?.points || 0, userData?.pointsHistory || []);
         loadOrders(userData?.orders || []);
         loadAddresses(userData?.addresses || []);
     } catch (error) {
@@ -233,7 +412,9 @@ function loadAddresses(addresses = []) {
     addressesList.innerHTML = addresses.map((address, index) => `
         <div class="address-card">
             <button onclick="deleteAddress(${index})">Supprimer</button>
-            <strong>${address.name}</strong>
+            <strong>${address.name || 'Adresse ' + (index + 1)}</strong>
+            <p>${address.firstName || ''} ${address.lastName || ''}</p>
+            ${address.email ? `<p>${address.email}</p>` : ''}
             <p>${address.address}</p>
             ${address.address2 ? `<p>${address.address2}</p>` : ''}
             <p>${address.postal} ${address.city}</p>
@@ -255,8 +436,130 @@ async function deleteAddress(index) {
         await updateDoc(doc(db, 'users', auth.currentUser.uid), { addresses });
         loadAccountData(auth.currentUser);
     } catch (error) {
-        alert('Erreur: ' + error.message);
+        showMessage('Erreur: ' + error.message);
     }
 }
 
 window.deleteAddress = deleteAddress;
+
+function loadLoyalty(points, history) {
+    document.getElementById('loyaltyPoints').textContent = points;
+    
+    // History toggle - remove old listener
+    const historyBtn = document.getElementById('showHistoryBtn');
+    const newHistoryBtn = historyBtn.cloneNode(true);
+    historyBtn.parentNode.replaceChild(newHistoryBtn, historyBtn);
+    
+    newHistoryBtn.addEventListener('click', function() {
+        const historyDiv = document.getElementById('loyaltyHistory');
+        if (historyDiv.style.display === 'none') {
+            historyDiv.style.display = 'block';
+            this.textContent = 'Masquer l\'historique';
+        } else {
+            historyDiv.style.display = 'none';
+            this.textContent = 'Voir l\'historique';
+        }
+    });
+    
+    // Load history
+    const historyList = document.getElementById('loyaltyHistoryList');
+    if (history.length === 0) {
+        historyList.innerHTML = '<p class="empty-state">Aucun historique pour le moment</p>';
+    } else {
+        historyList.innerHTML = history.map(entry => {
+            const isPositive = entry.points > 0;
+            return `
+                <div style="border-bottom: 1px solid var(--border); padding: 16px 0; display: flex; justify-content: space-between; align-items: center;">
+                    <div>
+                        <strong style="font-size: 14px;">${entry.description}</strong>
+                        <p style="color: var(--gray); font-size: 12px; margin-top: 4px;">${new Date(entry.date).toLocaleDateString('fr-FR')}</p>
+                    </div>
+                    <span style="font-size: 16px; font-weight: 500; color: ${isPositive ? '#22c55e' : '#ef4444'};">
+                        ${isPositive ? '+' : ''}${entry.points}
+                    </span>
+                </div>
+            `;
+        }).join('');
+    }
+    
+    const rewards = [
+        { points: 500, discount: 5 },
+        { points: 1000, discount: 10 },
+        { points: 2000, discount: 20 },
+        { points: 2500, discount: 30 }
+    ];
+    
+    const rewardsContainer = document.getElementById('loyaltyRewards');
+    rewardsContainer.innerHTML = rewards.map(reward => {
+        const canRedeem = points >= reward.points;
+        return `
+            <div style="border: 1px solid var(--border); padding: 24px; margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center; ${!canRedeem ? 'opacity: 0.5;' : ''}">
+                <div>
+                    <strong style="font-size: 18px;">${reward.discount}€ de réduction</strong>
+                    <p style="color: var(--gray); font-size: 14px; margin-top: 4px;">${reward.points} points</p>
+                </div>
+                <button class="btn-primary" ${!canRedeem ? 'disabled style="opacity: 0.5; cursor: not-allowed;"' : ''} onclick="redeemReward(${reward.points}, ${reward.discount})">
+                    ${canRedeem ? 'Utiliser' : 'Bloqué'}
+                </button>
+            </div>
+        `;
+    }).join('');
+}
+
+async function redeemReward(pointsCost, discount) {
+    const showConfirm = (message, callback) => {
+        document.body.classList.add('modal-open');
+        const modal = document.createElement('div');
+        modal.className = 'custom-modal active';
+        modal.innerHTML = `
+            <div class="custom-modal-content">
+                <p>${message}</p>
+                <div style="display: flex; gap: 12px; margin-top: 24px;">
+                    <button class="btn-secondary" style="flex: 1;" onclick="document.body.classList.remove('modal-open'); this.closest('.custom-modal').remove()">Annuler</button>
+                    <button class="btn-primary" style="flex: 1;" id="confirmOk">Confirmer</button>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(modal);
+        modal.querySelector('#confirmOk').onclick = () => {
+            callback();
+            document.body.classList.remove('modal-open');
+            modal.remove();
+        };
+    };
+    
+    showConfirm(`Êtes-vous sûr de vouloir générer un bon de réduction d'un montant de ${discount}€ ?`, async () => {
+        const { doc, getDoc, updateDoc, arrayUnion } = window.firebaseModules;
+        const auth = window.firebaseAuth;
+        const db = window.firebaseDb;
+        
+        try {
+            const userDoc = await getDoc(doc(db, 'users', auth.currentUser.uid));
+            const userData = userDoc.data();
+            const currentPoints = userData.points || 0;
+            
+            if (currentPoints < pointsCost) {
+                showMessage('Vous n\'avez pas assez de points.');
+                return;
+            }
+            
+            const newPoints = currentPoints - pointsCost;
+            
+            await updateDoc(doc(db, 'users', auth.currentUser.uid), {
+                points: newPoints,
+                pointsHistory: arrayUnion({
+                    points: -pointsCost,
+                    description: `Récompense utilisée : ${discount}€ de réduction`,
+                    date: new Date().toISOString()
+                })
+            });
+            
+            showMessage(`Vous avez utilisé ${pointsCost} points pour obtenir ${discount}€ de réduction !`);
+            loadAccountData(auth.currentUser);
+        } catch (error) {
+            showMessage('Erreur: ' + error.message);
+        }
+    });
+}
+
+window.redeemReward = redeemReward;
