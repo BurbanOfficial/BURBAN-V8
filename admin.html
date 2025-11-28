@@ -206,6 +206,11 @@
                 <input type="text" id="productSizes" placeholder="Tailles (séparées par des virgules)" value="S,M,L,XL" required>
                 <input type="text" id="productColors" placeholder="Couleurs hex (séparées par des virgules)" value="#000000,#FFFFFF" required>
                 
+                <h4 style="margin: 16px 0 8px; font-size: 14px; font-weight: 500;">Informations produit</h4>
+                <textarea id="productDetails" placeholder="Détails (ex: 100% coton bio, Coupe régulière, Fabriqué au Portugal)" rows="2"></textarea>
+                <textarea id="productMaterials" placeholder="Matériaux (ex: Coton biologique certifié GOTS, Teinture sans produits chimiques)" rows="2"></textarea>
+                <textarea id="productShipping" placeholder="Livraison (ex: Livraison gratuite dès 100€, Retours sous 30 jours)" rows="2"></textarea>
+                
                 <h4 style="margin: 16px 0 8px; font-size: 14px; font-weight: 500;">Dates de publication</h4>
                 <input type="datetime-local" id="productPublishDate">
                 <input type="datetime-local" id="productUnpublishDate" placeholder="Date de dépublication (optionnel)">
@@ -213,6 +218,20 @@
                 <h4 style="margin: 16px 0 8px; font-size: 14px; font-weight: 500;">Stock</h4>
                 <input type="number" id="productStock" placeholder="Stock (vide = illimité)" min="0">
                 <small style="color: var(--gray); font-size: 12px;">Laissez vide pour un stock illimité</small>
+                
+                <h4 style="margin: 16px 0 8px; font-size: 14px; font-weight: 500;">Promotion</h4>
+                <label style="display: flex; align-items: center; gap: 8px; margin-bottom: 12px;">
+                    <input type="checkbox" id="productPromoActive" style="width: auto;">
+                    <span style="font-size: 14px;">Activer la promotion</span>
+                </label>
+                <div id="promoFields" style="display: none;">
+                    <input type="number" id="productOriginalPrice" placeholder="Prix initial (€)" step="0.01" min="0">
+                    <label style="display: flex; align-items: center; gap: 8px; margin: 12px 0;">
+                        <input type="checkbox" id="productPromoUnlimited" style="width: auto;">
+                        <span style="font-size: 14px;">Réduction sans limite</span>
+                    </label>
+                    <input type="datetime-local" id="productPromoEndDate" placeholder="Date de fin de promotion">
+                </div>
                 
                 <button type="submit" class="btn-primary">Enregistrer</button>
             </form>
@@ -233,5 +252,22 @@
 
     <script src="js/admin.js"></script>
     <script src="js/admin-functions.js"></script>
+    <script>
+        // Toggle promo fields
+        document.getElementById('productPromoActive')?.addEventListener('change', (e) => {
+            document.getElementById('promoFields').style.display = e.target.checked ? 'block' : 'none';
+            if (!e.target.checked) {
+                document.getElementById('productOriginalPrice').value = '';
+                document.getElementById('productPromoEndDate').value = '';
+                document.getElementById('productPromoUnlimited').checked = false;
+            }
+        });
+        
+        document.getElementById('productPromoUnlimited')?.addEventListener('change', (e) => {
+            const endDateField = document.getElementById('productPromoEndDate');
+            endDateField.disabled = e.target.checked;
+            if (e.target.checked) endDateField.value = '';
+        });
+    </script>
 </body>
 </html>

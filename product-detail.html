@@ -31,7 +31,10 @@
                     </div>
                 </div>
                 <div class="product-info">
-                    <h1 id="productName"></h1>
+                    <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 16px;">
+                        <h1 id="productName" style="margin: 0;"></h1>
+                        <span id="newBadge" style="display: none; background: var(--black); color: var(--white); padding: 4px 12px; font-size: 11px; font-weight: 500; letter-spacing: 1px;">NOUVEAU</span>
+                    </div>
                     <p class="product-price" id="productPrice"></p>
                     
                     <div class="product-options">
@@ -65,15 +68,15 @@
                         </details>
                         <details>
                             <summary>Détails</summary>
-                            <p>100% coton bio<br>Coupe régulière<br>Fabriqué au Portugal</p>
+                            <p id="productDetails"></p>
                         </details>
                         <details>
                             <summary>Matériaux</summary>
-                            <p>Coton biologique certifié GOTS<br>Teinture sans produits chimiques<br>Lavage en machine à 30°</p>
+                            <p id="productMaterials"></p>
                         </details>
                         <details>
                             <summary>Livraison</summary>
-                            <p>Livraison gratuite dès 100€<br>Retours sous 30 jours<br>Expédition sous 24-48h</p>
+                            <p id="productShipping"></p>
                         </details>
                     </div>
                 </div>
