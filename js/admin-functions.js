@@ -258,34 +258,63 @@ let sizeGuideRowsData = [];
 
 function renderSizeGuideRows() {
     const container = document.getElementById('sizeGuideRows');
-    const columns = document.getElementById('sizeGuideColumns').value.split(',').map(c => c.trim()).filter(c => c);
+    if (!container) return;
+    
+    const columnsInput = document.getElementById('sizeGuideColumns');
+    if (!columnsInput) return;
+    
+    const columns = columnsInput.value.split(',').map(c => c.trim()).filter(c => c);
     
     container.innerHTML = sizeGuideRowsData.map((row, index) => `
         <div style="display: flex; gap: 8px; margin-bottom: 8px; align-items: center;">
             ${columns.map((col, colIndex) => `
                 <input type="text" placeholder="${col}" value="${row[colIndex] || ''}" 
-                    onchange="sizeGuideRowsData[${index}][${colIndex}] = this.value" 
+                    data-row="${index}" data-col="${colIndex}" class="size-guide-cell"
                     style="flex: 1;">
             `).join('')}
-            <button type="button" onclick="removeSizeGuideRow(${index})" style="background: none; color: var(--gray); padding: 8px;">✕</button>
+            <button type="button" class="remove-row-btn" data-index="${index}" style="background: none; color: var(--gray); padding: 8px; cursor: pointer;">✕</button>
         </div>
     `).join('');
+    
+    // Add event listeners
+    container.querySelectorAll('.size-guide-cell').forEach(input => {
+        input.addEventListener('input', function() {
+            const row = parseInt(this.dataset.row);
+            const col = parseInt(this.dataset.col);
+            sizeGuideRowsData[row][col] = this.value;
+        });
+    });
+    
+    container.querySelectorAll('.remove-row-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const index = parseInt(this.dataset.index);
+            sizeGuideRowsData.splice(index, 1);
+            renderSizeGuideRows();
+        });
+    });
 }
 
-function removeSizeGuideRow(index) {
-    sizeGuideRowsData.splice(index, 1);
-    renderSizeGuideRows();
-}
-
-document.getElementById('sizeGuideColumns')?.addEventListener('input', () => {
-    renderSizeGuideRows();
-});
-
-document.getElementById('addRowBtn')?.addEventListener('click', () => {
-    const columns = document.getElementById('sizeGuideColumns').value.split(',').map(c => c.trim()).filter(c => c);
+function addSizeGuideRow() {
+    const columnsInput = document.getElementById('sizeGuideColumns');
+    if (!columnsInput || !columnsInput.value.trim()) {
+        alert('Veuillez d\'abord définir les colonnes');
+        return;
+    }
+    const columns = columnsInput.value.split(',').map(c => c.trim()).filter(c => c);
     sizeGuideRowsData.push(new Array(columns.length).fill(''));
     renderSizeGuideRows();
-});
+}
+
+setTimeout(() => {
+    document.getElementById('sizeGuideColumns')?.addEventListener('input', () => {
+        renderSizeGuideRows();
+    });
+    
+    const addRowBtn = document.getElementById('addRowBtn');
+    if (addRowBtn) {
+        addRowBtn.addEventListener('click', addSizeGuideRow);
+    }
+}, 500);
 
 document.getElementById('addSizeGuideBtn')?.addEventListener('click', () => {
     document.getElementById('sizeGuideModalTitle').textContent = 'Ajouter un guide des tailles';
