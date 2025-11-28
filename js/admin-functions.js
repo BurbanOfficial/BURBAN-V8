@@ -93,6 +93,7 @@ document.getElementById('productForm')?.addEventListener('submit', (e) => {
         imagesByColor[color] = images;
     });
     
+    const promoActive = document.getElementById('productPromoActive').checked;
     const product = {
         id: id ? parseInt(id) : Date.now(),
         name: document.getElementById('productName').value,
@@ -105,9 +106,15 @@ document.getElementById('productForm')?.addEventListener('submit', (e) => {
         imagesByColor: imagesByColor,
         sizes: document.getElementById('productSizes').value.split(',').map(s => s.trim()),
         colors: colors,
-        publishDate: document.getElementById('productPublishDate').value || null,
+        details: document.getElementById('productDetails').value || '100% coton bio\nCoupe régulière\nFabriqué au Portugal',
+        materials: document.getElementById('productMaterials').value || 'Coton biologique certifié GOTS\nTeinture sans produits chimiques\nLavage en machine à 30°',
+        shipping: document.getElementById('productShipping').value || 'Livraison gratuite dès 100€\nRetours sous 30 jours\nExpédition sous 24-48h',
+        publishDate: document.getElementById('productPublishDate').value || new Date().toISOString(),
         unpublishDate: document.getElementById('productUnpublishDate').value || null,
-        stock: document.getElementById('productStock').value ? parseInt(document.getElementById('productStock').value) : null
+        stock: document.getElementById('productStock').value ? parseInt(document.getElementById('productStock').value) : null,
+        promoActive: promoActive,
+        originalPrice: promoActive ? parseFloat(document.getElementById('productOriginalPrice').value) : null,
+        promoEndDate: promoActive && !document.getElementById('productPromoUnlimited').checked ? document.getElementById('productPromoEndDate').value : null
     };
     
     if (id) {
@@ -180,9 +187,21 @@ function editProduct(id) {
         
         document.getElementById('productSizes').value = product.sizes.join(', ');
         document.getElementById('productColors').value = product.colors.join(', ');
+        document.getElementById('productDetails').value = product.details || '';
+        document.getElementById('productMaterials').value = product.materials || '';
+        document.getElementById('productShipping').value = product.shipping || '';
         document.getElementById('productPublishDate').value = product.publishDate || '';
         document.getElementById('productUnpublishDate').value = product.unpublishDate || '';
         document.getElementById('productStock').value = product.stock || '';
+        
+        // Promo
+        const promoActive = product.promoActive || false;
+        document.getElementById('productPromoActive').checked = promoActive;
+        document.getElementById('promoFields').style.display = promoActive ? 'block' : 'none';
+        document.getElementById('productOriginalPrice').value = product.originalPrice || '';
+        document.getElementById('productPromoUnlimited').checked = !product.promoEndDate && promoActive;
+        document.getElementById('productPromoEndDate').value = product.promoEndDate || '';
+        document.getElementById('productPromoEndDate').disabled = !product.promoEndDate && promoActive;
         
         document.getElementById('productModal').classList.add('active');
     }

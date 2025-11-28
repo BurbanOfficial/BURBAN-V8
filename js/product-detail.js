@@ -45,9 +45,45 @@ document.addEventListener('DOMContentLoaded', () => {
         showImageZoom(mainImage.src, currentImages);
     });
     
+    // Check promo expiration
+    const now = new Date();
+    if (product.promoActive && product.promoEndDate && new Date(product.promoEndDate) < now) {
+        product.promoActive = false;
+        product.price = product.originalPrice;
+        product.originalPrice = null;
+        product.promoEndDate = null;
+        const products = JSON.parse(localStorage.getItem('adminProducts')) || [];
+        const index = products.findIndex(p => p.id === product.id);
+        if (index !== -1) {
+            products[index] = product;
+            localStorage.setItem('adminProducts', JSON.stringify(products));
+        }
+    }
+    
+    // Check if new (less than 1 month old)
+    const publishDate = new Date(product.publishDate);
+    const oneMonthAgo = new Date();
+    oneMonthAgo.setMonth(oneMonthAgo.getMonth() - 1);
+    if (publishDate > oneMonthAgo) {
+        document.getElementById('newBadge').style.display = 'inline-block';
+    }
+    
     document.getElementById('productName').textContent = product.name;
-    document.getElementById('productPrice').textContent = `${product.price} €`;
+    
+    // Price with promo
+    const priceEl = document.getElementById('productPrice');
+    if (product.promoActive && product.originalPrice) {
+        priceEl.innerHTML = `<span style="text-decoration: line-through; color: var(--gray); margin-right: 8px;">${product.originalPrice.toFixed(2)} €</span>${product.price.toFixed(2)} €`;
+    } else {
+        priceEl.textContent = `${product.price.toFixed(2)} €`;
+    }
+    
     document.getElementById('productDescription').textContent = product.description;
+    
+    // Informations produit
+    document.getElementById('productDetails').innerHTML = (product.details || '100% coton bio<br>Coupe régulière<br>Fabriqué au Portugal').replace(/\n/g, '<br>');
+    document.getElementById('productMaterials').innerHTML = (product.materials || 'Coton biologique certifié GOTS<br>Teinture sans produits chimiques<br>Lavage en machine à 30°').replace(/\n/g, '<br>');
+    document.getElementById('productShipping').innerHTML = (product.shipping || 'Livraison gratuite dès 100€<br>Retours sous 30 jours<br>Expédition sous 24-48h').replace(/\n/g, '<br>');
     
     // Colors
     const colors = product.colors || ['#000000', '#FFFFFF', '#808080'];
