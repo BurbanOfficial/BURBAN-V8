@@ -28,32 +28,71 @@
                 <div class="checkout-form">
                     <h1>Paiement</h1>
                     
-                    <div class="checkout-section">
-                        <h3>Informations de livraison</h3>
-                        <form id="shippingForm">
-                            <div class="form-row">
-                                <input type="text" id="shippingFirstName" placeholder="Prénom" required>
-                                <input type="text" id="shippingLastName" placeholder="Nom" required>
+                    <!-- Étape 1: Adresses -->
+                    <div id="step1" class="checkout-step active">
+                        <div class="checkout-section">
+                            <h3>Adresse de livraison</h3>
+                            <div id="savedAddressesContainer" style="display: none; margin-bottom: 24px;">
+                                <label style="display: block; font-size: 14px; margin-bottom: 12px; font-weight: 500;">Adresses enregistrées</label>
+                                <div id="savedAddressesList" style="display: grid; gap: 16px; margin-bottom: 16px;"></div>
                             </div>
-                            <input type="email" id="shippingEmail" placeholder="Email" required>
-                            <input type="tel" id="shippingPhone" placeholder="Téléphone" required>
-                            <input type="text" id="shippingAddress" placeholder="Adresse" required>
-                            <input type="text" id="shippingAddress2" placeholder="Complément d'adresse">
-                            <div class="form-row">
-                                <input type="text" id="shippingPostal" placeholder="Code postal" required>
-                                <input type="text" id="shippingCity" placeholder="Ville" required>
+                            <form id="shippingForm">
+                                <div class="form-row">
+                                    <input type="text" id="shippingFirstName" placeholder="Prénom" required>
+                                    <input type="text" id="shippingLastName" placeholder="Nom" required>
+                                </div>
+                                <input type="email" id="shippingEmail" placeholder="Email" required>
+                                <input type="tel" id="shippingPhone" placeholder="Téléphone" required>
+                                <input type="text" id="shippingAddress" placeholder="Adresse" required>
+                                <input type="text" id="shippingAddress2" placeholder="Complément d'adresse">
+                                <div class="form-row">
+                                    <input type="text" id="shippingPostal" placeholder="Code postal" required>
+                                    <input type="text" id="shippingCity" placeholder="Ville" required>
+                                </div>
+                                <input type="text" id="shippingCountry" placeholder="Pays" value="France" required>
+                            </form>
+                        </div>
+
+                        <div class="checkout-section">
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="sameBillingAddress" checked>
+                                <span>Utiliser la même adresse pour la facturation</span>
+                            </label>
+                            
+                            <div id="billingAddressSection" style="display: none; margin-top: 24px;">
+                                <h3>Adresse de facturation</h3>
+                                <form id="billingForm">
+                                    <div class="form-row">
+                                        <input type="text" id="billingFirstName" placeholder="Prénom">
+                                        <input type="text" id="billingLastName" placeholder="Nom">
+                                    </div>
+                                    <input type="text" id="billingAddress" placeholder="Adresse">
+                                    <input type="text" id="billingAddress2" placeholder="Complément d'adresse">
+                                    <div class="form-row">
+                                        <input type="text" id="billingPostal" placeholder="Code postal">
+                                        <input type="text" id="billingCity" placeholder="Ville">
+                                    </div>
+                                    <input type="text" id="billingCountry" placeholder="Pays" value="France">
+                                </form>
                             </div>
-                            <input type="text" id="shippingCountry" placeholder="Pays" value="France" required>
-                        </form>
+                        </div>
+
+                        <button class="btn-primary" id="continueToPayment">Continuer vers le paiement</button>
                     </div>
 
-                    <div class="checkout-section">
-                        <h3>Paiement</h3>
-                        <div id="payment-element"></div>
-                        <div id="payment-message" class="payment-message"></div>
-                    </div>
+                    <!-- Étape 2: Paiement -->
+                    <div id="step2" class="checkout-step" style="display: none;">
+                        <div class="checkout-section">
+                            <h3>Paiement</h3>
+                            <div id="payment-element"></div>
+                            <div id="payment-message" class="payment-message"></div>
+                        </div>
 
-                    <button class="btn-primary" id="submitPayment">Payer <span id="paymentAmount"></span></button>
+                        <div style="display: flex; gap: 16px; margin-top: 24px;">
+                            <button class="btn-secondary" id="backToAddress">Retour</button>
+                            <button class="btn-primary" id="submitPayment" style="flex: 1;">Payer <span id="paymentAmount"></span></button>
+                        </div>
+                    </div>
                 </div>
 
                 <div class="checkout-summary">
@@ -73,6 +112,10 @@
                             <span id="checkoutTotal">0,00 €</span>
                         </div>
                     </div>
+                    <div class="checkout-steps-indicator">
+                        <div class="step-indicator" id="stepIndicator1">1. Adresses</div>
+                        <div class="step-indicator" id="stepIndicator2">2. Paiement</div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -84,6 +127,23 @@
         </div>
     </footer>
 
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+        import { getAuth } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
+        import { getFirestore, doc, getDoc } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+        
+        const firebaseConfig = {
+            apiKey: "AIzaSyDb4AOtRT7jGENnLZ2KNwpczaG2Z77G2rc",
+            authDomain: "burban-fidelity.firebaseapp.com",
+            projectId: "burban-fidelity"
+        };
+        
+        const app = initializeApp(firebaseConfig);
+        window.firebaseAuth = getAuth(app);
+        window.firebaseDb = getFirestore(app);
+        window.firebaseModules = { doc, getDoc };
+        window.firebaseReady = true;
+    </script>
     <script src="js/app.js"></script>
     <script src="js/checkout.js"></script>
 </body>

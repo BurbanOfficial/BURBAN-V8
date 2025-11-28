@@ -32,19 +32,76 @@
             <div class="auth-form active" id="loginForm">
                 <h2>Connexion</h2>
                 <form id="loginFormElement">
-                    <input type="email" placeholder="Email" required>
+                    <input type="email" id="loginEmail" placeholder="Email" required>
                     <input type="password" placeholder="Mot de passe" required>
                     <button type="submit" class="btn-primary">Se connecter</button>
+                    <button type="button" id="forgotPasswordBtn" style="background: none; border: none; color: var(--gray); text-decoration: underline; font-size: 14px; margin-top: 8px; cursor: pointer;">Mot de passe oublié ?</button>
                 </form>
             </div>
 
             <div class="auth-form" id="registerForm">
                 <h2>Inscription</h2>
                 <form id="registerFormElement">
-                    <input type="text" placeholder="Prénom" required>
-                    <input type="text" placeholder="Nom" required>
-                    <input type="email" placeholder="Email" required>
-                    <input type="password" placeholder="Mot de passe" required>
+                    <input type="text" id="regFirstName" placeholder="Prénom" required>
+                    <input type="text" id="regLastName" placeholder="Nom" required>
+                    <input type="email" id="regEmail" placeholder="Adresse Email" required>
+                    <input type="password" id="regPassword" placeholder="Mot de passe" required>
+                    <div style="display: flex; gap: 8px;">
+                        <select id="regPhoneCode" style="width: 200px;">
+                            <option value="+213">🇩🇿 Algérie (+213)</option>
+                            <option value="+49">🇩🇪 Allemagne (+49)</option>
+                            <option value="+966">🇸🇦 Arabie Saoudite (+966)</option>
+                            <option value="+61">🇦🇺 Australie (+61)</option>
+                            <option value="+43">🇦🇹 Autriche (+43)</option>
+                            <option value="+32">🇧🇪 Belgique (+32)</option>
+                            <option value="+55">🇧🇷 Brésil (+55)</option>
+                            <option value="+1">🇨🇦 Canada (+1)</option>
+                            <option value="+86">🇨🇳 Chine (+86)</option>
+                            <option value="+82">🇰🇷 Corée du Sud (+82)</option>
+                            <option value="+45">🇩🇰 Danemark (+45)</option>
+                            <option value="+20">🇪🇬 Égypte (+20)</option>
+                            <option value="+971">🇦🇪 Émirats Arabes Unis (+971)</option>
+                            <option value="+34">🇪🇸 Espagne (+34)</option>
+                            <option value="+1">🇺🇸 États-Unis (+1)</option>
+                            <option value="+358">🇫🇮 Finlande (+358)</option>
+                            <option value="+33" selected>🇫🇷 France (+33)</option>
+                            <option value="+30">🇬🇷 Grèce (+30)</option>
+                            <option value="+36">🇭🇺 Hongrie (+36)</option>
+                            <option value="+91">🇮🇳 Inde (+91)</option>
+                            <option value="+62">🇮🇩 Indonésie (+62)</option>
+                            <option value="+353">🇮🇪 Irlande (+353)</option>
+                            <option value="+39">🇮🇹 Italie (+39)</option>
+                            <option value="+81">🇯🇵 Japon (+81)</option>
+                            <option value="+352">🇱🇺 Luxembourg (+352)</option>
+                            <option value="+60">🇲🇾 Malaisie (+60)</option>
+                            <option value="+212">🇲🇦 Maroc (+212)</option>
+                            <option value="+52">🇲🇽 Mexique (+52)</option>
+                            <option value="+47">🇳🇴 Norvège (+47)</option>
+                            <option value="+64">🇳🇿 Nouvelle-Zélande (+64)</option>
+                            <option value="+31">🇳🇱 Pays-Bas (+31)</option>
+                            <option value="+63">🇵🇭 Philippines (+63)</option>
+                            <option value="+48">🇵🇱 Pologne (+48)</option>
+                            <option value="+351">🇵🇹 Portugal (+351)</option>
+                            <option value="+420">🇨🇿 République Tchèque (+420)</option>
+                            <option value="+40">🇷🇴 Roumanie (+40)</option>
+                            <option value="+44">🇬🇧 Royaume-Uni (+44)</option>
+                            <option value="+7">🇷🇺 Russie (+7)</option>
+                            <option value="+65">🇸🇬 Singapour (+65)</option>
+                            <option value="+46">🇸🇪 Suède (+46)</option>
+                            <option value="+41">🇨🇭 Suisse (+41)</option>
+                            <option value="+66">🇹🇭 Thaïlande (+66)</option>
+                            <option value="+216">🇹🇳 Tunisie (+216)</option>
+                            <option value="+90">🇹🇷 Turquie (+90)</option>
+                            <option value="+84">🇻🇳 Vietnam (+84)</option>
+                            <option value="+27">🇿🇦 Afrique du Sud (+27)</option>
+                        </select>
+                        <input type="tel" id="regPhone" placeholder="Numéro de téléphone (optionnel)" style="flex: 1;" maxlength="15">
+                    </div>
+                    <input type="date" id="regBirthday" placeholder="Date de naissance" onfocus="(this.type='date')" onblur="if(!this.value)this.type='text'" required style="color: var(--gray);">
+                    <style>
+                        #regBirthday:before { content: attr(placeholder); color: var(--gray); }
+                        #regBirthday:focus:before, #regBirthday:valid:before { content: ''; }
+                    </style>
                     <button type="submit" class="btn-primary">S'inscrire</button>
                 </form>
             </div>
@@ -58,7 +115,8 @@
                 <aside class="account-sidebar">
                     <h2 id="userName">Mon Compte</h2>
                     <nav class="account-nav">
-                        <a href="#" class="account-nav-link active" data-section="profile">Profil</a>
+                        <a href="#" class="account-nav-link active" data-section="loyalty">Fidélité</a>
+                        <a href="#" class="account-nav-link" data-section="profile">Profil</a>
                         <a href="#" class="account-nav-link" data-section="orders">Commandes</a>
                         <a href="#" class="account-nav-link" data-section="addresses">Adresses</a>
                         <a href="#" class="account-nav-link" data-section="settings">Paramètres</a>
@@ -67,8 +125,24 @@
                 </aside>
 
                 <div class="account-content">
+                    <!-- Loyalty Section -->
+                    <div class="account-panel active" id="loyaltyPanel">
+                        <h3>Programme de Fidélité</h3>
+                        <div style="background: var(--light-gray); padding: 32px; margin-bottom: 32px; text-align: center;">
+                            <p style="font-size: 14px; color: var(--gray); margin-bottom: 8px;">Vos points</p>
+                            <p style="font-size: 48px; font-weight: 300; margin-bottom: 0;" id="loyaltyPoints">0</p>
+                            <button id="showHistoryBtn" style="background: none; border: none; color: var(--gray); text-decoration: underline; font-size: 14px; margin-top: 16px; cursor: pointer;">Voir l'historique</button>
+                        </div>
+                        <div id="loyaltyHistory" style="display: none; margin-bottom: 32px;">
+                            <h4 style="margin-bottom: 16px;">Historique des points</h4>
+                            <div id="loyaltyHistoryList"></div>
+                        </div>
+                        <h4 style="margin-bottom: 16px;">Récompenses disponibles</h4>
+                        <div id="loyaltyRewards"></div>
+                    </div>
+
                     <!-- Profile Section -->
-                    <div class="account-panel active" id="profilePanel">
+                    <div class="account-panel" id="profilePanel">
                         <h3>Profil</h3>
                         <form id="profileForm">
                             <div class="form-row">
@@ -118,7 +192,13 @@
             <span class="modal-close">&times;</span>
             <h3>Ajouter une adresse</h3>
             <form id="addressForm">
-                <input type="text" placeholder="Nom complet" required>
+                <input type="text" placeholder="Nom de l'adresse (ex: Maison, Bureau)" required>
+                <div class="form-row">
+                    <input type="text" placeholder="Prénom" required>
+                    <input type="text" placeholder="Nom" required>
+                </div>
+                <input type="email" placeholder="Email" required>
+                <input type="tel" placeholder="Téléphone" required>
                 <input type="text" placeholder="Adresse" required>
                 <input type="text" placeholder="Complément d'adresse">
                 <div class="form-row">
@@ -126,7 +206,6 @@
                     <input type="text" placeholder="Ville" required>
                 </div>
                 <input type="text" placeholder="Pays" value="France" required>
-                <input type="tel" placeholder="Téléphone" required>
                 <button type="submit" class="btn-primary">Enregistrer</button>
             </form>
         </div>
@@ -158,8 +237,8 @@
 
     <script type="module">
         import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
-        import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut, updateProfile } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
-        import { getFirestore, doc, setDoc, getDoc, updateDoc } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+        import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut, updateProfile, sendPasswordResetEmail } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
+        import { getFirestore, doc, setDoc, getDoc, updateDoc, arrayUnion } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
 
         const firebaseConfig = {
             apiKey: "AIzaSyDb4AOtRT7jGENnLZ2KNwpczaG2Z77G2rc",
@@ -178,7 +257,7 @@
         console.log('Initialisation Firebase...');
         window.firebaseAuth = auth;
         window.firebaseDb = db;
-        window.firebaseModules = { createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut, updateProfile, doc, setDoc, getDoc, updateDoc };
+        window.firebaseModules = { createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut, updateProfile, sendPasswordResetEmail, doc, setDoc, getDoc, updateDoc, arrayUnion };
         window.firebaseReady = true;
         console.log('Firebase prêt');
     </script>
