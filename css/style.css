@@ -1025,6 +1025,14 @@ body.modal-open {
     margin-bottom: 48px;
 }
 
+.checkout-step {
+    display: none;
+}
+
+.checkout-step.active {
+    display: block;
+}
+
 .checkout-section {
     margin-bottom: 48px;
 }
@@ -1041,6 +1049,20 @@ body.modal-open {
     gap: 16px;
 }
 
+.checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.checkbox-label input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    cursor: pointer;
+}
+
 #payment-element {
     margin-bottom: 24px;
 }
@@ -1049,6 +1071,42 @@ body.modal-open {
     color: #df1b41;
     font-size: 14px;
     margin-top: 16px;
+}
+
+.checkout-steps-indicator {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-top: 32px;
+    padding-top: 32px;
+    border-top: 1px solid var(--border);
+}
+
+.step-indicator {
+    font-size: 14px;
+    color: var(--gray);
+    padding: 8px 0;
+}
+
+.step-indicator.active {
+    color: var(--black);
+    font-weight: 500;
+}
+
+.address-card-checkout:hover {
+    background: var(--light-gray);
+    border-color: var(--black) !important;
+}
+
+.address-card-checkout.selected {
+    background: var(--black);
+    color: var(--white);
+    border-color: var(--black) !important;
+}
+
+.address-card-checkout.selected strong,
+.address-card-checkout.selected p {
+    color: var(--white) !important;
 }
 
 .checkout-summary {
@@ -1288,9 +1346,18 @@ body.modal-open {
         gap: 24px;
     }
 
-    .product-layout, .cart-layout, .account-layout, .checkout-layout {
+    .product-layout, .cart-layout, .account-layout {
         grid-template-columns: 1fr;
         gap: 40px;
+    }
+
+    .checkout-layout {
+        grid-template-columns: 1fr;
+        gap: 40px;
+    }
+
+    .checkout-summary {
+        order: -1;
     }
 
     .product-images {
