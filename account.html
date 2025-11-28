@@ -116,6 +116,7 @@
                     <h2 id="userName">Mon Compte</h2>
                     <nav class="account-nav">
                         <a href="#" class="account-nav-link active" data-section="loyalty">Fidélité</a>
+                        <a href="#" class="account-nav-link" data-section="favorites">Favoris</a>
                         <a href="#" class="account-nav-link" data-section="profile">Profil</a>
                         <a href="#" class="account-nav-link" data-section="orders">Commandes</a>
                         <a href="#" class="account-nav-link" data-section="addresses">Adresses</a>
@@ -139,6 +140,14 @@
                         </div>
                         <h4 style="margin-bottom: 16px;">Récompenses disponibles</h4>
                         <div id="loyaltyRewards"></div>
+                    </div>
+
+                    <!-- Favorites Section -->
+                    <div class="account-panel" id="favoritesPanel">
+                        <h3>Mes Favoris</h3>
+                        <div id="favoritesList" class="products-grid" style="margin-top: 32px; text-align: center;">
+                            <p class="empty-state">Aucun favori pour le moment</p>
+                        </div>
                     </div>
 
                     <!-- Profile Section -->
