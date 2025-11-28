@@ -1,10 +1,17 @@
 document.addEventListener('DOMContentLoaded', () => {
-    const authSection = document.getElementById('authSection');
-    const accountSection = document.getElementById('accountSection');
-    const { onAuthStateChanged } = window.firebaseModules;
-    const auth = window.firebaseAuth;
-    
-    onAuthStateChanged(auth, (user) => {
+    const waitForFirebase = setInterval(() => {
+        if (!window.firebaseReady) return;
+        clearInterval(waitForFirebase);
+        
+        const authSection = document.getElementById('authSection');
+        const accountSection = document.getElementById('accountSection');
+        const { onAuthStateChanged } = window.firebaseModules;
+        const auth = window.firebaseAuth;
+        
+        console.log('Firebase chargé, initialisation compte...');
+        
+        onAuthStateChanged(auth, (user) => {
+            console.log('Auth state changed:', user ? 'Connecté' : 'Déconnecté');
         if (user) {
             authSection.style.display = 'none';
             accountSection.style.display = 'block';
@@ -13,10 +20,10 @@ document.addEventListener('DOMContentLoaded', () => {
             authSection.style.display = 'block';
             accountSection.style.display = 'none';
         }
-    });
-    
-    // Auth tabs
-    document.querySelectorAll('.auth-tab').forEach(tab => {
+        });
+        
+        // Auth tabs
+        document.querySelectorAll('.auth-tab').forEach(tab => {
         tab.addEventListener('click', () => {
             document.querySelectorAll('.auth-tab').forEach(t => t.classList.remove('active'));
             document.querySelectorAll('.auth-form').forEach(f => f.classList.remove('active'));
@@ -160,7 +167,8 @@ document.addEventListener('DOMContentLoaded', () => {
         } catch (error) {
             alert('Erreur: ' + error.message);
         }
-    });
+        });
+    }, 100);
 });
 
 async function loadAccountData(user) {
