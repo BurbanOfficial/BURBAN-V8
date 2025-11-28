@@ -175,9 +175,12 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
 
+        console.log('Initialisation Firebase...');
         window.firebaseAuth = auth;
         window.firebaseDb = db;
         window.firebaseModules = { createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut, updateProfile, doc, setDoc, getDoc, updateDoc };
+        window.firebaseReady = true;
+        console.log('Firebase prêt');
     </script>
     <script src="js/app.js"></script>
     <script src="js/account.js"></script>
