@@ -341,44 +341,55 @@ function showImageZoom(imageSrc, images = [imageSrc]) {
     document.body.appendChild(modal);
 }
 
-function showSizeGuide() {
+function showSizeGuide(sizeGuideId) {
+    const guides = JSON.parse(localStorage.getItem('sizeGuides')) || [];
+    const guide = guides.find(g => g.id === sizeGuideId);
+    
+    let content = `
+        <table style="width: 100%; border-collapse: collapse; margin-bottom: 24px; text-align: left;">
+            <thead>
+                <tr style="border-bottom: 1px solid var(--border);">
+                    <th style="padding: 12px;">Taille</th>
+                    <th style="padding: 12px;">Poitrine (cm)</th>
+                    <th style="padding: 12px;">Longueur (cm)</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr style="border-bottom: 1px solid var(--border);">
+                    <td style="padding: 12px;">S</td>
+                    <td style="padding: 12px;">94-98</td>
+                    <td style="padding: 12px;">68</td>
+                </tr>
+                <tr style="border-bottom: 1px solid var(--border);">
+                    <td style="padding: 12px;">M</td>
+                    <td style="padding: 12px;">98-102</td>
+                    <td style="padding: 12px;">70</td>
+                </tr>
+                <tr style="border-bottom: 1px solid var(--border);">
+                    <td style="padding: 12px;">L</td>
+                    <td style="padding: 12px;">102-106</td>
+                    <td style="padding: 12px;">72</td>
+                </tr>
+                <tr>
+                    <td style="padding: 12px;">XL</td>
+                    <td style="padding: 12px;">106-110</td>
+                    <td style="padding: 12px;">74</td>
+                </tr>
+            </tbody>
+        </table>
+    `;
+    
+    if (guide) {
+        content = guide.content;
+    }
+    
     document.body.classList.add('modal-open');
     const modal = document.createElement('div');
     modal.className = 'custom-modal active';
     modal.innerHTML = `
         <div class="custom-modal-content" style="max-width: 600px;">
             <h3 style="font-size: 20px; font-weight: 400; margin-bottom: 24px;">Tableau des tailles</h3>
-            <table style="width: 100%; border-collapse: collapse; margin-bottom: 24px; text-align: left;">
-                <thead>
-                    <tr style="border-bottom: 1px solid var(--border);">
-                        <th style="padding: 12px;">Taille</th>
-                        <th style="padding: 12px;">Poitrine (cm)</th>
-                        <th style="padding: 12px;">Longueur (cm)</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr style="border-bottom: 1px solid var(--border);">
-                        <td style="padding: 12px;">S</td>
-                        <td style="padding: 12px;">94-98</td>
-                        <td style="padding: 12px;">68</td>
-                    </tr>
-                    <tr style="border-bottom: 1px solid var(--border);">
-                        <td style="padding: 12px;">M</td>
-                        <td style="padding: 12px;">98-102</td>
-                        <td style="padding: 12px;">70</td>
-                    </tr>
-                    <tr style="border-bottom: 1px solid var(--border);">
-                        <td style="padding: 12px;">L</td>
-                        <td style="padding: 12px;">102-106</td>
-                        <td style="padding: 12px;">72</td>
-                    </tr>
-                    <tr>
-                        <td style="padding: 12px;">XL</td>
-                        <td style="padding: 12px;">106-110</td>
-                        <td style="padding: 12px;">74</td>
-                    </tr>
-                </tbody>
-            </table>
+            ${content}
             <button class="btn-primary" onclick="document.body.classList.remove('modal-open'); this.closest('.custom-modal').remove()">Fermer</button>
         </div>
     `;

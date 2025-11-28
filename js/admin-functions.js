@@ -94,6 +94,8 @@ document.getElementById('productForm')?.addEventListener('submit', (e) => {
     });
     
     const promoActive = document.getElementById('productPromoActive').checked;
+    const existingProduct = id ? products.find(p => p.id === parseInt(id)) : null;
+    
     const product = {
         id: id ? parseInt(id) : Date.now(),
         name: document.getElementById('productName').value,
@@ -109,12 +111,13 @@ document.getElementById('productForm')?.addEventListener('submit', (e) => {
         details: document.getElementById('productDetails').value || '100% coton bio\nCoupe régulière\nFabriqué au Portugal',
         materials: document.getElementById('productMaterials').value || 'Coton biologique certifié GOTS\nTeinture sans produits chimiques\nLavage en machine à 30°',
         shipping: document.getElementById('productShipping').value || 'Livraison gratuite dès 100€\nRetours sous 30 jours\nExpédition sous 24-48h',
-        publishDate: document.getElementById('productPublishDate').value || new Date().toISOString(),
+        publishDate: existingProduct ? existingProduct.publishDate : (document.getElementById('productPublishDate').value || new Date().toISOString()),
         unpublishDate: document.getElementById('productUnpublishDate').value || null,
         stock: document.getElementById('productStock').value ? parseInt(document.getElementById('productStock').value) : null,
         promoActive: promoActive,
         originalPrice: promoActive ? parseFloat(document.getElementById('productOriginalPrice').value) : null,
-        promoEndDate: promoActive && !document.getElementById('productPromoUnlimited').checked ? document.getElementById('productPromoEndDate').value : null
+        promoEndDate: promoActive && !document.getElementById('productPromoUnlimited').checked ? document.getElementById('productPromoEndDate').value : null,
+        sizeGuideId: document.getElementById('productSizeGuide').value ? parseInt(document.getElementById('productSizeGuide').value) : null
     };
     
     if (id) {
@@ -202,6 +205,7 @@ function editProduct(id) {
         document.getElementById('productPromoUnlimited').checked = !product.promoEndDate && promoActive;
         document.getElementById('productPromoEndDate').value = product.promoEndDate || '';
         document.getElementById('productPromoEndDate').disabled = !product.promoEndDate && promoActive;
+        document.getElementById('productSizeGuide').value = product.sizeGuideId || '';
         
         document.getElementById('productModal').classList.add('active');
     }
@@ -217,7 +221,93 @@ function deleteProduct(id) {
     }
 }
 
+// Size Guides Management
+function loadSizeGuides() {
+    const guides = JSON.parse(localStorage.getItem('sizeGuides')) || [];
+    
+    // Update select in product form
+    const select = document.getElementById('productSizeGuide');
+    if (select) {
+        select.innerHTML = '<option value="">Guide des tailles (optionnel)</option>' + 
+            guides.map(g => `<option value="${g.id}">${g.name}</option>`).join('');
+    }
+    
+    // Update table
+    const tbody = document.getElementById('sizeguidesTableBody');
+    if (tbody) {
+        const products = JSON.parse(localStorage.getItem('adminProducts')) || [];
+        tbody.innerHTML = guides.map(guide => {
+            const count = products.filter(p => p.sizeGuideId === guide.id).length;
+            return `
+                <tr>
+                    <td>${guide.name}</td>
+                    <td>${count}</td>
+                    <td>
+                        <div class="admin-actions">
+                            <button class="admin-btn" onclick="editSizeGuide(${guide.id})">Modifier</button>
+                            <button class="admin-btn admin-btn-delete" onclick="deleteSizeGuide(${guide.id})">Supprimer</button>
+                        </div>
+                    </td>
+                </tr>
+            `;
+        }).join('');
+    }
+}
+
+document.getElementById('addSizeGuideBtn')?.addEventListener('click', () => {
+    document.getElementById('sizeGuideModalTitle').textContent = 'Ajouter un guide des tailles';
+    document.getElementById('sizeGuideForm').reset();
+    document.getElementById('sizeGuideId').value = '';
+    document.getElementById('sizeGuideModal').classList.add('active');
+});
+
+document.getElementById('sizeGuideForm')?.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const guides = JSON.parse(localStorage.getItem('sizeGuides')) || [];
+    const id = document.getElementById('sizeGuideId').value;
+    
+    const guide = {
+        id: id ? parseInt(id) : Date.now(),
+        name: document.getElementById('sizeGuideName').value,
+        content: document.getElementById('sizeGuideContent').value
+    };
+    
+    if (id) {
+        const index = guides.findIndex(g => g.id === parseInt(id));
+        guides[index] = guide;
+    } else {
+        guides.push(guide);
+    }
+    
+    localStorage.setItem('sizeGuides', JSON.stringify(guides));
+    document.getElementById('sizeGuideModal').classList.remove('active');
+    loadSizeGuides();
+});
+
+function editSizeGuide(id) {
+    const guides = JSON.parse(localStorage.getItem('sizeGuides')) || [];
+    const guide = guides.find(g => g.id === id);
+    
+    if (guide) {
+        document.getElementById('sizeGuideModalTitle').textContent = 'Modifier le guide';
+        document.getElementById('sizeGuideId').value = guide.id;
+        document.getElementById('sizeGuideName').value = guide.name;
+        document.getElementById('sizeGuideContent').value = guide.content;
+        document.getElementById('sizeGuideModal').classList.add('active');
+    }
+}
+
+function deleteSizeGuide(id) {
+    if (confirm('Supprimer ce guide des tailles ?')) {
+        let guides = JSON.parse(localStorage.getItem('sizeGuides')) || [];
+        guides = guides.filter(g => g.id !== id);
+        localStorage.setItem('sizeGuides', JSON.stringify(guides));
+        loadSizeGuides();
+    }
+}
+
 // Charger les catégories au démarrage
 if (document.getElementById('productCategory')) {
     loadCategories();
+    loadSizeGuides();
 }

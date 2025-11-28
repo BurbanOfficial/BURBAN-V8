@@ -123,9 +123,13 @@ document.addEventListener('DOMContentLoaded', () => {
     });
     
     // Size Guide
-    document.getElementById('sizeGuide').addEventListener('click', () => {
-        showSizeGuide();
-    });
+    const sizeGuideBtn = document.getElementById('sizeGuide');
+    if (product.sizeGuideId) {
+        sizeGuideBtn.style.display = 'block';
+        sizeGuideBtn.addEventListener('click', () => {
+            showSizeGuide(product.sizeGuideId);
+        });
+    }
     
     // Add to Cart
     document.getElementById('addToCart').addEventListener('click', () => {
