@@ -30,22 +30,16 @@ document.getElementById('loginForm').addEventListener('submit', (e) => {
 
 // Initialize TOTP (Google Authenticator)
 function initializeTOTP() {
-    console.log('Initialisation TOTP...');
     const email = ADMIN_CREDENTIALS.email;
-    let secretBase32 = localStorage.getItem('totp_secret_' + email);
-    
-    console.log('Secret existant:', secretBase32 ? 'Oui' : 'Non');
+    const secretKey = 'totp_secret_burban_cms';
+    let secretBase32 = localStorage.getItem(secretKey);
     
     if (!secretBase32) {
-        console.log('Génération d\'un nouveau secret...');
-        // Générer un nouveau secret
         const secret = new OTPAuth.Secret({ size: 20 });
         secretBase32 = secret.base32;
-        localStorage.setItem('totp_secret_' + email, secretBase32);
-        console.log('Secret généré et stocké:', secretBase32);
+        localStorage.setItem(secretKey, secretBase32);
         
-        // Créer l'instance TOTP
-        const totp = new OTPAuth.TOTP({
+        totpInstance = new OTPAuth.TOTP({
             issuer: 'BURBAN CMS',
             label: email,
             algorithm: 'SHA1',
@@ -54,45 +48,27 @@ function initializeTOTP() {
             secret: secret
         });
         
-        // Afficher le QR code
-        const uri = totp.toString();
-        console.log('URI TOTP:', uri);
-        
+        const uri = totpInstance.toString();
         const qrSection = document.getElementById('qrCodeSection');
         const qrDiv = document.getElementById('qrcode');
-        
-        console.log('qrCodeSection:', qrSection);
-        console.log('qrcode div:', qrDiv);
         
         qrSection.style.display = 'block';
         qrDiv.innerHTML = '';
         
-        console.log('Génération du QR code...');
-        try {
-            new QRCode(qrDiv, {
-                text: uri,
-                width: 250,
-                height: 250,
-                colorDark: '#000000',
-                colorLight: '#ffffff',
-                correctLevel: QRCode.CorrectLevel.H
-            });
-            console.log('QR code généré avec succès');
-        } catch (err) {
-            console.error('Erreur QR code:', err);
-            document.getElementById('twoFAError').textContent = 'Erreur: ' + err.message;
-        }
+        new QRCode(qrDiv, {
+            text: uri,
+            width: 250,
+            height: 250,
+            colorDark: '#000000',
+            colorLight: '#ffffff',
+            correctLevel: QRCode.CorrectLevel.H
+        });
         
         document.getElementById('codePrompt').textContent = 'Scannez le QR code puis entrez le code généré';
-        
-        totpInstance = totp;
     } else {
-        console.log('Utilisation du secret existant');
-        // Secret existe déjà
         document.getElementById('qrCodeSection').style.display = 'none';
         document.getElementById('codePrompt').textContent = 'Entrez le code de votre application';
         
-        // Créer l'instance TOTP avec le secret existant
         totpInstance = new OTPAuth.TOTP({
             issuer: 'BURBAN CMS',
             label: email,
@@ -102,7 +78,6 @@ function initializeTOTP() {
             secret: OTPAuth.Secret.fromBase32(secretBase32)
         });
     }
-    console.log('TOTP initialisé');
 }
 
 // Vérifier le code TOTP
@@ -122,6 +97,7 @@ document.getElementById('twoFAForm').addEventListener('submit', (e) => {
     if (delta !== null) {
         twoFAVerified = true;
         sessionStorage.setItem('adminAuth', 'true');
+        localStorage.setItem('adminAuthExpiry', (Date.now() + 24 * 60 * 60 * 1000).toString());
         document.getElementById('admin2FA').style.display = 'none';
         document.getElementById('adminDashboard').style.display = 'block';
         loadDashboard();
@@ -135,15 +111,20 @@ document.getElementById('twoFAForm').addEventListener('submit', (e) => {
 // Logout
 document.getElementById('logoutBtn').addEventListener('click', () => {
     sessionStorage.removeItem('adminAuth');
+    localStorage.removeItem('adminAuthExpiry');
     window.location.reload();
 });
 
 // Check auth on load
-if (sessionStorage.getItem('adminAuth') === 'true') {
+const authExpiry = localStorage.getItem('adminAuthExpiry');
+if (sessionStorage.getItem('adminAuth') === 'true' && authExpiry && Date.now() < parseInt(authExpiry)) {
     document.getElementById('adminLogin').style.display = 'none';
     document.getElementById('admin2FA').style.display = 'none';
     document.getElementById('adminDashboard').style.display = 'block';
     loadDashboard();
+} else {
+    sessionStorage.removeItem('adminAuth');
+    localStorage.removeItem('adminAuthExpiry');
 }
 
 // Menu navigation
