@@ -1,7 +1,7 @@
 // Admin credentials
 const ADMIN_CREDENTIALS = {
-    email: 'admin@burban.com',
-    password: 'Burban2024!'
+    email: 'direction@burbanofficial.com',
+    password: 'CMS_TEAM_BURBAN'
 };
 
 let isAuthenticated = false;
@@ -30,15 +30,21 @@ document.getElementById('loginForm').addEventListener('submit', (e) => {
 
 // Initialize TOTP (Google Authenticator)
 function initializeTOTP() {
+    console.log('Initialisation TOTP...');
     const email = ADMIN_CREDENTIALS.email;
-    let secret = localStorage.getItem('totp_secret_' + email);
+    let secretBase32 = localStorage.getItem('totp_secret_' + email);
     
-    if (!secret) {
+    console.log('Secret existant:', secretBase32 ? 'Oui' : 'Non');
+    
+    if (!secretBase32) {
+        console.log('Génération d\'un nouveau secret...');
         // Générer un nouveau secret
-        secret = OTPAuth.Secret.fromBase32(OTPAuth.Secret.fromLatin1(Math.random().toString(36).substring(2, 15)).base32);
-        localStorage.setItem('totp_secret_' + email, secret.base32);
+        const secret = new OTPAuth.Secret({ size: 20 });
+        secretBase32 = secret.base32;
+        localStorage.setItem('totp_secret_' + email, secretBase32);
+        console.log('Secret généré et stocké:', secretBase32);
         
-        // Afficher le QR code
+        // Créer l'instance TOTP
         const totp = new OTPAuth.TOTP({
             issuer: 'BURBAN CMS',
             label: email,
@@ -48,29 +54,55 @@ function initializeTOTP() {
             secret: secret
         });
         
+        // Afficher le QR code
         const uri = totp.toString();
-        document.getElementById('qrCodeSection').style.display = 'block';
-        document.getElementById('qrcode').innerHTML = '';
-        QRCode.toCanvas(uri, { width: 250 }, (err, canvas) => {
-            if (!err) document.getElementById('qrcode').appendChild(canvas);
-        });
+        console.log('URI TOTP:', uri);
+        
+        const qrSection = document.getElementById('qrCodeSection');
+        const qrDiv = document.getElementById('qrcode');
+        
+        console.log('qrCodeSection:', qrSection);
+        console.log('qrcode div:', qrDiv);
+        
+        qrSection.style.display = 'block';
+        qrDiv.innerHTML = '';
+        
+        console.log('Génération du QR code...');
+        try {
+            new QRCode(qrDiv, {
+                text: uri,
+                width: 250,
+                height: 250,
+                colorDark: '#000000',
+                colorLight: '#ffffff',
+                correctLevel: QRCode.CorrectLevel.H
+            });
+            console.log('QR code généré avec succès');
+        } catch (err) {
+            console.error('Erreur QR code:', err);
+            document.getElementById('twoFAError').textContent = 'Erreur: ' + err.message;
+        }
         
         document.getElementById('codePrompt').textContent = 'Scannez le QR code puis entrez le code généré';
+        
+        totpInstance = totp;
     } else {
+        console.log('Utilisation du secret existant');
         // Secret existe déjà
         document.getElementById('qrCodeSection').style.display = 'none';
         document.getElementById('codePrompt').textContent = 'Entrez le code de votre application';
+        
+        // Créer l'instance TOTP avec le secret existant
+        totpInstance = new OTPAuth.TOTP({
+            issuer: 'BURBAN CMS',
+            label: email,
+            algorithm: 'SHA1',
+            digits: 6,
+            period: 30,
+            secret: OTPAuth.Secret.fromBase32(secretBase32)
+        });
     }
-    
-    // Créer l'instance TOTP
-    totpInstance = new OTPAuth.TOTP({
-        issuer: 'BURBAN CMS',
-        label: email,
-        algorithm: 'SHA1',
-        digits: 6,
-        period: 30,
-        secret: OTPAuth.Secret.fromBase32(secret)
-    });
+    console.log('TOTP initialisé');
 }
 
 // Vérifier le code TOTP
