@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CMS - BURBAN</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/admin.css">
+    <script src="https://cdn.jsdelivr.net/npm/otpauth@9.1.4/dist/otpauth.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+</head>
+<body>
+    <!-- Login Section -->
+    <section class="admin-login" id="adminLogin">
+        <div class="container-small">
+            <div class="admin-login-box">
+                <img src="https://i.imgur.com/Kl9kTBg.png" alt="BURBAN" style="height: 40px; margin-bottom: 32px;">
+                <h1>CMS Admin</h1>
+                
+                <form id="loginForm" class="admin-form">
+                    <input type="email" id="adminEmail" placeholder="Email" required>
+                    <input type="password" id="adminPassword" placeholder="Mot de passe" required>
+                    <button type="submit" class="btn-primary">Se connecter</button>
+                    <p class="form-error" id="loginError"></p>
+                </form>
+            </div>
+        </div>
+    </section>
+
+    <!-- 2FA Section -->
+    <section class="admin-2fa" id="admin2FA" style="display: none;">
+        <div class="container-small">
+            <div class="admin-login-box" style="max-width: 500px;">
+                <img src="https://i.imgur.com/Kl9kTBg.png" alt="BURBAN" style="height: 40px; margin-bottom: 32px;">
+                <h1>Authentification à deux facteurs</h1>
+                
+                <div id="qrCodeSection" style="display: none;">
+                    <p style="color: var(--gray); margin-bottom: 24px;">Scannez ce QR code avec votre application d'authentification</p>
+                    <div id="qrcode" style="display: flex; justify-content: center; margin-bottom: 24px;"></div>
+                    <p style="font-size: 12px; color: var(--gray); margin-bottom: 24px;">Compatible avec Google Authenticator, Microsoft Authenticator, Authy, etc.</p>
+                </div>
+                
+                <p style="color: var(--gray); margin-bottom: 16px;" id="codePrompt">Entrez le code à 6 chiffres</p>
+                <form id="twoFAForm" class="admin-form">
+                    <input type="text" id="twoFACode" placeholder="000000" maxlength="6" pattern="[0-9]{6}" required autocomplete="off">
+                    <button type="submit" class="btn-primary">Vérifier</button>
+                    <p class="form-error" id="twoFAError"></p>
+                </form>
+            </div>
+        </div>
+    </section>
+
+    <!-- Admin Dashboard -->
+    <section class="admin-dashboard" id="adminDashboard" style="display: none;">
+        <nav class="admin-nav">
+            <div class="admin-nav-container">
+                <img src="https://i.imgur.com/Kl9kTBg.png" alt="BURBAN" style="height: 28px;">
+                <button class="btn-secondary" id="logoutBtn">Déconnexion</button>
+            </div>
+        </nav>
+
+        <div class="admin-container">
+            <aside class="admin-sidebar">
+                <a href="#" class="admin-menu-link active" data-section="products">Produits</a>
+                <a href="#" class="admin-menu-link" data-section="orders">Commandes</a>
+                <a href="#" class="admin-menu-link" data-section="users">Utilisateurs</a>
+                <a href="#" class="admin-menu-link" data-section="settings">Paramètres</a>
+            </aside>
+
+            <div class="admin-content">
+                <!-- Products Section -->
+                <div class="admin-section active" id="productsSection">
+                    <div class="admin-header">
+                        <h2>Gestion des produits</h2>
+                        <button class="btn-primary" id="addProductBtn">Ajouter un produit</button>
+                    </div>
+                    <div class="admin-table">
+                        <table id="productsTable">
+                            <thead>
+                                <tr>
+                                    <th>Image</th>
+                                    <th>Nom</th>
+                                    <th>Prix</th>
+                                    <th>Catégorie</th>
+                                    <th>Genre</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="productsTableBody"></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Orders Section -->
+                <div class="admin-section" id="ordersSection">
+                    <div class="admin-header">
+                        <h2>Commandes</h2>
+                    </div>
+                    <div class="admin-table">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Client</th>
+                                    <th>Date</th>
+                                    <th>Total</th>
+                                    <th>Statut</th>
+                                </tr>
+                            </thead>
+                            <tbody id="ordersTableBody"></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Users Section -->
+                <div class="admin-section" id="usersSection">
+                    <div class="admin-header">
+                        <h2>Utilisateurs</h2>
+                    </div>
+                    <div class="admin-table">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Nom</th>
+                                    <th>Email</th>
+                                    <th>Commandes</th>
+                                    <th>Inscrit le</th>
+                                </tr>
+                            </thead>
+                            <tbody id="usersTableBody"></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Settings Section -->
+                <div class="admin-section" id="settingsSection">
+                    <div class="admin-header">
+                        <h2>Paramètres</h2>
+                    </div>
+                    <form id="settingsForm" class="admin-form" style="max-width: 600px;">
+                        <h3>Informations du site</h3>
+                        <input type="text" placeholder="Nom du site" value="BURBAN">
+                        <input type="email" placeholder="Email de contact" value="contact@burban.com">
+                        <input type="text" placeholder="Téléphone" value="+33 1 23 45 67 89">
+                        
+                        <h3 style="margin-top: 32px;">Stripe</h3>
+                        <input type="text" placeholder="Clé publique Stripe">
+                        <input type="password" placeholder="Clé secrète Stripe">
+                        
+                        <button type="submit" class="btn-primary">Enregistrer</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Product Modal -->
+    <div class="modal" id="productModal">
+        <div class="modal-content" style="max-width: 700px;">
+            <span class="modal-close">&times;</span>
+            <h3 id="productModalTitle">Ajouter un produit</h3>
+            <form id="productForm" class="admin-form">
+                <input type="hidden" id="productId">
+                <input type="text" id="productName" placeholder="Nom du produit" required>
+                <input type="number" id="productPrice" placeholder="Prix (€)" required>
+                <textarea id="productDescription" placeholder="Description" rows="3" required></textarea>
+                
+                <select id="productCategory" required>
+                    <option value="">Catégorie</option>
+                    <option value="t-shirts">T-shirts</option>
+                    <option value="hoodies">Hoodies</option>
+                    <option value="pants">Pantalons</option>
+                    <option value="accessories">Accessoires</option>
+                </select>
+                
+                <select id="productGender" required>
+                    <option value="">Genre</option>
+                    <option value="men">Homme</option>
+                    <option value="women">Femme</option>
+                </select>
+                
+                <input type="text" id="productImage" placeholder="URL de l'image principale" required>
+                <input type="text" id="productSizes" placeholder="Tailles (séparées par des virgules)" value="S,M,L,XL" required>
+                <input type="text" id="productColors" placeholder="Couleurs hex (séparées par des virgules)" value="#000000,#FFFFFF" required>
+                
+                <button type="submit" class="btn-primary">Enregistrer</button>
+            </form>
+        </div>
+    </div>
+
+    <script src="js/admin.js"></script>
+</body>
+</html>
