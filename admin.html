@@ -63,6 +63,7 @@
             <aside class="admin-sidebar">
                 <a href="#" class="admin-menu-link active" data-section="products">Produits</a>
                 <a href="#" class="admin-menu-link" data-section="categories">Catégories</a>
+                <a href="#" class="admin-menu-link" data-section="sizeguides">Guides des tailles</a>
                 <a href="#" class="admin-menu-link" data-section="orders">Commandes</a>
                 <a href="#" class="admin-menu-link" data-section="users">Utilisateurs</a>
                 <a href="#" class="admin-menu-link" data-section="settings">Paramètres</a>
@@ -88,6 +89,26 @@
                                 </tr>
                             </thead>
                             <tbody id="productsTableBody"></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Size Guides Section -->
+                <div class="admin-section" id="sizeguidesSection">
+                    <div class="admin-header">
+                        <h2>Guides des tailles</h2>
+                        <button class="btn-primary" id="addSizeGuideBtn">Ajouter un guide</button>
+                    </div>
+                    <div class="admin-table">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Nom</th>
+                                    <th>Produits associés</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="sizeguidesTableBody"></tbody>
                         </table>
                     </div>
                 </div>
@@ -206,6 +227,10 @@
                 <input type="text" id="productSizes" placeholder="Tailles (séparées par des virgules)" value="S,M,L,XL" required>
                 <input type="text" id="productColors" placeholder="Couleurs hex (séparées par des virgules)" value="#000000,#FFFFFF" required>
                 
+                <select id="productSizeGuide">
+                    <option value="">Guide des tailles (optionnel)</option>
+                </select>
+                
                 <h4 style="margin: 16px 0 8px; font-size: 14px; font-weight: 500;">Informations produit</h4>
                 <textarea id="productDetails" placeholder="Détails (ex: 100% coton bio, Coupe régulière, Fabriqué au Portugal)" rows="2"></textarea>
                 <textarea id="productMaterials" placeholder="Matériaux (ex: Coton biologique certifié GOTS, Teinture sans produits chimiques)" rows="2"></textarea>
@@ -245,6 +270,21 @@
             <h3>Ajouter une catégorie</h3>
             <form id="categoryForm" class="admin-form">
                 <input type="text" id="categoryName" placeholder="Nom de la catégorie" required>
+                <button type="submit" class="btn-primary">Enregistrer</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Size Guide Modal -->
+    <div class="modal" id="sizeGuideModal">
+        <div class="modal-content" style="max-width: 800px;">
+            <span class="modal-close" onclick="document.getElementById('sizeGuideModal').classList.remove('active')">&times;</span>
+            <h3 id="sizeGuideModalTitle">Ajouter un guide des tailles</h3>
+            <form id="sizeGuideForm" class="admin-form">
+                <input type="hidden" id="sizeGuideId">
+                <input type="text" id="sizeGuideName" placeholder="Nom du guide (ex: T-shirts Homme)" required>
+                <textarea id="sizeGuideContent" placeholder="Contenu HTML du tableau des tailles" rows="10" required></textarea>
+                <small style="color: var(--gray); font-size: 12px; margin-top: -8px; display: block;">Utilisez du HTML pour créer votre tableau (table, tr, td, etc.)</small>
                 <button type="submit" class="btn-primary">Enregistrer</button>
             </form>
         </div>
