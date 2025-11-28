@@ -35,7 +35,18 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
             await signInWithEmailAndPassword(auth, email, password);
         } catch (error) {
-            alert('Email ou mot de passe incorrect');
+            console.error('Erreur de connexion:', error);
+            if (error.code === 'auth/user-not-found') {
+                alert('Aucun compte trouvé avec cet email. Veuillez vous inscrire.');
+            } else if (error.code === 'auth/wrong-password') {
+                alert('Mot de passe incorrect');
+            } else if (error.code === 'auth/invalid-email') {
+                alert('Email invalide');
+            } else if (error.code === 'auth/invalid-credential') {
+                alert('Email ou mot de passe incorrect');
+            } else {
+                alert('Erreur de connexion: ' + error.message);
+            }
         }
     });
     
@@ -63,8 +74,16 @@ document.addEventListener('DOMContentLoaded', () => {
                 orders: [],
                 createdAt: new Date().toISOString()
             });
+            alert('Compte créé avec succès !');
         } catch (error) {
-            alert('Erreur lors de l\'inscription: ' + error.message);
+            console.error('Erreur inscription:', error);
+            if (error.code === 'auth/email-already-in-use') {
+                alert('Cet email est déjà utilisé');
+            } else if (error.code === 'auth/weak-password') {
+                alert('Le mot de passe doit contenir au moins 6 caractères');
+            } else {
+                alert('Erreur lors de l\'inscription: ' + error.message);
+            }
         }
     });
     
