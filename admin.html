@@ -277,14 +277,24 @@
 
     <!-- Size Guide Modal -->
     <div class="modal" id="sizeGuideModal">
-        <div class="modal-content" style="max-width: 800px;">
+        <div class="modal-content" style="max-width: 900px;">
             <span class="modal-close">&times;</span>
             <h3 id="sizeGuideModalTitle">Ajouter un guide des tailles</h3>
             <form id="sizeGuideForm" class="admin-form">
                 <input type="hidden" id="sizeGuideId">
                 <input type="text" id="sizeGuideName" placeholder="Nom du guide (ex: T-shirts Homme)" required>
-                <textarea id="sizeGuideContent" placeholder="Contenu HTML du tableau des tailles" rows="10" required></textarea>
-                <small style="color: var(--gray); font-size: 12px; margin-top: -8px; display: block;">Utilisez du HTML pour créer votre tableau (table, tr, td, etc.)</small>
+                
+                <div style="margin: 16px 0;">
+                    <label style="font-size: 14px; font-weight: 500; margin-bottom: 8px; display: block;">Colonnes (séparées par des virgules)</label>
+                    <input type="text" id="sizeGuideColumns" placeholder="Taille, Poitrine (cm), Longueur (cm)" required>
+                </div>
+                
+                <div style="margin: 16px 0;">
+                    <label style="font-size: 14px; font-weight: 500; margin-bottom: 8px; display: block;">Lignes</label>
+                    <div id="sizeGuideRows"></div>
+                    <button type="button" class="btn-secondary" id="addRowBtn" style="margin-top: 8px;">+ Ajouter une ligne</button>
+                </div>
+                
                 <button type="submit" class="btn-primary">Enregistrer</button>
             </form>
         </div>
