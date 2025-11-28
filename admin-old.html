@@ -62,7 +62,6 @@
         <div class="admin-container">
             <aside class="admin-sidebar">
                 <a href="#" class="admin-menu-link active" data-section="products">Produits</a>
-                <a href="#" class="admin-menu-link" data-section="categories">Catégories</a>
                 <a href="#" class="admin-menu-link" data-section="orders">Commandes</a>
                 <a href="#" class="admin-menu-link" data-section="users">Utilisateurs</a>
                 <a href="#" class="admin-menu-link" data-section="settings">Paramètres</a>
@@ -83,32 +82,11 @@
                                     <th>Nom</th>
                                     <th>Prix</th>
                                     <th>Catégorie</th>
-                                    <th>Stock</th>
+                                    <th>Genre</th>
                                     <th>Actions</th>
                                 </tr>
                             </thead>
                             <tbody id="productsTableBody"></tbody>
-                        </table>
-                    </div>
-                </div>
-
-                <!-- Categories Section -->
-                <div class="admin-section" id="categoriesSection">
-                    <div class="admin-header">
-                        <h2>Gestion des catégories</h2>
-                        <button class="btn-primary" id="addCategoryBtn">Ajouter une catégorie</button>
-                    </div>
-                    <div class="admin-table">
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th>Nom</th>
-                                    <th>Slug</th>
-                                    <th>Produits</th>
-                                    <th>Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody id="categoriesTableBody"></tbody>
                         </table>
                     </div>
                 </div>
@@ -178,17 +156,21 @@
 
     <!-- Product Modal -->
     <div class="modal" id="productModal">
-        <div class="modal-content" style="max-width: 700px; max-height: 90vh; overflow-y: auto;">
+        <div class="modal-content" style="max-width: 700px;">
             <span class="modal-close">&times;</span>
             <h3 id="productModalTitle">Ajouter un produit</h3>
             <form id="productForm" class="admin-form">
                 <input type="hidden" id="productId">
                 <input type="text" id="productName" placeholder="Nom du produit" required>
-                <input type="number" id="productPrice" placeholder="Prix (€)" step="0.01" min="0" required>
+                <input type="number" id="productPrice" placeholder="Prix (€)" required>
                 <textarea id="productDescription" placeholder="Description" rows="3" required></textarea>
                 
                 <select id="productCategory" required>
                     <option value="">Catégorie</option>
+                    <option value="t-shirts">T-shirts</option>
+                    <option value="hoodies">Hoodies</option>
+                    <option value="pants">Pantalons</option>
+                    <option value="accessories">Accessoires</option>
                 </select>
                 
                 <select id="productGender" required>
@@ -197,41 +179,15 @@
                     <option value="women">Femme</option>
                 </select>
                 
-                <h4 style="margin: 16px 0 8px; font-size: 14px; font-weight: 500;">Galerie d'images</h4>
-                <input type="text" id="productImage1" placeholder="Image 1 (principale)" required>
-                <input type="text" id="productImage2" placeholder="Image 2">
-                <input type="text" id="productImage3" placeholder="Image 3">
-                <input type="text" id="productImage4" placeholder="Image 4">
-                
+                <input type="text" id="productImage" placeholder="URL de l'image principale" required>
                 <input type="text" id="productSizes" placeholder="Tailles (séparées par des virgules)" value="S,M,L,XL" required>
                 <input type="text" id="productColors" placeholder="Couleurs hex (séparées par des virgules)" value="#000000,#FFFFFF" required>
                 
-                <h4 style="margin: 16px 0 8px; font-size: 14px; font-weight: 500;">Dates de publication</h4>
-                <input type="datetime-local" id="productPublishDate">
-                <input type="datetime-local" id="productUnpublishDate" placeholder="Date de dépublication (optionnel)">
-                
-                <h4 style="margin: 16px 0 8px; font-size: 14px; font-weight: 500;">Stock</h4>
-                <input type="number" id="productStock" placeholder="Stock (vide = illimité)" min="0">
-                <small style="color: var(--gray); font-size: 12px;">Laissez vide pour un stock illimité</small>
-                
-                <button type="submit" class="btn-primary">Enregistrer</button>
-            </form>
-        </div>
-    </div>
-
-    <!-- Category Modal -->
-    <div class="modal" id="categoryModal">
-        <div class="modal-content">
-            <span class="modal-close" onclick="document.getElementById('categoryModal').classList.remove('active')">&times;</span>
-            <h3>Ajouter une catégorie</h3>
-            <form id="categoryForm" class="admin-form">
-                <input type="text" id="categoryName" placeholder="Nom de la catégorie" required>
                 <button type="submit" class="btn-primary">Enregistrer</button>
             </form>
         </div>
     </div>
 
     <script src="js/admin.js"></script>
-    <script src="js/admin-functions.js"></script>
 </body>
 </html>
