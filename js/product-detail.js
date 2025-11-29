@@ -11,6 +11,27 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
     }
     
+    // Tracker les vues de produits dans Firestore
+    setTimeout(async () => {
+        if (window.firebaseReady && window.firebaseModules) {
+            try {
+                const { doc, getDoc, setDoc, increment } = window.firebaseModules;
+                const statsRef = doc(window.firebaseDb, 'stats', 'products');
+                const statsDoc = await getDoc(statsRef);
+                
+                if (statsDoc.exists()) {
+                    const views = statsDoc.data().views || {};
+                    views[productId] = (views[productId] || 0) + 1;
+                    await setDoc(statsRef, { views }, { merge: true });
+                } else {
+                    await setDoc(statsRef, { views: { [productId]: 1 }, sales: {} });
+                }
+            } catch (error) {
+                console.error('Erreur tracking vue:', error);
+            }
+        }
+    }, 500);
+    
     // Gallery
     const imagesByColor = product.imagesByColor || {
         '#000000': product.images || [product.image, product.image, product.image, product.image]

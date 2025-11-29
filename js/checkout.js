@@ -292,6 +292,23 @@ function processOrder() {
         status: 'confirmed'
     };
     
+    // Tracker les ventes pour best sellers dans Firestore
+    if (window.firebaseReady && window.firebaseModules) {
+        try {
+            const { doc, getDoc, setDoc } = window.firebaseModules;
+            const statsRef = doc(window.firebaseDb, 'stats', 'products');
+            const statsDoc = await getDoc(statsRef);
+            
+            const sales = statsDoc.exists() ? (statsDoc.data().sales || {}) : {};
+            cart.forEach(item => {
+                sales[item.id] = (sales[item.id] || 0) + item.quantity;
+            });
+            await setDoc(statsRef, { sales }, { merge: true });
+        } catch (error) {
+            console.error('Erreur tracking ventes:', error);
+        }
+    }
+    
     // Sauvegarder la commande si l'utilisateur est connecté
     if (currentUser) {
         const orders = currentUser.orders || [];
