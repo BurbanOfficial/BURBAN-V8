@@ -1397,4 +1397,9 @@ body.modal-open {
         width: 120%;
         background-position: center;
     }
+
+    #featuredProducts,
+    #bestSellersCarousel {
+        grid-template-columns: repeat(3, 1fr) !important;
+    }
 }
