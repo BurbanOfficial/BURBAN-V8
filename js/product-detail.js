@@ -143,25 +143,66 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // Add to Favorites
     const favBtn = document.getElementById('addToFavorites');
-    const favorites = JSON.parse(localStorage.getItem('favorites')) || [];
-    if (favorites.includes(productId)) {
-        favBtn.classList.add('active');
-    }
     
-    favBtn.addEventListener('click', () => {
-        const favorites = JSON.parse(localStorage.getItem('favorites')) || [];
-        const index = favorites.indexOf(productId);
-        
-        if (index > -1) {
-            favorites.splice(index, 1);
-            favBtn.classList.remove('active');
-            showMessage('Retiré des favoris');
-        } else {
-            favorites.push(productId);
-            favBtn.classList.add('active');
-            showMessage('Ajouté aux favoris');
+    // Vérifier les favoris
+    const checkFavorites = async () => {
+        if (window.firebaseAuth && window.firebaseAuth.currentUser) {
+            const { doc, getDoc } = window.firebaseModules || {};
+            if (doc && getDoc) {
+                const userDoc = await getDoc(doc(window.firebaseDb, 'users', window.firebaseAuth.currentUser.uid));
+                const favorites = userDoc.data()?.favorites || [];
+                if (favorites.includes(productId)) {
+                    favBtn.classList.add('active');
+                }
+            }
+        }
+    };
+    
+    setTimeout(checkFavorites, 500);
+    
+    favBtn.addEventListener('click', async () => {
+        // Vérifier si connecté
+        if (!window.firebaseAuth || !window.firebaseAuth.currentUser) {
+            document.body.classList.add('modal-open');
+            const modal = document.createElement('div');
+            modal.className = 'custom-modal active';
+            modal.innerHTML = `
+                <div class="custom-modal-content">
+                    <h3 style="font-size: 20px; font-weight: 400; margin-bottom: 16px;">Connectez-vous pour sauvegarder vos favoris</h3>
+                    <p style="margin-bottom: 24px;">Créez un compte ou connectez-vous pour retrouver vos produits favoris plus tard.</p>
+                    <div style="display: flex; gap: 12px; justify-content: center;">
+                        <button class="btn-secondary" onclick="document.body.classList.remove('modal-open'); this.closest('.custom-modal').remove();">Annuler</button>
+                        <button class="btn-primary" onclick="window.location.href='account.html';">Se connecter</button>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(modal);
+            return;
         }
         
-        localStorage.setItem('favorites', JSON.stringify(favorites));
+        // Ajouter/retirer des favoris
+        try {
+            const { doc, getDoc, updateDoc, arrayUnion, arrayRemove } = window.firebaseModules;
+            const userRef = doc(window.firebaseDb, 'users', window.firebaseAuth.currentUser.uid);
+            const userDoc = await getDoc(userRef);
+            const favorites = userDoc.data()?.favorites || [];
+            
+            if (favorites.includes(productId)) {
+                await updateDoc(userRef, {
+                    favorites: arrayRemove(productId)
+                });
+                favBtn.classList.remove('active');
+                showMessage('Retiré des favoris');
+            } else {
+                await updateDoc(userRef, {
+                    favorites: arrayUnion(productId)
+                });
+                favBtn.classList.add('active');
+                showMessage('Ajouté aux favoris');
+            }
+        } catch (error) {
+            console.error('Erreur favoris:', error);
+            showMessage('Erreur lors de la mise à jour des favoris');
+        }
     });
 });

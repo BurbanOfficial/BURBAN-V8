@@ -365,11 +365,34 @@ async function loadAccountData(user) {
         document.getElementById('phone').value = userData?.phone || '';
         
         loadLoyalty(userData?.points || 0, userData?.pointsHistory || []);
+        loadFavorites(userData?.favorites || []);
         loadOrders(userData?.orders || []);
         loadAddresses(userData?.addresses || []);
     } catch (error) {
         console.error('Erreur:', error);
     }
+}
+
+function loadFavorites(favoriteIds = []) {
+    const favoritesList = document.getElementById('favoritesList');
+    const products = JSON.parse(localStorage.getItem('adminProducts')) || [];
+    
+    if (favoriteIds.length === 0) {
+        favoritesList.innerHTML = '<p class="empty-state" style="grid-column: 1 / -1; text-align: center;">Aucun favori pour le moment</p>';
+        return;
+    }
+    
+    const favoriteProducts = products.filter(p => favoriteIds.includes(p.id));
+    
+    favoritesList.innerHTML = favoriteProducts.map(product => `
+        <div class="product-card" onclick="window.location.href='product-detail.html?id=${product.id}'">
+            <div class="product-image">
+                <img src="${product.image}" alt="${product.name}">
+            </div>
+            <h3 class="product-name">${product.name}</h3>
+            <p class="product-price">${product.price.toFixed(2)} €</p>
+        </div>
+    `).join('');
 }
 
 function loadOrders(orders = []) {
