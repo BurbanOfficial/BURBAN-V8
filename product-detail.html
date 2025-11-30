@@ -23,12 +23,6 @@
 
     <section class="product-detail">
         <div class="container">
-            <!-- Retour à la boutique -->
-            <div style="margin-bottom: 20px;">
-                <button id="backToShopBtn" class="btn-secondary" aria-label="Retour à la boutique" style="display: inline-flex; align-items: center; gap: 8px;">
-                    ← Retour à la boutique
-                </button>
-            </div>
             <div class="product-layout">
                 <div class="product-images">
                     <div class="thumbnails" id="thumbnails"></div>
@@ -40,14 +34,6 @@
                     <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 16px;">
                         <h1 id="productName" style="margin: 0;"></h1>
                         <span id="newBadge" style="display: none; background: var(--black); color: var(--white); padding: 4px 12px; font-size: 11px; font-weight: 500; letter-spacing: 1px;">NOUVEAU</span>
-                    </div>
-                    <!-- Stock indicator -->
-                    <div class="stock-indicator" id="stockIndicator" aria-hidden="false" style="margin-bottom: 16px;">
-                        <div class="stock-visual" id="stockVisual" aria-hidden="true">
-                            <span class="stock-wave"></span>
-                            <span class="stock-core"></span>
-                        </div>
-                        <div class="stock-text" id="stockText">Chargement...</div>
                     </div>
                     <p class="product-price" id="productPrice"></p>
                     
@@ -141,26 +127,5 @@
     </script>
     <script src="js/app.js"></script>
     <script src="js/product-detail.js"></script>
-    <script>
-        // Back to shop button: prefer history.back(), fallback to products.html
-        (function() {
-            const btn = document.getElementById('backToShopBtn');
-            if (!btn) return;
-            btn.addEventListener('click', (e) => {
-                e.preventDefault();
-                // If referrer is from our site or history length is sufficient, go back
-                try {
-                    if (document.referrer && document.referrer.indexOf(window.location.origin) === 0) {
-                        history.back();
-                        return;
-                    }
-                } catch (err) {
-                    // ignore
-                }
-                // Otherwise, go to products listing
-                window.location.href = 'products.html';
-            });
-        })();
-    </script>
 </body>
 </html>
