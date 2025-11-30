@@ -23,7 +23,58 @@
 
     <!-- Login/Register Forms -->
     <section class="auth-section" id="authSection">
-        <div class="container" style="max-width: 500px;">
+        <div class="container" style="max-width: 1000px;">
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 80px; align-items: center;">
+                <!-- Personnages animés -->
+                <div id="characters" style="position: relative; height: 400px;">
+                    <!-- Personnage 1 -->
+                    <svg id="char1" class="character" width="120" height="180" viewBox="0 0 120 180" style="position: absolute; left: 20px; top: 50px;">
+                        <g class="char-body">
+                            <ellipse cx="60" cy="140" rx="30" ry="40" fill="#000" class="body"/>
+                            <circle cx="60" cy="60" r="40" fill="#000" class="head"/>
+                            <g class="face face-normal">
+                                <circle cx="50" cy="55" r="5" fill="#fff" class="eye-left"/>
+                                <circle cx="70" cy="55" r="5" fill="#fff" class="eye-right"/>
+                                <path d="M 45 70 Q 60 75 75 70" stroke="#fff" stroke-width="2" fill="none" class="mouth"/>
+                            </g>
+                            <g class="face face-impressed" style="display: none;">
+                                <circle cx="50" cy="55" r="8" fill="#fff" class="eye-left"/>
+                                <circle cx="70" cy="55" r="8" fill="#fff" class="eye-right"/>
+                                <ellipse cx="60" cy="75" rx="8" ry="12" fill="#fff" class="mouth"/>
+                            </g>
+                            <g class="face face-sad" style="display: none;">
+                                <line x1="45" y1="55" x2="55" y2="50" stroke="#fff" stroke-width="2" class="eye-left"/>
+                                <line x1="65" y1="50" x2="75" y2="55" stroke="#fff" stroke-width="2" class="eye-right"/>
+                                <path d="M 45 75 Q 60 70 75 75" stroke="#fff" stroke-width="2" fill="none" class="mouth"/>
+                            </g>
+                        </g>
+                    </svg>
+                    
+                    <!-- Personnage 2 -->
+                    <svg id="char2" class="character" width="100" height="160" viewBox="0 0 100 160" style="position: absolute; left: 150px; top: 100px;">
+                        <g class="char-body">
+                            <rect x="35" y="100" width="30" height="50" rx="15" fill="#000" class="body"/>
+                            <circle cx="50" cy="50" r="35" fill="#000" class="head"/>
+                            <g class="face face-normal">
+                                <circle cx="42" cy="45" r="4" fill="#fff" class="eye-left"/>
+                                <circle cx="58" cy="45" r="4" fill="#fff" class="eye-right"/>
+                                <path d="M 40 60 Q 50 63 60 60" stroke="#fff" stroke-width="2" fill="none" class="mouth"/>
+                            </g>
+                            <g class="face face-impressed" style="display: none;">
+                                <circle cx="42" cy="45" r="7" fill="#fff" class="eye-left"/>
+                                <circle cx="58" cy="45" r="7" fill="#fff" class="eye-right"/>
+                                <ellipse cx="50" cy="62" rx="7" ry="10" fill="#fff" class="mouth"/>
+                            </g>
+                            <g class="face face-sad" style="display: none;">
+                                <line x1="38" y1="45" x2="46" y2="42" stroke="#fff" stroke-width="2" class="eye-left"/>
+                                <line x1="54" y1="42" x2="62" y2="45" stroke="#fff" stroke-width="2" class="eye-right"/>
+                                <path d="M 40 62 Q 50 58 60 62" stroke="#fff" stroke-width="2" fill="none" class="mouth"/>
+                            </g>
+                        </g>
+                    </svg>
+                </div>
+                
+                <div>
             <div class="auth-tabs">
                 <button class="auth-tab active" data-tab="login">Connexion</button>
                 <button class="auth-tab" data-tab="register">Inscription</button>

@@ -1,6 +1,89 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Admin - BURBAN (local)</title>
+    <link rel="stylesheet" href="css/admin.css">
+</head>
+<body>
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+        import { getFirestore, collection, doc, setDoc, deleteDoc, onSnapshot } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDb4AOtRT7jGENnLZ2KNwpczaG2Z77G2rc",
+            authDomain: "burban-fidelity.firebaseapp.com",
+            projectId: "burban-fidelity"
+        };
+
+        try {
+            const app = initializeApp(firebaseConfig);
+            const db = getFirestore(app);
+            window.firebaseDb = db;
+            window.firebaseModules = { collection, doc, setDoc, deleteDoc, onSnapshot };
+            window.firebaseReady = true;
+        } catch (err) {
+            console.error('Firebase admin init error', err);
+            window.firebaseReady = false;
+        }
+    </script>
+    <nav class="admin-nav">
+        <div class="admin-nav-container">
+            <h1>Admin - Produits</h1>
+            <a href="index.html">Site</a>
+        </div>
+    </nav>
+
+    <div class="admin-container">
+        <aside class="admin-sidebar">
+            <button class="admin-menu-link active" id="btnList">Liste</button>
+            <button class="admin-menu-link" id="btnCreate">Ajouter</button>
+        </aside>
+
+        <main class="admin-content">
+            <section class="admin-section active" id="sectionList">
+                <div class="admin-header">
+                    <h2>Produits</h2>
+                </div>
+                <div class="admin-table" id="productsTable"></div>
+            </section>
+
+            <section class="admin-section" id="sectionCreate">
+                <div class="admin-header">
+                    <h2>Créer / Éditer produit</h2>
+                </div>
+                <form id="productForm" class="admin-form">
+                    <input type="hidden" id="productId">
+                    <input id="pName" placeholder="Nom">
+                    <input id="pPrice" placeholder="Prix">
+                    <input id="pImage" placeholder="Image URL">
+                    <textarea id="pDescription" placeholder="Description"></textarea>
+
+                    <h4>Tailles (séparées par ,)</h4>
+                    <input id="pSizes" placeholder="S,M,L">
+
+                    <h4>Couleurs (hex, séparées par ,)</h4>
+                    <input id="pColors" placeholder="#000000,#ffffff">
+
+                    <h4>Variants (après avoir ajouté tailles & couleurs)</h4>
+                    <div id="variantsEditor"></div>
+
+                    <div style="display:flex; gap:12px;">
+                        <button class="admin-btn" type="button" id="saveProduct">Enregistrer</button>
+                        <button class="admin-btn" type="button" id="resetForm">Réinitialiser</button>
+                    </div>
+                </form>
+            </section>
+        </main>
+    </div>
+
+    <script src="js/admin.js"></script>
+</body>
+</html>
+<!DOCTYPE html>
+<html lang="fr">
+<head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CMS - BURBAN</title>
