@@ -6,6 +6,9 @@ let shippingData = null;
 let billingData = null;
 
 document.addEventListener('DOMContentLoaded', async () => {
+    console.log('Panier au checkout:', cart);
+    console.log('Total:', getCartTotal());
+    
     if (cart.length === 0) {
         window.location.href = 'cart.html';
         return;
@@ -256,8 +259,8 @@ async function handlePayment(e) {
     document.getElementById('submitPayment').textContent = 'Traitement...';
     
     // Mode démo: simuler le paiement
-    setTimeout(() => {
-        processOrder();
+    setTimeout(async () => {
+        await processOrder();
     }, 1500);
     
     /* 
@@ -278,7 +281,7 @@ async function handlePayment(e) {
     */
 }
 
-function processOrder() {
+async function processOrder() {
     const order = {
         id: Date.now(),
         date: new Date().toISOString(),

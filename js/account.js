@@ -1,4 +1,45 @@
 document.addEventListener('DOMContentLoaded', () => {
+    // Animation des personnages
+    const authForms = document.querySelectorAll('.auth-form');
+    const characters = document.querySelectorAll('.character');
+    
+    authForms.forEach(form => {
+        form.addEventListener('mouseenter', () => {
+            characters.forEach(char => {
+                char.classList.add('impressed');
+                char.querySelectorAll('.face-normal').forEach(f => f.style.display = 'none');
+                char.querySelectorAll('.face-impressed').forEach(f => f.style.display = 'block');
+                char.querySelectorAll('.face-sad').forEach(f => f.style.display = 'none');
+            });
+        });
+        
+        form.addEventListener('mouseleave', () => {
+            characters.forEach(char => {
+                char.classList.remove('impressed');
+                char.querySelectorAll('.face-normal').forEach(f => f.style.display = 'block');
+                char.querySelectorAll('.face-impressed').forEach(f => f.style.display = 'none');
+                char.querySelectorAll('.face-sad').forEach(f => f.style.display = 'none');
+            });
+        });
+    });
+    
+    // Fonction pour afficher la tête triste
+    window.showSadCharacters = () => {
+        characters.forEach(char => {
+            char.classList.remove('impressed');
+            char.classList.add('sad');
+            char.querySelectorAll('.face-normal').forEach(f => f.style.display = 'none');
+            char.querySelectorAll('.face-impressed').forEach(f => f.style.display = 'none');
+            char.querySelectorAll('.face-sad').forEach(f => f.style.display = 'block');
+            
+            setTimeout(() => {
+                char.classList.remove('sad');
+                char.querySelectorAll('.face-normal').forEach(f => f.style.display = 'block');
+                char.querySelectorAll('.face-sad').forEach(f => f.style.display = 'none');
+            }, 2000);
+        });
+    };
+    
     const waitForFirebase = setInterval(() => {
         if (!window.firebaseReady) return;
         clearInterval(waitForFirebase);

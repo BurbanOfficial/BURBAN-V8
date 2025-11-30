@@ -1,303 +1,210 @@
-// Admin credentials
-const ADMIN_CREDENTIALS = {
-    email: 'direction@burbanofficial.com',
-    password: 'CMS_TEAM_BURBAN'
-};
+// Minimal admin UI for local editing of products and variant stocks
+document.addEventListener('DOMContentLoaded', () => {
+    const productsTable = document.getElementById('productsTable');
+    const productForm = document.getElementById('productForm');
+    const btnList = document.getElementById('btnList');
+    const btnCreate = document.getElementById('btnCreate');
+    const sectionList = document.getElementById('sectionList');
+    const sectionCreate = document.getElementById('sectionCreate');
 
-let isAuthenticated = false;
-let twoFAVerified = false;
-let totpInstance = null;
-
-// Login
-document.getElementById('loginForm').addEventListener('submit', (e) => {
-    e.preventDefault();
-    const email = document.getElementById('adminEmail').value;
-    const password = document.getElementById('adminPassword').value;
-    const error = document.getElementById('loginError');
-    
-    if (email === ADMIN_CREDENTIALS.email && password === ADMIN_CREDENTIALS.password) {
-        isAuthenticated = true;
-        document.getElementById('adminLogin').style.display = 'none';
-        document.getElementById('admin2FA').style.display = 'block';
-        error.textContent = '';
-        
-        // Initialize TOTP
-        initializeTOTP();
-    } else {
-        error.textContent = 'Email ou mot de passe incorrect';
+    function readProducts() {
+        return JSON.parse(localStorage.getItem('adminProducts')) || [];
     }
-});
 
-// Initialize TOTP (Google Authenticator)
-function initializeTOTP() {
-    const email = ADMIN_CREDENTIALS.email;
-    const secretKey = 'totp_secret_burban_cms';
-    let secretBase32 = localStorage.getItem(secretKey);
-    
-    if (!secretBase32) {
-        const secret = new OTPAuth.Secret({ size: 20 });
-        secretBase32 = secret.base32;
-        localStorage.setItem(secretKey, secretBase32);
-        
-        totpInstance = new OTPAuth.TOTP({
-            issuer: 'BURBAN CMS',
-            label: email,
-            algorithm: 'SHA1',
-            digits: 6,
-            period: 30,
-            secret: secret
-        });
-        
-        const uri = totpInstance.toString();
-        const qrSection = document.getElementById('qrCodeSection');
-        const qrDiv = document.getElementById('qrcode');
-        
-        qrSection.style.display = 'block';
-        qrDiv.innerHTML = '';
-        
-        new QRCode(qrDiv, {
-            text: uri,
-            width: 250,
-            height: 250,
-            colorDark: '#000000',
-            colorLight: '#ffffff',
-            correctLevel: QRCode.CorrectLevel.H
-        });
-        
-        document.getElementById('codePrompt').textContent = 'Scannez le QR code puis entrez le code généré';
-    } else {
-        document.getElementById('qrCodeSection').style.display = 'none';
-        document.getElementById('codePrompt').textContent = 'Entrez le code de votre application';
-        
-        totpInstance = new OTPAuth.TOTP({
-            issuer: 'BURBAN CMS',
-            label: email,
-            algorithm: 'SHA1',
-            digits: 6,
-            period: 30,
-            secret: OTPAuth.Secret.fromBase32(secretBase32)
-        });
-    }
-}
-
-// Vérifier le code TOTP
-document.getElementById('twoFAForm').addEventListener('submit', (e) => {
-    e.preventDefault();
-    const code = document.getElementById('twoFACode').value;
-    const error = document.getElementById('twoFAError');
-    
-    if (!totpInstance) {
-        error.textContent = 'Erreur d\'initialisation';
-        return;
-    }
-    
-    // Vérifier le code (avec fenêtre de tolérance de ±1 période)
-    const delta = totpInstance.validate({ token: code, window: 1 });
-    
-    if (delta !== null) {
-        twoFAVerified = true;
-        sessionStorage.setItem('adminAuth', 'true');
-        localStorage.setItem('adminAuthExpiry', (Date.now() + 24 * 60 * 60 * 1000).toString());
-        document.getElementById('admin2FA').style.display = 'none';
-        document.getElementById('adminDashboard').style.display = 'block';
-        loadDashboard();
-        error.textContent = '';
-    } else {
-        error.textContent = 'Code incorrect ou expiré';
-        document.getElementById('twoFACode').value = '';
-    }
-});
-
-// Logout
-document.getElementById('logoutBtn').addEventListener('click', () => {
-    sessionStorage.removeItem('adminAuth');
-    localStorage.removeItem('adminAuthExpiry');
-    window.location.reload();
-});
-
-// Check auth on load
-const authExpiry = localStorage.getItem('adminAuthExpiry');
-if (sessionStorage.getItem('adminAuth') === 'true' && authExpiry && Date.now() < parseInt(authExpiry)) {
-    document.getElementById('adminLogin').style.display = 'none';
-    document.getElementById('admin2FA').style.display = 'none';
-    document.getElementById('adminDashboard').style.display = 'block';
-    loadDashboard();
-} else {
-    sessionStorage.removeItem('adminAuth');
-    localStorage.removeItem('adminAuthExpiry');
-}
-
-// Menu navigation
-document.querySelectorAll('.admin-menu-link').forEach(link => {
-    link.addEventListener('click', (e) => {
-        e.preventDefault();
-        document.querySelectorAll('.admin-menu-link').forEach(l => l.classList.remove('active'));
-        document.querySelectorAll('.admin-section').forEach(s => s.classList.remove('active'));
-        link.classList.add('active');
-        document.getElementById(link.dataset.section + 'Section').classList.add('active');
-    });
-});
-
-// Load Dashboard
-function loadDashboard() {
-    loadProducts();
-    loadOrders();
-    loadUsers();
-    if (typeof loadSizeGuides === 'function') loadSizeGuides();
-}
-
-// Products Management
-function loadProducts() {
-    const tbody = document.getElementById('productsTableBody');
-    const products = JSON.parse(localStorage.getItem('adminProducts')) || window.products || [];
-    
-    tbody.innerHTML = products.map(product => `
-        <tr>
-            <td><img src="${product.image}" alt="${product.name}"></td>
-            <td>${product.name}</td>
-            <td>${product.price} €</td>
-            <td>${product.category}</td>
-            <td>${product.gender === 'men' ? 'Homme' : 'Femme'}</td>
-            <td>
-                <div class="admin-actions">
-                    <button class="admin-btn" onclick="editProduct(${product.id})">Modifier</button>
-                    <button class="admin-btn admin-btn-delete" onclick="deleteProduct(${product.id})">Supprimer</button>
-                </div>
-            </td>
-        </tr>
-    `).join('');
-}
-
-// Add Product
-document.getElementById('addProductBtn').addEventListener('click', () => {
-    document.getElementById('productModalTitle').textContent = 'Ajouter un produit';
-    document.getElementById('productForm').reset();
-    document.getElementById('productId').value = '';
-    document.getElementById('productModal').classList.add('active');
-});
-
-// Product Form
-document.getElementById('productForm').addEventListener('submit', (e) => {
-    e.preventDefault();
-    
-    const products = JSON.parse(localStorage.getItem('adminProducts')) || window.products || [];
-    const id = document.getElementById('productId').value;
-    
-    const product = {
-        id: id ? parseInt(id) : Date.now(),
-        name: document.getElementById('productName').value,
-        price: parseFloat(document.getElementById('productPrice').value),
-        description: document.getElementById('productDescription').value,
-        category: document.getElementById('productCategory').value,
-        gender: document.getElementById('productGender').value,
-        image: document.getElementById('productImage').value,
-        sizes: document.getElementById('productSizes').value.split(',').map(s => s.trim()),
-        colors: document.getElementById('productColors').value.split(',').map(c => c.trim())
-    };
-    
-    if (id) {
-        const index = products.findIndex(p => p.id === parseInt(id));
-        products[index] = product;
-    } else {
-        products.push(product);
-    }
-    
-    localStorage.setItem('adminProducts', JSON.stringify(products));
-    window.products = products;
-    loadProducts();
-    document.getElementById('productModal').classList.remove('active');
-});
-
-function editProduct(id) {
-    const products = JSON.parse(localStorage.getItem('adminProducts')) || window.products || [];
-    const product = products.find(p => p.id === id);
-    
-    if (product) {
-        document.getElementById('productModalTitle').textContent = 'Modifier le produit';
-        document.getElementById('productId').value = product.id;
-        document.getElementById('productName').value = product.name;
-        document.getElementById('productPrice').value = product.price;
-        document.getElementById('productDescription').value = product.description;
-        document.getElementById('productCategory').value = product.category;
-        document.getElementById('productGender').value = product.gender;
-        document.getElementById('productImage').value = product.image;
-        document.getElementById('productSizes').value = product.sizes.join(', ');
-        document.getElementById('productColors').value = product.colors.join(', ');
-        document.getElementById('productModal').classList.add('active');
-    }
-}
-
-function deleteProduct(id) {
-    if (confirm('Êtes-vous sûr de vouloir supprimer ce produit ?')) {
-        let products = JSON.parse(localStorage.getItem('adminProducts')) || window.products || [];
-        products = products.filter(p => p.id !== id);
+    function saveProducts(products) {
         localStorage.setItem('adminProducts', JSON.stringify(products));
-        window.products = products;
-        loadProducts();
     }
-}
 
-// Orders Management
-function loadOrders() {
-    const tbody = document.getElementById('ordersTableBody');
-    const users = JSON.parse(localStorage.getItem('users')) || [];
-    const orders = [];
-    
-    users.forEach(user => {
-        if (user.orders) {
-            user.orders.forEach(order => {
-                orders.push({
-                    ...order,
-                    userName: `${user.firstName} ${user.lastName}`,
-                    userEmail: user.email
-                });
+    function renderTable() {
+        const products = readProducts();
+        if (products.length === 0) {
+            productsTable.innerHTML = '<p style="padding:16px;">Aucun produit</p>';
+            return;
+        }
+        const rows = products.map(p => `
+            <div style="display:flex; align-items:center; justify-content:space-between; padding:12px; border-bottom:1px solid #eee;">
+                <div style="display:flex; gap:12px; align-items:center;">
+                    <img src="${p.image||''}" style="width:50px;height:65px;object-fit:cover;background:#f5f5f5">
+                    <div>
+                        <div><strong>${p.name}</strong></div>
+                        <div style="font-size:13px;color:#666">${p.price ? p.price + ' €' : ''}</div>
+                    </div>
+                </div>
+                <div class="admin-actions">
+                    <button class="admin-btn" data-id="${p.id}" data-action="edit">Éditer</button>
+                    <button class="admin-btn admin-btn-delete" data-id="${p.id}" data-action="delete">Supprimer</button>
+                </div>
+            </div>
+        `).join('');
+        productsTable.innerHTML = rows;
+        productsTable.querySelectorAll('.admin-btn').forEach(b => b.addEventListener('click', (e) => {
+            const id = parseInt(b.dataset.id);
+            const action = b.dataset.action;
+            if (action === 'edit') loadProduct(id);
+            if (action === 'delete') {
+                if (!confirm('Supprimer ce produit ?')) return;
+                // If Firestore is available, delete remote doc, else delete local
+                if (window.firebaseReady && window.firebaseDb && window.firebaseModules && window.firebaseModules.deleteDoc && window.firebaseModules.doc) {
+                    const { deleteDoc, doc } = window.firebaseModules;
+                    try {
+                        deleteDoc(doc(window.firebaseDb, 'products', String(id))).catch(err => {
+                            console.error('Erreur suppression Firestore', err);
+                            // fallback to local delete
+                            const ps = readProducts().filter(x => x.id !== id);
+                            saveProducts(ps);
+                            renderTable();
+                        });
+                    } catch (err) {
+                        console.error(err);
+                        const ps = readProducts().filter(x => x.id !== id);
+                        saveProducts(ps);
+                        renderTable();
+                    }
+                } else {
+                    const ps = readProducts().filter(x => x.id !== id);
+                    saveProducts(ps);
+                    renderTable();
+                }
+            }
+        }));
+    }
+
+    function switchToCreate() {
+        btnList.classList.remove('active');
+        btnCreate.classList.add('active');
+        sectionList.classList.remove('active');
+        sectionCreate.classList.add('active');
+    }
+
+    btnList.addEventListener('click', () => {
+        btnCreate.classList.remove('active');
+        btnList.classList.add('active');
+        sectionCreate.classList.remove('active');
+        sectionList.classList.add('active');
+    });
+    btnCreate.addEventListener('click', switchToCreate);
+
+    function resetForm() {
+        productForm.reset();
+        document.getElementById('productId').value = '';
+        document.getElementById('variantsEditor').innerHTML = '';
+    }
+
+    document.getElementById('resetForm').addEventListener('click', resetForm);
+
+    function loadProduct(id) {
+        const products = readProducts();
+        const p = products.find(x => x.id === id);
+        if (!p) return;
+        document.getElementById('productId').value = p.id;
+        document.getElementById('pName').value = p.name || '';
+        document.getElementById('pPrice').value = p.price || '';
+        document.getElementById('pImage').value = p.image || '';
+        document.getElementById('pDescription').value = p.description || '';
+        document.getElementById('pSizes').value = (p.sizes||[]).join(',');
+        document.getElementById('pColors').value = (p.colors||[]).join(',');
+        renderVariantsEditor(p);
+        switchToCreate();
+    }
+
+    function renderVariantsEditor(product) {
+        const container = document.getElementById('variantsEditor');
+        const sizes = product.sizes || [];
+        const colors = product.colors || [];
+        // Build table
+        let html = '<table style="width:100%;border-collapse:collapse">';
+        html += '<tr><th>Taille</th><th>Couleur</th><th>Stock</th></tr>';
+        const variants = product.variants || [];
+        sizes.forEach(size => {
+            colors.forEach(color => {
+                const v = variants.find(x => x.size === size && x.color === color) || { size, color, stock: 0 };
+                html += `<tr data-size="${size}" data-color="${color}"><td>${size}</td><td>${color}</td><td><input type="number" value="${v.stock||0}" data-size="${size}" data-color="${color}" style="width:100px"></td></tr>`;
             });
+        });
+        html += '</table>';
+        container.innerHTML = html;
+    }
+
+    document.getElementById('pSizes').addEventListener('change', () => {
+        const sizes = document.getElementById('pSizes').value.split(',').map(s => s.trim()).filter(Boolean);
+        const colors = document.getElementById('pColors').value.split(',').map(s => s.trim()).filter(Boolean);
+        renderVariantsEditor({ sizes, colors, variants: [] });
+    });
+    document.getElementById('pColors').addEventListener('change', () => {
+        const sizes = document.getElementById('pSizes').value.split(',').map(s => s.trim()).filter(Boolean);
+        const colors = document.getElementById('pColors').value.split(',').map(s => s.trim()).filter(Boolean);
+        renderVariantsEditor({ sizes, colors, variants: [] });
+    });
+
+    document.getElementById('saveProduct').addEventListener('click', () => {
+        const idVal = document.getElementById('productId').value;
+        const id = idVal ? parseInt(idVal,10) : Date.now();
+        const name = document.getElementById('pName').value;
+        const price = parseFloat(document.getElementById('pPrice').value) || 0;
+        const image = document.getElementById('pImage').value;
+        const description = document.getElementById('pDescription').value;
+        const sizes = document.getElementById('pSizes').value.split(',').map(s => s.trim()).filter(Boolean);
+        const colors = document.getElementById('pColors').value.split(',').map(s => s.trim()).filter(Boolean);
+
+        const variants = [];
+        document.querySelectorAll('#variantsEditor input[type="number"]').forEach(input => {
+            const s = input.dataset.size;
+            const c = input.dataset.color;
+            const stock = parseInt(input.value||0,10) || 0;
+            variants.push({ size: s, color: c, stock });
+        });
+
+        const product = { id, name, price, image, description, sizes, colors, variants };
+        // If Firestore available, write to collection 'products'
+        if (window.firebaseReady && window.firebaseDb && window.firebaseModules && window.firebaseModules.setDoc && window.firebaseModules.doc) {
+            const { setDoc, doc } = window.firebaseModules;
+            setDoc(doc(window.firebaseDb, 'products', String(id)), product).then(() => {
+                resetForm();
+                btnList.click();
+            }).catch(err => {
+                console.error('Erreur écriture Firestore, fallback local', err);
+                const products = readProducts();
+                const existingIndex = products.findIndex(p => p.id === id);
+                if (existingIndex === -1) products.push(product); else products[existingIndex] = product;
+                saveProducts(products);
+                resetForm();
+                renderTable();
+                btnList.click();
+            });
+        } else {
+            const products = readProducts();
+            const existingIndex = products.findIndex(p => p.id === id);
+            if (existingIndex === -1) products.push(product); else products[existingIndex] = product;
+            saveProducts(products);
+            resetForm();
+            renderTable();
+            btnList.click();
         }
     });
-    
-    if (orders.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; color: var(--gray);">Aucune commande</td></tr>';
-        return;
+
+    // Init: subscribe to Firestore 'products' collection if available, otherwise render from localStorage
+    if (window.firebaseReady && window.firebaseDb && window.firebaseModules && window.firebaseModules.onSnapshot && window.firebaseModules.collection) {
+        const { onSnapshot, collection } = window.firebaseModules;
+        try {
+            onSnapshot(collection(window.firebaseDb, 'products'), (snapshot) => {
+                const prods = [];
+                snapshot.forEach(docSnap => {
+                    const data = docSnap.data();
+                    const pid = data.id ?? (docSnap.id ? parseInt(docSnap.id, 10) : undefined);
+                    prods.push({ ...data, id: pid });
+                });
+                // cache locally for offline
+                localStorage.setItem('adminProducts', JSON.stringify(prods));
+                renderTable();
+            }, (err) => {
+                console.error('Firestore onSnapshot error', err);
+                renderTable();
+            });
+        } catch (err) {
+            console.error('Erreur initialisation snapshot', err);
+            renderTable();
+        }
+    } else {
+        renderTable();
     }
-    
-    tbody.innerHTML = orders.map(order => `
-        <tr>
-            <td>#${order.id}</td>
-            <td>${order.userName}<br><small style="color: var(--gray);">${order.userEmail}</small></td>
-            <td>${new Date(order.date).toLocaleDateString()}</td>
-            <td>${order.total.toFixed(2)} €</td>
-            <td><span style="color: green;">Confirmée</span></td>
-        </tr>
-    `).join('');
-}
-
-// Users Management
-function loadUsers() {
-    const tbody = document.getElementById('usersTableBody');
-    const users = JSON.parse(localStorage.getItem('users')) || [];
-    
-    if (users.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="4" style="text-align: center; color: var(--gray);">Aucun utilisateur</td></tr>';
-        return;
-    }
-    
-    tbody.innerHTML = users.map(user => `
-        <tr>
-            <td>${user.firstName} ${user.lastName}</td>
-            <td>${user.email}</td>
-            <td>${user.orders ? user.orders.length : 0}</td>
-            <td>${new Date(user.id).toLocaleDateString()}</td>
-        </tr>
-    `).join('');
-}
-
-// Modal close
-document.querySelector('.modal-close').addEventListener('click', () => {
-    document.getElementById('productModal').classList.remove('active');
-});
-
-// Settings Form
-document.getElementById('settingsForm').addEventListener('submit', (e) => {
-    e.preventDefault();
-    alert('Paramètres enregistrés avec succès');
 });
