@@ -244,6 +244,8 @@
                 <input type="number" id="productStock" placeholder="Stock (vide = illimité)" min="0">
                 <small style="color: var(--gray); font-size: 12px;">Laissez vide pour un stock illimité</small>
                 
+                <div id="stockVariantsContainer" style="margin-top: 16px;"></div>
+                
                 <h4 style="margin: 16px 0 8px; font-size: 14px; font-weight: 500;">Promotion</h4>
                 <label style="display: flex; align-items: center; gap: 8px; margin-bottom: 12px;">
                     <input type="checkbox" id="productPromoActive" style="width: auto;">
@@ -300,6 +302,21 @@
         </div>
     </div>
 
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+        import { getFirestore, doc, getDoc, setDoc, deleteDoc, arrayUnion } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+        
+        const firebaseConfig = {
+            apiKey: "AIzaSyDb4AOtRT7jGENnLZ2KNwpczaG2Z77G2rc",
+            authDomain: "burban-fidelity.firebaseapp.com",
+            projectId: "burban-fidelity"
+        };
+        
+        const app = initializeApp(firebaseConfig);
+        window.firebaseDb = getFirestore(app);
+        window.firebaseModules = { doc, getDoc, setDoc, deleteDoc, arrayUnion };
+        window.firebaseReady = true;
+    </script>
     <script src="js/admin.js"></script>
     <script src="js/admin-functions.js"></script>
     <script>
