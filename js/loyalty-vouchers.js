@@ -28,7 +28,7 @@ async function displayVouchers() {
 
     vouchersContainer.innerHTML = `
         <h3 style="margin-bottom: 16px;">Utiliser mes points de fidélité (${points} points disponibles)</h3>
-        <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 24px;">
+        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-bottom: 24px;">
             ${vouchers.map(v => {
                 const hasEnoughPoints = points >= v.points;
                 const hasMinPurchase = cartTotal >= v.minPurchase;
