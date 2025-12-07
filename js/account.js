@@ -581,6 +581,14 @@ async function loadOrders(orderNumbers = []) {
                                 ${order.shippingAddress?.address || ''}<br>
                                 ${order.shippingAddress?.phone || ''}
                             </p>
+                            ${order.billingAddress ? `
+                            <h4 style="font-size: 12px; text-transform: uppercase; letter-spacing: 1px; color: var(--gray); margin-bottom: 12px; margin-top: 16px;">Facturation</h4>
+                            <p style="font-size: 14px; line-height: 1.6;">
+                                ${order.billingAddress?.firstName || ''} ${order.billingAddress?.lastName || ''}<br>
+                                ${order.billingAddress?.address || ''}<br>
+                                ${order.billingAddress?.postal || ''} ${order.billingAddress?.city || ''}
+                            </p>
+                            ` : ''}
                         </div>
                         <div>
                             <h4 style="font-size: 12px; text-transform: uppercase; letter-spacing: 1px; color: var(--gray); margin-bottom: 12px;">Paiement</h4>
@@ -684,14 +692,14 @@ window.confirmCancelOrder = async function(orderNumber) {
         if (pointsEarned > 0) {
             updates.push({
                 points: -pointsEarned,
-                description: `Annulation commande ${orderNumber} - Retrait des points gagnés`,
+                description: 'Annulation de commande',
                 date: new Date().toISOString()
             });
         }
         if (pointsSpent > 0) {
             updates.push({
                 points: pointsSpent,
-                description: `Annulation commande ${orderNumber} - Remboursement des points utilisés`,
+                description: 'Remboursement bon de réduction',
                 date: new Date().toISOString()
             });
         }

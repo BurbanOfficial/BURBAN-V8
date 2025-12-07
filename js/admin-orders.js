@@ -103,11 +103,18 @@ async function viewOrderDetails(orderNumber) {
                     <p>${order.shippingAddress?.address || ''}</p>
                     <p>${order.shippingAddress?.phone || ''}</p>
                     <p>${order.shippingAddress?.email || ''}</p>
+                    ${order.billingAddress ? `
+                    <h4 style="margin-bottom: 12px; margin-top: 16px;">Facturation</h4>
+                    <p>${order.billingAddress?.firstName || ''} ${order.billingAddress?.lastName || ''}</p>
+                    <p>${order.billingAddress?.address || ''}</p>
+                    <p>${order.billingAddress?.postal || ''} ${order.billingAddress?.city || ''}</p>
+                    ` : ''}
                 </div>
                 <div>
                     <h4 style="margin-bottom: 12px;">Paiement</h4>
                     <p>Carte bancaire</p>
                     <p>**** **** **** ${order.cardLast4 || 'XXXX'}</p>
+                    ${order.voucherPoints ? `<p style="margin-top: 12px;">Bon utilisé: ${order.voucherPoints} points (-${order.discount.toFixed(2)} €)</p>` : ''}
                     <p style="margin-top: 12px;"><strong>Total: ${order.total.toFixed(2)} €</strong></p>
                 </div>
             </div>

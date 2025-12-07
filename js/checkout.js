@@ -346,7 +346,7 @@ async function processOrder() {
         discount: discount,
         total: finalTotal,
         shippingAddress: shippingData,
-        billingAddress: billingData,
+        billingAddress: JSON.stringify(billingData) !== JSON.stringify(shippingData) ? billingData : null,
         cardLast4: document.getElementById('cardNumber')?.value.slice(-4) || 'XXXX',
         status: 'confirmed'
     };
