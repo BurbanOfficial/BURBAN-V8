@@ -1691,14 +1691,35 @@ body.modal-open {
         margin-bottom: 24px;
     }
 
+    .account-panel form {
+        max-width: 100%;
+    }
+
     .order-card {
         padding: 16px;
+        font-size: 14px;
     }
 
     .order-header {
         flex-direction: column;
         gap: 8px;
         align-items: flex-start;
+        font-size: 13px;
+    }
+
+    .order-item {
+        font-size: 13px;
+    }
+
+    .address-card {
+        padding: 16px;
+        font-size: 14px;
+    }
+
+    .address-card button {
+        position: static;
+        margin-top: 12px;
+        width: 100%;
     }
 
     .auth-section {
