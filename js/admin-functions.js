@@ -114,7 +114,6 @@ document.getElementById('productForm')?.addEventListener('submit', (e) => {
         shipping: document.getElementById('productShipping').value || 'Livraison gratuite dès 100€\nRetours sous 30 jours\nExpédition sous 24-48h',
         publishDate: existingProduct ? existingProduct.publishDate : (document.getElementById('productPublishDate').value || new Date().toISOString()),
         unpublishDate: document.getElementById('productUnpublishDate').value || null,
-        stock: document.getElementById('productStock').value ? parseInt(document.getElementById('productStock').value) : null,
         stockByVariant: saveStockVariants(colors, sizes),
         promoActive: promoActive,
         originalPrice: promoActive ? parseFloat(document.getElementById('productOriginalPrice').value) : null,
@@ -156,7 +155,7 @@ function loadProducts() {
     
     tbody.innerHTML = products.map(product => {
         const isVisible = visibleProducts.includes(product);
-        const stockText = product.stock === null ? 'Illimité' : product.stock;
+        const stockText = 'Variantes';
         
         return `
             <tr style="${!isVisible ? 'opacity: 0.5;' : ''}">
@@ -203,10 +202,9 @@ function editProduct(id) {
         document.getElementById('productShipping').value = product.shipping || '';
         document.getElementById('productPublishDate').value = product.publishDate || '';
         document.getElementById('productUnpublishDate').value = product.unpublishDate || '';
-        document.getElementById('productStock').value = product.stock || '';
         
         // Charger le stock par variante
-        loadStockVariants(product);
+        setTimeout(() => loadStockVariants(product), 100);
         
         // Promo
         const promoActive = product.promoActive || false;
@@ -402,23 +400,30 @@ function loadStockVariants(product) {
     const sizes = product.sizes || [];
     const stockByVariant = product.stockByVariant || {};
     
-    container.innerHTML = '<h4 style="margin: 16px 0 12px; font-size: 14px;">Stock par variante</h4>';
+    if (colors.length === 0 || sizes.length === 0) {
+        container.innerHTML = '';
+        return;
+    }
+    
+    let html = '<h4 style="margin: 16px 0 12px; font-size: 14px;">Stock par variante</h4>';
     
     colors.forEach(color => {
         const colorName = getColorName(color);
-        container.innerHTML += `<div style="margin-bottom: 16px;"><strong>${colorName}</strong></div>`;
+        html += `<div style="margin-bottom: 16px;"><strong>${colorName}</strong></div>`;
         
         sizes.forEach(size => {
             const key = `${color}-${size}`;
-            const stock = stockByVariant[key] || 0;
-            container.innerHTML += `
+            const stock = stockByVariant[key] || 10;
+            html += `
                 <div style="display: flex; gap: 8px; align-items: center; margin-bottom: 8px;">
                     <label style="width: 60px; font-size: 14px;">${size}:</label>
-                    <input type="number" min="0" value="${stock}" data-variant="${key}" class="variant-stock" style="width: 100px; padding: 8px;">
+                    <input type="number" min="0" value="${stock}" data-variant="${key}" class="variant-stock" style="width: 100px; padding: 8px; border: 1px solid var(--border);">
                 </div>
             `;
         });
     });
+    
+    container.innerHTML = html;
 }
 
 function saveStockVariants(colors, sizes) {
@@ -485,23 +490,23 @@ async function checkAndNotifyStockIncrease(product) {
 }
 
 // Mettre à jour les couleurs/tailles pour générer les variantes
-document.getElementById('productColors')?.addEventListener('input', () => {
-    const product = {
-        colors: document.getElementById('productColors').value.split(',').map(c => c.trim()),
-        sizes: document.getElementById('productSizes').value.split(',').map(s => s.trim()),
-        stockByVariant: {}
-    };
-    loadStockVariants(product);
-});
+setTimeout(() => {
+    document.getElementById('productColors')?.addEventListener('blur', () => {
+        const colors = document.getElementById('productColors').value.split(',').map(c => c.trim()).filter(c => c);
+        const sizes = document.getElementById('productSizes').value.split(',').map(s => s.trim()).filter(s => s);
+        if (colors.length && sizes.length) {
+            loadStockVariants({ colors, sizes, stockByVariant: {} });
+        }
+    });
 
-document.getElementById('productSizes')?.addEventListener('input', () => {
-    const product = {
-        colors: document.getElementById('productColors').value.split(',').map(c => c.trim()),
-        sizes: document.getElementById('productSizes').value.split(',').map(s => s.trim()),
-        stockByVariant: {}
-    };
-    loadStockVariants(product);
-});
+    document.getElementById('productSizes')?.addEventListener('blur', () => {
+        const colors = document.getElementById('productColors').value.split(',').map(c => c.trim()).filter(c => c);
+        const sizes = document.getElementById('productSizes').value.split(',').map(s => s.trim()).filter(s => s);
+        if (colors.length && sizes.length) {
+            loadStockVariants({ colors, sizes, stockByVariant: {} });
+        }
+    });
+}, 500);
 
 // Charger les catégories au démarrage
 if (document.getElementById('productCategory')) {
