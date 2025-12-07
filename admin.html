@@ -143,15 +143,33 @@
                         <table>
                             <thead>
                                 <tr>
-                                    <th>ID</th>
+                                    <th>Numéro</th>
                                     <th>Client</th>
                                     <th>Date</th>
                                     <th>Total</th>
                                     <th>Statut</th>
+                                    <th>Actions</th>
                                 </tr>
                             </thead>
                             <tbody id="ordersTableBody"></tbody>
                         </table>
+                    </div>
+                </div>
+                
+                <!-- Order Modal -->
+                <div class="modal" id="orderModal">
+                    <div class="modal-content">
+                        <span class="modal-close">&times;</span>
+                        <h3>Gérer la commande</h3>
+                        <form id="orderForm" class="admin-form">
+                            <input type="hidden" id="orderNumber">
+                            <input type="text" id="orderTrackingUrl" placeholder="Lien de suivi colis">
+                            <select id="orderStatus">
+                                <option value="processing">En cours de traitement</option>
+                                <option value="shipped">Envoyé</option>
+                            </select>
+                            <button type="submit" class="btn-primary">Enregistrer</button>
+                        </form>
                     </div>
                 </div>
 
@@ -315,6 +333,7 @@
     </script>
     <script src="js/admin.js"></script>
     <script src="js/admin-functions.js"></script>
+    <script src="js/admin-orders.js"></script>
     <script src="js/email-service.js"></script>
     <script>
         // Toggle promo fields

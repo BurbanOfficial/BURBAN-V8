@@ -44,7 +44,7 @@
     <script type="module">
         import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
         import { getAuth, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
-        import { getFirestore, doc, getDoc, updateDoc, arrayUnion } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+        import { getFirestore, doc, getDoc, updateDoc, arrayUnion, setDoc, collection, getDocs } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
         
         const firebaseConfig = {
             apiKey: "AIzaSyDb4AOtRT7jGENnLZ2KNwpczaG2Z77G2rc",
@@ -78,6 +78,39 @@
                 console.log('Order:', order, 'Voucher:', voucher);
                 
                 try {
+                    // Générer numéro de commande BR + 9 chiffres + 2 lettres
+                    const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+                    const orderNumber = 'BR' + String(Date.now()).slice(-9) + letters[Math.floor(Math.random() * 26)] + letters[Math.floor(Math.random() * 26)];
+                    
+                    // Déduire le stock
+                    const productsSnapshot = await getDocs(collection(db, 'products'));
+                    for (const item of order.items) {
+                        const productDoc = productsSnapshot.docs.find(d => d.data().id === item.id);
+                        if (productDoc) {
+                            const product = productDoc.data();
+                            const variantKey = `${item.color}-${item.size}`;
+                            const currentStock = product.stockByVariant[variantKey] || 0;
+                            product.stockByVariant[variantKey] = Math.max(0, currentStock - item.quantity);
+                            await setDoc(doc(db, 'products', `${product.id}`), product);
+                        }
+                    }
+                    
+                    // Créer la commande dans Firestore
+                    const orderData = {
+                        orderNumber,
+                        userId: user.uid,
+                        userEmail: user.email,
+                        items: order.items,
+                        total: order.total,
+                        discount: voucher ? voucher.discount : 0,
+                        status: 'processing',
+                        trackingUrl: null,
+                        date: new Date().toISOString(),
+                        shippingAddress: order.shippingAddress || null
+                    };
+                    await setDoc(doc(db, 'orders', orderNumber), orderData);
+                    
+                    // Mettre à jour les points utilisateur
                     const userRef = doc(db, 'users', user.uid);
                     const userDoc = await getDoc(userRef);
                     const userData = userDoc.data();
@@ -86,11 +119,8 @@
                     const pointsEarned = Math.floor(order.total * 10);
                     let newPoints = currentPoints + pointsEarned;
                     
-                    console.log('Points actuels:', currentPoints, 'Points gagnés:', pointsEarned);
-                    
                     const updates = [];
                     
-                    // Déduire les points du bon si utilisé
                     if (voucher) {
                         newPoints -= voucher.points;
                         updates.push({
@@ -98,10 +128,8 @@
                             description: `Échange de ${voucher.points} points contre un bon de ${voucher.discount}€`,
                             date: new Date().toISOString()
                         });
-                        console.log('Bon utilisé:', voucher.points, 'points déduits');
                     }
                     
-                    // Ajouter les points gagnés
                     updates.push({
                         points: pointsEarned,
                         description: `Ajout de ${pointsEarned} points suite à votre achat`,
@@ -110,12 +138,11 @@
                     
                     await updateDoc(userRef, {
                         points: newPoints,
-                        pointsHistory: arrayUnion(...updates)
+                        pointsHistory: arrayUnion(...updates),
+                        orders: arrayUnion(orderNumber)
                     });
                     
-                    console.log('Points mis à jour avec succès! Nouveau total:', newPoints);
-                    
-                    // Nettoyer le sessionStorage
+                    console.log('Commande créée:', orderNumber);
                     sessionStorage.removeItem('lastOrder');
                 } catch (error) {
                     console.error('Erreur mise à jour points:', error);
