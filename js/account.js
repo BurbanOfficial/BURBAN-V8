@@ -740,7 +740,10 @@ function loadAddresses(addresses = []) {
     
     addressesList.innerHTML = addresses.map((address, index) => `
         <div class="address-card">
-            <button onclick="deleteAddress(${index})">Supprimer</button>
+            <div style="display: flex; gap: 8px; margin-bottom: 12px;">
+                <button onclick="editAddress(${index})" style="flex: 1; padding: 8px; background: var(--black); color: white; border: none; cursor: pointer;">Modifier</button>
+                <button onclick="deleteAddress(${index})" style="flex: 1; padding: 8px; background: white; color: var(--black); border: 1px solid var(--border); cursor: pointer;">Supprimer</button>
+            </div>
             <strong>${address.name || 'Adresse ' + (index + 1)}</strong>
             <p>${address.firstName || ''} ${address.lastName || ''}</p>
             ${address.email ? `<p>${address.email}</p>` : ''}
@@ -770,6 +773,60 @@ async function deleteAddress(index) {
 }
 
 window.deleteAddress = deleteAddress;
+
+async function editAddress(index) {
+    const { doc, getDoc, updateDoc } = window.firebaseModules;
+    const auth = window.firebaseAuth;
+    const db = window.firebaseDb;
+    
+    try {
+        const userDoc = await getDoc(doc(db, 'users', auth.currentUser.uid));
+        const addresses = userDoc.data().addresses || [];
+        const address = addresses[index];
+        
+        const modal = document.getElementById('addressModal');
+        document.getElementById('addressForm').elements[0].value = address.name || '';
+        document.getElementById('addressForm').elements[1].value = address.firstName || '';
+        document.getElementById('addressForm').elements[2].value = address.lastName || '';
+        document.getElementById('addressForm').elements[3].value = address.email || '';
+        document.getElementById('addressForm').elements[4].value = address.phone || '';
+        document.getElementById('addressForm').elements[5].value = address.address || '';
+        document.getElementById('addressForm').elements[6].value = address.address2 || '';
+        document.getElementById('addressForm').elements[7].value = address.postal || '';
+        document.getElementById('addressForm').elements[8].value = address.city || '';
+        document.getElementById('addressForm').elements[9].value = address.country || '';
+        
+        modal.classList.add('active');
+        
+        const form = document.getElementById('addressForm');
+        const newForm = form.cloneNode(true);
+        form.parentNode.replaceChild(newForm, form);
+        
+        newForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            addresses[index] = {
+                name: e.target[0].value,
+                firstName: e.target[1].value,
+                lastName: e.target[2].value,
+                email: e.target[3].value,
+                phone: e.target[4].value,
+                address: e.target[5].value,
+                address2: e.target[6].value,
+                postal: e.target[7].value,
+                city: e.target[8].value,
+                country: e.target[9].value
+            };
+            await updateDoc(doc(db, 'users', auth.currentUser.uid), { addresses });
+            modal.classList.remove('active');
+            loadAccountData(auth.currentUser);
+            e.target.reset();
+        });
+    } catch (error) {
+        showMessage('Erreur: ' + error.message);
+    }
+}
+
+window.editAddress = editAddress;
 
 function loadLoyalty(points, history) {
     document.getElementById('loyaltyPoints').textContent = points;

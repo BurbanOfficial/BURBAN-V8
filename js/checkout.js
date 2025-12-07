@@ -14,8 +14,37 @@ document.addEventListener('DOMContentLoaded', async () => {
         return;
     }
     
-    displayCheckoutSummary();
+    // Code promo
+    document.getElementById('applyPromoBtn')?.addEventListener('click', () => {
+        const code = document.getElementById('promoCode').value.trim().toUpperCase();
+        const msg = document.getElementById('promoMessage');
+        
+        if (!code) {
+            msg.style.display = 'block';
+            msg.style.color = '#ef4444';
+            msg.textContent = 'Veuillez entrer un code';
+            return;
+        }
+        
+        if (window.selectedVoucher) {
+            msg.style.display = 'block';
+            msg.style.color = '#ef4444';
+            msg.textContent = 'Impossible de cumuler un code promo avec un bon de réduction';
+            return;
+        }
+        
+        // Ici vous pouvez ajouter la logique de validation des codes promo
+        msg.style.display = 'block';
+        msg.style.color = '#ef4444';
+        msg.textContent = 'Code promotionnel invalide';
+    });
+    
     updateStepIndicator();
+    
+    // Attendre que le panier soit chargé
+    setTimeout(() => {
+        displayCheckoutSummary();
+    }, 100);
     
     // Attendre Firebase et charger les adresses
     setTimeout(() => {
@@ -128,7 +157,9 @@ function getColorName(hex) {
 
 function displayCheckoutSummary() {
     const checkoutItems = document.getElementById('checkoutItems');
-    const total = getCartTotal();
+    const subtotal = getCartTotal();
+    const shipping = subtotal < 49 ? 5 : 0;
+    const total = subtotal + shipping;
     
     checkoutItems.innerHTML = cart.map(item => {
         const itemName = item.color ? `${item.name} - ${getColorName(item.color)}` : item.name;
@@ -145,7 +176,8 @@ function displayCheckoutSummary() {
         </div>
     `}).join('');
     
-    document.getElementById('checkoutSubtotal').textContent = `${total.toFixed(2)} €`;
+    document.getElementById('checkoutSubtotal').textContent = `${subtotal.toFixed(2)} €`;
+    document.getElementById('checkoutShipping').textContent = shipping > 0 ? `${shipping.toFixed(2)} €` : 'Gratuite';
     document.getElementById('checkoutTotal').textContent = `${total.toFixed(2)} €`;
     document.getElementById('paymentAmount').textContent = `${total.toFixed(2)} €`;
 }
@@ -153,9 +185,11 @@ function displayCheckoutSummary() {
 function updateCheckoutSummary() {
     const subtotal = getCartTotal();
     const discount = window.selectedVoucher ? window.selectedVoucher.discount : 0;
-    const total = Math.max(0, subtotal - discount);
+    const shipping = subtotal < 49 ? 5 : 0;
+    const total = Math.max(0, subtotal - discount + shipping);
 
     document.getElementById('checkoutSubtotal').textContent = `${subtotal.toFixed(2)} €`;
+    document.getElementById('checkoutShipping').textContent = shipping > 0 ? `${shipping.toFixed(2)} €` : 'Gratuite';
     if (window.selectedVoucher) {
         document.getElementById('discount').textContent = `-${discount.toFixed(2)} €`;
         document.getElementById('discountLine').style.display = 'flex';
@@ -333,7 +367,8 @@ async function handlePayment(e) {
 async function processOrder() {
     const cartTotal = getCartTotal();
     const discount = window.selectedVoucher ? window.selectedVoucher.discount : 0;
-    const finalTotal = Math.max(0, cartTotal - discount);
+    const shipping = cartTotal < 49 ? 5 : 0;
+    const finalTotal = Math.max(0, cartTotal - discount + shipping);
     
     const order = {
         id: Date.now(),

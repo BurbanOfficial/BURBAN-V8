@@ -90,8 +90,12 @@ function displayCart() {
         </div>
     `}).join('');
     
-    const total = getCartTotal();
-    document.getElementById('subtotal').textContent = `${total.toFixed(2)} €`;
+    const subtotal = getCartTotal();
+    const shipping = subtotal < 49 ? 5 : 0;
+    const total = subtotal + shipping;
+    
+    document.getElementById('subtotal').textContent = `${subtotal.toFixed(2)} €`;
+    document.getElementById('shipping').textContent = shipping > 0 ? `${shipping.toFixed(2)} €` : 'Gratuite';
     document.getElementById('total').textContent = `${total.toFixed(2)} €`;
 }
 

@@ -140,15 +140,17 @@ const defaultProducts = [
 ];
 
 // Charger depuis Firestore au démarrage
-if (window.firebaseReady) {
-    loadProductsFromFirestore();
-} else {
-    const waitForFirebase = setInterval(() => {
-        if (window.firebaseReady) {
-            clearInterval(waitForFirebase);
-            loadProductsFromFirestore();
-        }
-    }, 100);
+if (typeof window !== 'undefined') {
+    if (window.firebaseReady) {
+        loadProductsFromFirestore();
+    } else {
+        const waitForFirebase = setInterval(() => {
+            if (window.firebaseReady) {
+                clearInterval(waitForFirebase);
+                loadProductsFromFirestore();
+            }
+        }, 100);
+    }
 }
 
 // Sauvegarder les produits par défaut si aucun n'existe
@@ -496,4 +498,31 @@ document.addEventListener('DOMContentLoaded', () => {
             link.classList.add('active');
         }
     });
+    
+    // Hamburger menu
+    const hamburger = document.querySelector('.hamburger');
+    const navLinks = document.querySelector('.nav-links');
+    
+    if (hamburger && navLinks) {
+        hamburger.addEventListener('click', () => {
+            hamburger.classList.toggle('active');
+            navLinks.classList.toggle('active');
+        });
+        
+        // Close menu on link click
+        navLinks.querySelectorAll('a').forEach(link => {
+            link.addEventListener('click', () => {
+                hamburger.classList.remove('active');
+                navLinks.classList.remove('active');
+            });
+        });
+        
+        // Close menu on outside click
+        document.addEventListener('click', (e) => {
+            if (!hamburger.contains(e.target) && !navLinks.contains(e.target)) {
+                hamburger.classList.remove('active');
+                navLinks.classList.remove('active');
+            }
+        });
+    }
 });
