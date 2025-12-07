@@ -561,12 +561,11 @@ async function deleteAddress(index) {
 
 window.deleteAddress = deleteAddress;
 
-let historyDisplayCount = 3;
-
 function loadLoyalty(points, history) {
     document.getElementById('loyaltyPoints').textContent = points;
     
     const sortedHistory = [...history].sort((a, b) => new Date(b.date) - new Date(a.date));
+    let historyDisplayCount = 3;
     
     const historyBtn = document.getElementById('showHistoryBtn');
     const newHistoryBtn = historyBtn.cloneNode(true);
@@ -574,18 +573,18 @@ function loadLoyalty(points, history) {
     
     newHistoryBtn.addEventListener('click', function() {
         const historyDiv = document.getElementById('loyaltyHistory');
-        if (historyDiv.style.display === 'none') {
+        if (historyDiv.style.display === 'none' || historyDiv.style.display === '') {
             historyDiv.style.display = 'block';
             this.textContent = 'Masquer l\'historique';
             historyDisplayCount = 3;
-            renderHistory(sortedHistory);
+            renderHistory();
         } else {
             historyDiv.style.display = 'none';
-            this.textContent = 'Voir l\'historique';
+            this.textContent = 'Afficher l\'historique';
         }
     });
     
-    function renderHistory(sortedHistory) {
+    function renderHistory() {
         const historyList = document.getElementById('loyaltyHistoryList');
         if (sortedHistory.length === 0) {
             historyList.innerHTML = '<p class="empty-state">Aucun historique pour le moment</p>';
@@ -615,10 +614,8 @@ function loadLoyalty(points, history) {
         if (hasMore) {
             document.getElementById('loadMoreHistory').addEventListener('click', function() {
                 historyDisplayCount += 5;
-                renderHistory(sortedHistory);
+                renderHistory();
             });
         }
     }
-    
-    renderHistory(sortedHistory);
 }
