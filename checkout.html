@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Paiement - BURBAN</title>
     <link rel="stylesheet" href="css/style.css">
     <script src="https://js.stripe.com/v3/"></script>
@@ -11,6 +11,13 @@
     <nav class="nav">
         <div class="nav-container">
             <a href="index.html" class="logo"><img src="https://i.imgur.com/Kl9kTBg.png" alt="BURBAN"></a>
+            <button class="hamburger">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                    <line class="line line1" x1="3" y1="6" x2="21" y2="6"/>
+                    <line class="line line2" x1="3" y1="12" x2="21" y2="12"/>
+                    <line class="line line3" x1="3" y1="18" x2="21" y2="18"/>
+                </svg>
+            </button>
             <div class="nav-links">
                 <a href="products.html?category=men" data-text="Men"><span class="link-text">Men</span></a>
                 <a href="products.html?category=women" data-text="Women"><span class="link-text">Women</span></a>
@@ -117,6 +124,12 @@
                             <span>Total</span>
                             <span id="checkoutTotal">0,00 €</span>
                         </div>
+                        <p style="font-size: 12px; color: var(--gray); margin-top: 16px; text-align: center;">Les prix sont au format TTC.</p>
+                    </div>
+                    <div style="margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--border);">
+                        <input type="text" id="promoCode" placeholder="Code promotionnel" style="width: 100%; padding: 12px; border: 1px solid var(--border); margin-bottom: 8px;">
+                        <button id="applyPromoBtn" class="btn-secondary" style="width: 100%;">Appliquer</button>
+                        <p id="promoMessage" style="font-size: 12px; margin-top: 8px; display: none;"></p>
                     </div>
                     <div class="checkout-steps-indicator">
                         <div class="step-indicator" id="stepIndicator1">1. Adresses</div>
