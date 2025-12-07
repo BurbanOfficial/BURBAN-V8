@@ -161,9 +161,8 @@
                 await setDoc(doc(db, 'temp_orders', tempOrderId), { deleted: true }, { merge: true });
                 
                 console.log('Commande finalisée:', orderNumber);
-                } catch (error) {
-                    console.error('Erreur mise à jour points:', error);
-                }
+            } catch (error) {
+                console.error('Erreur mise à jour points:', error);
             }
         });
     </script>
