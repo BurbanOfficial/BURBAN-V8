@@ -177,7 +177,7 @@ function getColorName(hex) {
 function displayCheckoutSummary() {
     const checkoutItems = document.getElementById('checkoutItems');
     const subtotal = getCartTotal();
-    const shipping = subtotal < 49 ? 5 : 0;
+    const shipping = subtotal < 49 ? 0 : 0;
     const total = subtotal + shipping;
     
     checkoutItems.innerHTML = cart.map(item => {
@@ -204,7 +204,7 @@ function displayCheckoutSummary() {
 function updateCheckoutSummary() {
     const subtotal = getCartTotal();
     const discount = window.selectedVoucher ? window.selectedVoucher.discount : 0;
-    const shipping = subtotal < 49 ? 5 : 0;
+    const shipping = subtotal < 49 ? 0 : 0;
     const total = Math.max(0, subtotal - discount + shipping);
 
     document.getElementById('checkoutSubtotal').textContent = `${subtotal.toFixed(2)} €`;
@@ -300,7 +300,7 @@ function goToAddressStep() {
 async function initializePayment() {
     const subtotal = getCartTotal();
     const discount = window.selectedVoucher ? window.selectedVoucher.discount : 0;
-    const shipping = subtotal < 49 ? 5 : 0;
+    const shipping = subtotal < 49 ? 0 : 0;
     const total = Math.max(0, subtotal - discount + shipping);
     
     try {
@@ -361,7 +361,7 @@ async function handlePayment(e) {
     // Sauvegarder les données de commande avant la redirection
     const cartTotal = getCartTotal();
     const discount = window.selectedVoucher ? window.selectedVoucher.discount : 0;
-    const shipping = cartTotal < 49 ? 5 : 0;
+    const shipping = cartTotal < 49 ? 0 : 0;
     const finalTotal = Math.max(0, cartTotal - discount + shipping);
     
     const orderData = {
@@ -396,7 +396,7 @@ async function handlePayment(e) {
 async function processOrder() {
     const cartTotal = getCartTotal();
     const discount = window.selectedVoucher ? window.selectedVoucher.discount : 0;
-    const shipping = cartTotal < 49 ? 5 : 0;
+    const shipping = cartTotal < 49 ? 0 : 0;
     const finalTotal = Math.max(0, cartTotal - discount + shipping);
     
     const order = {
