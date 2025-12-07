@@ -216,6 +216,10 @@ function updateCheckoutSummary() {
         document.getElementById('discountLine').style.display = 'none';
     }
     document.getElementById('checkoutTotal').textContent = `${total.toFixed(2)} €`;
+    const paymentAmountEl = document.getElementById('paymentAmount');
+    if (paymentAmountEl) {
+        paymentAmountEl.textContent = `${total.toFixed(2)} €`;
+    }
     document.getElementById('paymentAmount').textContent = `${total.toFixed(2)} €`;
 }
 
@@ -381,7 +385,7 @@ async function handlePayment(e) {
     const { error } = await stripe.confirmPayment({
         elements,
         confirmParams: {
-            return_url: 'https://burban-v8.onrender.com/success.html',
+            return_url: 'https://burbanofficial.github.io/BURBAN-V8/success.html',
             receipt_email: shippingData.email,
         },
     });
