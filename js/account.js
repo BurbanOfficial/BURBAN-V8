@@ -505,7 +505,7 @@ async function loadOrders(orderNumbers = []) {
         
         for (const orderNumber of orderNumbers) {
             const orderDoc = await getDoc(doc(window.firebaseDb, 'orders', orderNumber));
-            if (orderDoc.exists()) {
+            if (orderDoc.exists() && orderDoc.data().status !== 'cancelled') {
                 orders.push(orderDoc.data());
             }
         }
@@ -644,7 +644,7 @@ window.confirmCancelOrder = async function(orderNumber) {
     document.querySelectorAll('.custom-modal').forEach(m => m.remove());
     
     try {
-        const { doc, deleteDoc, getDoc, collection, getDocs, setDoc } = window.firebaseModules;
+        const { doc, deleteDoc, getDoc, collection, getDocs, setDoc, updateDoc, arrayUnion } = window.firebaseModules;
         const auth = window.firebaseAuth;
         
         const orderDoc = await getDoc(doc(window.firebaseDb, 'orders', orderNumber));
@@ -662,14 +662,45 @@ window.confirmCancelOrder = async function(orderNumber) {
             }
         }
         
-        await deleteDoc(doc(window.firebaseDb, 'orders', orderNumber));
-        
-        // Mettre à jour la liste des commandes utilisateur
+        // Annuler les transactions de points
         const userRef = doc(window.firebaseDb, 'users', auth.currentUser.uid);
         const userDoc = await getDoc(userRef);
         const userData = userDoc.data();
+        
+        const pointsEarned = Math.floor(order.total * 10);
+        const pointsSpent = order.discount > 0 ? Math.floor(order.discount * 100) : 0;
+        let newPoints = userData.points - pointsEarned + pointsSpent;
+        
+        const updates = [];
+        if (pointsEarned > 0) {
+            updates.push({
+                points: -pointsEarned,
+                description: `Annulation commande ${orderNumber} - Retrait des points gagnés`,
+                date: new Date().toISOString()
+            });
+        }
+        if (pointsSpent > 0) {
+            updates.push({
+                points: pointsSpent,
+                description: `Annulation commande ${orderNumber} - Remboursement des points utilisés`,
+                date: new Date().toISOString()
+            });
+        }
+        
         const updatedOrders = (userData.orders || []).filter(o => o !== orderNumber);
-        await setDoc(userRef, { ...userData, orders: updatedOrders });
+        
+        // Utiliser updateDoc pour ne pas écraser les données existantes
+        await updateDoc(userRef, { 
+            orders: updatedOrders,
+            points: newPoints,
+            pointsHistory: arrayUnion(...updates)
+        });
+        
+        // Marquer la commande comme annulée au lieu de la supprimer
+        await updateDoc(doc(window.firebaseDb, 'orders', orderNumber), {
+            status: 'cancelled',
+            cancelledAt: new Date().toISOString()
+        });
         
         showMessage('Votre commande a bien été annulée. Vous recevrez un remboursement ou un avoir couvrant l\'intégralité du montant que vous avez payé.');
         
