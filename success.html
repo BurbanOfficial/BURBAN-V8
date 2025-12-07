@@ -103,10 +103,13 @@
                         items: order.items,
                         total: order.total,
                         discount: voucher ? voucher.discount : 0,
+                        voucherPoints: voucher ? voucher.points : 0,
                         status: 'processing',
                         trackingUrl: null,
                         date: new Date().toISOString(),
-                        shippingAddress: order.shippingAddress || null
+                        shippingAddress: order.shippingAddress || null,
+                        billingAddress: order.billingAddress || null,
+                        cardLast4: order.cardLast4 || 'XXXX'
                     };
                     await setDoc(doc(db, 'orders', orderNumber), orderData);
                     
