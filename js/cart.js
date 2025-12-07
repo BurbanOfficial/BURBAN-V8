@@ -112,7 +112,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         <h3 style="font-size: 20px; font-weight: 400; margin-bottom: 16px;">Gagnez des points de fidélité !</h3>
                         <p style="margin-bottom: 24px;">Connectez-vous ou créez un compte pour gagner <strong>${points} points</strong> avec cet achat.</p>
                         <p style="font-size: 14px; color: var(--gray); margin-bottom: 24px;">1€ dépensé = 10 points</p>
-                        <div style="display: flex; gap: 12px;">
+                        <div style="display: flex; gap: 12px; justify-content: center;">
                             <button class="btn-secondary" onclick="document.body.classList.remove('modal-open'); this.closest('.custom-modal').remove(); window.location.href='checkout.html';">Continuer sans compte</button>
                             <button class="btn-primary" onclick="window.location.href='account.html';">Se connecter</button>
                         </div>
