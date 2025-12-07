@@ -142,13 +142,32 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         });
         
-        // Auth tabs
+        // Auth tabs with loader
         document.querySelectorAll('.auth-tab').forEach(tab => {
         tab.addEventListener('click', () => {
-            document.querySelectorAll('.auth-tab').forEach(t => t.classList.remove('active'));
-            document.querySelectorAll('.auth-form').forEach(f => f.classList.remove('active'));
-            tab.classList.add('active');
-            document.getElementById(tab.dataset.tab + 'Form').classList.add('active');
+            // Show mini loader
+            const miniLoader = document.createElement('div');
+            miniLoader.innerHTML = `
+                <div style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 10000;">
+                    <div style="display: flex; flex-direction: column; align-items: center; gap: 20px;">
+                        <img src="https://i.imgur.com/Kl9kTBg.png" style="width: 60px; filter: brightness(0) invert(1);">
+                        <div style="display: flex; gap: 6px;">
+                            <div style="width: 8px; height: 8px; background-image: url('https://i.imgur.com/2vSFewG.png'); background-size: contain; filter: brightness(0) invert(1); animation: dotPulse 1.5s ease-in-out infinite;"></div>
+                            <div style="width: 8px; height: 8px; background-image: url('https://i.imgur.com/2vSFewG.png'); background-size: contain; filter: brightness(0) invert(1); animation: dotPulse 1.5s ease-in-out infinite; animation-delay: 0.2s;"></div>
+                            <div style="width: 8px; height: 8px; background-image: url('https://i.imgur.com/2vSFewG.png'); background-size: contain; filter: brightness(0) invert(1); animation: dotPulse 1.5s ease-in-out infinite; animation-delay: 0.4s;"></div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(miniLoader);
+            
+            setTimeout(() => {
+                document.querySelectorAll('.auth-tab').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.auth-form').forEach(f => f.classList.remove('active'));
+                tab.classList.add('active');
+                document.getElementById(tab.dataset.tab + 'Form').classList.add('active');
+                miniLoader.remove();
+            }, 500);
         });
     });
     
@@ -159,9 +178,27 @@ document.addEventListener('DOMContentLoaded', () => {
         const password = e.target[1].value;
         const { signInWithEmailAndPassword } = window.firebaseModules;
         
+        // Show loader
+        const loginLoader = document.createElement('div');
+        loginLoader.innerHTML = `
+            <div style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); display: flex; align-items: center; justify-content: center; z-index: 10000;">
+                <div style="display: flex; flex-direction: column; align-items: center; gap: 20px;">
+                    <img src="https://i.imgur.com/Kl9kTBg.png" style="width: 60px; filter: brightness(0) invert(1);">
+                    <div style="display: flex; gap: 6px;">
+                        <div style="width: 8px; height: 8px; background-image: url('https://i.imgur.com/2vSFewG.png'); background-size: contain; filter: brightness(0) invert(1); animation: dotPulse 1.5s ease-in-out infinite;"></div>
+                        <div style="width: 8px; height: 8px; background-image: url('https://i.imgur.com/2vSFewG.png'); background-size: contain; filter: brightness(0) invert(1); animation: dotPulse 1.5s ease-in-out infinite; animation-delay: 0.2s;"></div>
+                        <div style="width: 8px; height: 8px; background-image: url('https://i.imgur.com/2vSFewG.png'); background-size: contain; filter: brightness(0) invert(1); animation: dotPulse 1.5s ease-in-out infinite; animation-delay: 0.4s;"></div>
+                    </div>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(loginLoader);
+        
         try {
             await signInWithEmailAndPassword(auth, email, password);
+            loginLoader.remove();
         } catch (error) {
+            loginLoader.remove();
             console.error('Erreur de connexion:', error);
             if (error.code === 'auth/user-not-found') {
                 showMessage('Aucun compte trouvé avec cet email. Veuillez vous inscrire.');
@@ -270,6 +307,22 @@ document.addEventListener('DOMContentLoaded', () => {
         const { createUserWithEmailAndPassword, updateProfile, doc, setDoc } = window.firebaseModules;
         const db = window.firebaseDb;
         
+        // Show loader
+        const registerLoader = document.createElement('div');
+        registerLoader.innerHTML = `
+            <div style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); display: flex; align-items: center; justify-content: center; z-index: 10000;">
+                <div style="display: flex; flex-direction: column; align-items: center; gap: 20px;">
+                    <img src="https://i.imgur.com/Kl9kTBg.png" style="width: 60px; filter: brightness(0) invert(1);">
+                    <div style="display: flex; gap: 6px;">
+                        <div style="width: 8px; height: 8px; background-image: url('https://i.imgur.com/2vSFewG.png'); background-size: contain; filter: brightness(0) invert(1); animation: dotPulse 1.5s ease-in-out infinite;"></div>
+                        <div style="width: 8px; height: 8px; background-image: url('https://i.imgur.com/2vSFewG.png'); background-size: contain; filter: brightness(0) invert(1); animation: dotPulse 1.5s ease-in-out infinite; animation-delay: 0.2s;"></div>
+                        <div style="width: 8px; height: 8px; background-image: url('https://i.imgur.com/2vSFewG.png'); background-size: contain; filter: brightness(0) invert(1); animation: dotPulse 1.5s ease-in-out infinite; animation-delay: 0.4s;"></div>
+                    </div>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(registerLoader);
+        
         try {
             const userCredential = await createUserWithEmailAndPassword(auth, email, password);
             await updateProfile(userCredential.user, {
@@ -297,8 +350,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 orders: [],
                 createdAt: new Date()
             });
+            registerLoader.remove();
             showMessage('Compte créé avec succès ! Vous avez reçu 100 points de bienvenue.');
         } catch (error) {
+            registerLoader.remove();
             console.error('Erreur inscription:', error);
             if (error.code === 'auth/email-already-in-use') {
                 showMessage('Cet email est déjà utilisé');
