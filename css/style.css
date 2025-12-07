@@ -1675,15 +1675,22 @@ body.modal-open {
     }
 
     .account-nav {
-        flex-direction: row;
-        overflow-x: auto;
-        gap: 16px;
-        padding-bottom: 8px;
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 8px;
     }
 
     .account-nav-link {
         white-space: nowrap;
-        font-size: 13px;
+        font-size: 12px;
+        text-align: center;
+        padding: 8px 4px;
+    }
+
+    .account-nav-link:nth-child(5),
+    .account-nav-link:nth-child(6),
+    #logoutBtn {
+        grid-column: span 1;
     }
 
     .account-panel h3 {
