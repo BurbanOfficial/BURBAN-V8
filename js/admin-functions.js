@@ -95,6 +95,7 @@ document.getElementById('productForm')?.addEventListener('submit', (e) => {
     
     const promoActive = document.getElementById('productPromoActive').checked;
     const existingProduct = id ? products.find(p => p.id === parseInt(id)) : null;
+    const sizes = document.getElementById('productSizes').value.split(',').map(s => s.trim());
     
     const product = {
         id: id ? parseInt(id) : Date.now(),
@@ -106,7 +107,7 @@ document.getElementById('productForm')?.addEventListener('submit', (e) => {
         image: images[0],
         images: images,
         imagesByColor: imagesByColor,
-        sizes: document.getElementById('productSizes').value.split(',').map(s => s.trim()),
+        sizes: sizes,
         colors: colors,
         details: document.getElementById('productDetails').value || '100% coton bio\nCoupe régulière\nFabriqué au Portugal',
         materials: document.getElementById('productMaterials').value || 'Coton biologique certifié GOTS\nTeinture sans produits chimiques\nLavage en machine à 30°',
@@ -114,7 +115,7 @@ document.getElementById('productForm')?.addEventListener('submit', (e) => {
         publishDate: existingProduct ? existingProduct.publishDate : (document.getElementById('productPublishDate').value || new Date().toISOString()),
         unpublishDate: document.getElementById('productUnpublishDate').value || null,
         stock: document.getElementById('productStock').value ? parseInt(document.getElementById('productStock').value) : null,
-        stockByVariant: saveStockVariants(colors, product.sizes),
+        stockByVariant: saveStockVariants(colors, sizes),
         promoActive: promoActive,
         originalPrice: promoActive ? parseFloat(document.getElementById('productOriginalPrice').value) : null,
         promoEndDate: promoActive && !document.getElementById('productPromoUnlimited').checked ? document.getElementById('productPromoEndDate').value : null,
