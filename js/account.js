@@ -491,33 +491,193 @@ function loadFavorites(favoriteIds = []) {
     `).join('');
 }
 
-function loadOrders(orders = []) {
+async function loadOrders(orderNumbers = []) {
     const ordersList = document.getElementById('ordersList');
     
-    if (orders.length === 0) {
+    if (orderNumbers.length === 0) {
         ordersList.innerHTML = '<p class="empty-state">Aucune commande pour le moment</p>';
         return;
     }
     
-    ordersList.innerHTML = orders.map(order => `
-        <div class="order-card">
-            <div class="order-header">
-                <div>
-                    <strong>Commande #${order.id}</strong>
-                    <p>${new Date(order.date).toLocaleDateString()}</p>
+    try {
+        const { doc, getDoc } = window.firebaseModules;
+        const orders = [];
+        
+        for (const orderNumber of orderNumbers) {
+            const orderDoc = await getDoc(doc(window.firebaseDb, 'orders', orderNumber));
+            if (orderDoc.exists()) {
+                orders.push(orderDoc.data());
+            }
+        }
+        
+        orders.sort((a, b) => new Date(b.date) - new Date(a.date));
+        
+        ordersList.innerHTML = orders.map(order => {
+            const statusStep = order.status === 'processing' ? 1 : order.status === 'shipped' ? 2 : 3;
+            return `
+            <div style="background: white; border: 1px solid var(--border); margin-bottom: 32px;">
+                <!-- Barre de suivi -->
+                <div style="display: flex; height: 4px; background: var(--light-gray);">
+                    <div style="flex: 1; background: ${statusStep >= 1 ? 'var(--black)' : 'var(--light-gray)'};" title="En cours de traitement"></div>
+                    <div style="flex: 1; background: ${statusStep >= 2 ? 'var(--black)' : 'var(--light-gray)'};" title="Expédiée"></div>
+                    <div style="flex: 1; background: ${statusStep >= 3 ? 'var(--black)' : 'var(--light-gray)'};" title="Livrée"></div>
                 </div>
-                <strong>${order.total.toFixed(2)} €</strong>
-            </div>
-            <div class="order-items">
-                ${order.items.map(item => `
-                    <div class="order-item">
-                        <span>${item.name} (${item.size}) x${item.quantity}</span>
-                        <span>${(item.price * item.quantity).toFixed(2)} €</span>
+                
+                <!-- En-tête -->
+                <div style="padding: 24px; border-bottom: 1px solid var(--border);">
+                    <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 20px;">
+                        <div>
+                            <h3 style="font-size: 18px; font-weight: 400; margin-bottom: 8px;">${order.orderNumber}</h3>
+                            <p style="color: var(--gray); font-size: 14px;">${new Date(order.date).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })}</p>
+                        </div>
+                        <div style="text-align: right;">
+                            <p style="font-size: 24px; font-weight: 300;">${order.total.toFixed(2)} €</p>
+                            <p style="color: var(--gray); font-size: 12px; margin-top: 4px;">${order.items.length} article${order.items.length > 1 ? 's' : ''}</p>
+                        </div>
                     </div>
-                `).join('')}
+                    
+                    <div style="display: flex; gap: 8px; overflow-x: auto;">
+                        ${order.items.map(item => `
+                            <img src="${item.image}" style="width: 80px; height: 80px; object-fit: cover; flex-shrink: 0;">
+                        `).join('')}
+                    </div>
+                </div>
+                
+                <!-- Statut -->
+                <div style="padding: 16px 24px; background: var(--light-gray); display: flex; justify-content: space-between; align-items: center;">
+                    <div style="display: flex; gap: 16px; font-size: 13px;">
+                        <span style="padding: 8px 16px; background: ${statusStep >= 1 ? 'white' : 'transparent'}; color: ${statusStep >= 1 ? 'var(--black)' : 'var(--gray)'}; font-weight: ${statusStep === 1 ? '600' : '400'}; box-shadow: ${statusStep >= 1 ? 'inset 0 2px 4px rgba(0,0,0,0.1)' : 'none'}; border: 1px solid ${statusStep >= 1 ? 'var(--border)' : 'transparent'}; display: inline-flex; align-items: center; gap: 6px;">
+                            En traitement
+                            ${statusStep > 1 ? '<span style="color: #22c55e; font-size: 16px;">✓</span>' : ''}
+                        </span>
+                        <span style="padding: 8px 16px; background: ${statusStep >= 2 ? 'white' : 'transparent'}; color: ${statusStep >= 2 ? 'var(--black)' : 'var(--gray)'}; font-weight: ${statusStep === 2 ? '600' : '400'}; box-shadow: ${statusStep >= 2 ? 'inset 0 2px 4px rgba(0,0,0,0.1)' : 'none'}; border: 1px solid ${statusStep >= 2 ? 'var(--border)' : 'transparent'}; display: inline-flex; align-items: center; gap: 6px;">
+                            Expédiée
+                            ${statusStep > 2 ? '<span style="color: #22c55e; font-size: 16px;">✓</span>' : ''}
+                        </span>
+                        <span style="padding: 8px 16px; background: ${statusStep >= 3 ? 'white' : 'transparent'}; color: ${statusStep >= 3 ? 'var(--black)' : 'var(--gray)'}; font-weight: ${statusStep === 3 ? '600' : '400'}; box-shadow: ${statusStep >= 3 ? 'inset 0 2px 4px rgba(0,0,0,0.1)' : 'none'}; border: 1px solid ${statusStep >= 3 ? 'var(--border)' : 'transparent'}; display: inline-flex; align-items: center; gap: 6px;">
+                            Livrée
+                            ${statusStep > 3 ? '<span style="color: #22c55e; font-size: 16px;">✓</span>' : ''}
+                        </span>
+                    </div>
+                    <button onclick="toggleOrderDetails('${order.orderNumber}')" class="order-details-btn" style="background: var(--black); border: none; color: var(--white); font-size: 13px; cursor: pointer; padding: 8px 16px; transition: opacity 0.2s;" onmouseover="this.style.opacity='0.8'" onmouseout="this.style.opacity='1'">
+                        Détails ▾
+                    </button>
+                </div>
+                
+                <!-- Détails -->
+                <div id="details-${order.orderNumber}" style="display: none;">
+                    <div style="padding: 24px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px;">
+                        <div>
+                            <h4 style="font-size: 12px; text-transform: uppercase; letter-spacing: 1px; color: var(--gray); margin-bottom: 12px;">Livraison</h4>
+                            <p style="font-size: 14px; line-height: 1.6;">
+                                ${order.shippingAddress?.firstName || ''} ${order.shippingAddress?.lastName || ''}<br>
+                                ${order.shippingAddress?.address || ''}<br>
+                                ${order.shippingAddress?.phone || ''}
+                            </p>
+                        </div>
+                        <div>
+                            <h4 style="font-size: 12px; text-transform: uppercase; letter-spacing: 1px; color: var(--gray); margin-bottom: 12px;">Paiement</h4>
+                            <p style="font-size: 14px; line-height: 1.6;">
+                                Carte bancaire<br>
+                                **** **** **** ${order.cardLast4 || 'XXXX'}
+                            </p>
+                        </div>
+                        <div>
+                            <h4 style="font-size: 12px; text-transform: uppercase; letter-spacing: 1px; color: var(--gray); margin-bottom: 12px;">Résumé</h4>
+                            <p style="font-size: 14px; line-height: 1.6;">
+                                ${(order.discount || 0) > 0 ? `Sous-total: ${(order.total + order.discount).toFixed(2)} €<br>Réduction: -${order.discount.toFixed(2)} €<br>` : ''}
+                                <strong>Total: ${order.total.toFixed(2)} €</strong>
+                            </p>
+                        </div>
+                    </div>
+                    
+                    <div style="padding: 0 24px 24px;">
+                        <h4 style="font-size: 12px; text-transform: uppercase; letter-spacing: 1px; color: var(--gray); margin-bottom: 16px;">Articles</h4>
+                        ${order.items.map(item => `
+                            <div style="display: flex; gap: 16px; padding: 16px 0; border-top: 1px solid var(--border);">
+                                <img src="${item.image}" style="width: 60px; height: 60px; object-fit: cover;">
+                                <div style="flex: 1;">
+                                    <p style="font-size: 14px; font-weight: 500;">${item.name}</p>
+                                    <p style="font-size: 13px; color: var(--gray); margin-top: 4px;">Taille ${item.size} · Quantité ${item.quantity}</p>
+                                </div>
+                                <p style="font-size: 14px; font-weight: 500;">${(item.price * item.quantity).toFixed(2)} €</p>
+                            </div>
+                        `).join('')}
+                    </div>
+                    
+                    <div style="padding: 24px; border-top: 1px solid var(--border); display: flex; gap: 12px;">
+                        ${order.trackingUrl ? `<a href="${order.trackingUrl}" target="_blank" class="btn-primary" style="flex: 1; text-align: center;">Suivre mon colis</a>` : ''}
+                        ${order.status === 'processing' ? `<button onclick="cancelOrderConfirm('${order.orderNumber}')" class="btn-secondary" style="flex: 1; background: white; border: 1px solid var(--border); color: var(--black); transition: all 0.2s;" onmouseover="this.style.background='#ef4444'; this.style.color='white'; this.style.borderColor='#ef4444'" onmouseout="this.style.background='white'; this.style.color='var(--black)'; this.style.borderColor='var(--border)'">Annuler</button>` : ''}
+                    </div>
+                </div>
+            </div>
+        `}).join('');
+    } catch (error) {
+        console.error('Erreur chargement commandes:', error);
+        ordersList.innerHTML = '<p class="empty-state">Erreur de chargement</p>';
+    }
+}
+
+window.toggleOrderDetails = function(orderNumber) {
+    const details = document.getElementById(`details-${orderNumber}`);
+    details.style.display = details.style.display === 'none' ? 'block' : 'none';
+}
+
+window.cancelOrderConfirm = function(orderNumber) {
+    document.body.classList.add('modal-open');
+    const modal = document.createElement('div');
+    modal.className = 'custom-modal active';
+    modal.innerHTML = `
+        <div class="custom-modal-content">
+            <p style="font-size: 16px; margin-bottom: 24px;">Êtes-vous sûr de vouloir annuler votre commande ?</p>
+            <div style="display: flex; gap: 12px;">
+                <button class="btn-secondary" style="flex: 1;" onclick="document.body.classList.remove('modal-open'); this.closest('.custom-modal').remove()">Non</button>
+                <button class="btn-primary" style="flex: 1; background: #ef4444;" onclick="confirmCancelOrder('${orderNumber}')">Oui, annuler</button>
             </div>
         </div>
-    `).join('');
+    `;
+    document.body.appendChild(modal);
+}
+
+window.confirmCancelOrder = async function(orderNumber) {
+    document.body.classList.remove('modal-open');
+    document.querySelectorAll('.custom-modal').forEach(m => m.remove());
+    
+    try {
+        const { doc, deleteDoc, getDoc, collection, getDocs, setDoc } = window.firebaseModules;
+        const auth = window.firebaseAuth;
+        
+        const orderDoc = await getDoc(doc(window.firebaseDb, 'orders', orderNumber));
+        const order = orderDoc.data();
+        
+        // Restaurer le stock
+        const productsSnapshot = await getDocs(collection(window.firebaseDb, 'products'));
+        for (const item of order.items) {
+            const productDoc = productsSnapshot.docs.find(d => d.data().id === item.id);
+            if (productDoc) {
+                const product = productDoc.data();
+                const variantKey = `${item.color}-${item.size}`;
+                product.stockByVariant[variantKey] = (product.stockByVariant[variantKey] || 0) + item.quantity;
+                await setDoc(doc(window.firebaseDb, 'products', `${product.id}`), product);
+            }
+        }
+        
+        await deleteDoc(doc(window.firebaseDb, 'orders', orderNumber));
+        
+        // Mettre à jour la liste des commandes utilisateur
+        const userRef = doc(window.firebaseDb, 'users', auth.currentUser.uid);
+        const userDoc = await getDoc(userRef);
+        const userData = userDoc.data();
+        const updatedOrders = (userData.orders || []).filter(o => o !== orderNumber);
+        await setDoc(userRef, { ...userData, orders: updatedOrders });
+        
+        showMessage('Votre commande a bien été annulée. Vous recevrez un remboursement ou un avoir couvrant l\'intégralité du montant que vous avez payé.');
+        
+        loadAccountData(auth.currentUser);
+    } catch (error) {
+        console.error('Erreur annulation:', error);
+        showMessage('Erreur lors de l\'annulation de la commande.');
+    }
 }
 
 function loadAddresses(addresses = []) {

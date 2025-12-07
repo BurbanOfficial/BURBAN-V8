@@ -345,8 +345,9 @@ async function processOrder() {
         subtotal: cartTotal,
         discount: discount,
         total: finalTotal,
-        shipping: shippingData,
-        billing: billingData,
+        shippingAddress: shippingData,
+        billingAddress: billingData,
+        cardLast4: document.getElementById('cardNumber')?.value.slice(-4) || 'XXXX',
         status: 'confirmed'
     };
     

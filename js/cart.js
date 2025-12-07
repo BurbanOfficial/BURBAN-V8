@@ -4,6 +4,18 @@ function updateQuantity(productId, size, newQuantity, color = null) {
         return;
     }
     
+    // Vérifier le stock
+    const products = JSON.parse(localStorage.getItem('adminProducts')) || [];
+    const product = products.find(p => p.id === productId);
+    if (product) {
+        const variantKey = `${color}-${size}`;
+        const stock = product.stockByVariant?.[variantKey] || 0;
+        if (newQuantity > stock) {
+            showMessage(`Stock insuffisant. Seulement ${stock} disponible(s)`);
+            return;
+        }
+    }
+    
     const itemIndex = cart.findIndex(item => 
         item.id === productId && 
         item.size === size && 
