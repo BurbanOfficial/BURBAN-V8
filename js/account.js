@@ -405,10 +405,12 @@ document.addEventListener('DOMContentLoaded', () => {
     // Address modal
     const modal = document.getElementById('addressModal');
     document.getElementById('addAddressBtn')?.addEventListener('click', () => {
+        document.body.classList.add('modal-open');
         modal.classList.add('active');
     });
     
     document.querySelector('.modal-close')?.addEventListener('click', () => {
+        document.body.classList.remove('modal-open');
         modal.classList.remove('active');
     });
     
@@ -435,6 +437,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const addresses = userDoc.data().addresses || [];
             addresses.push(address);
             await updateDoc(doc(db, 'users', auth.currentUser.uid), { addresses });
+            document.body.classList.remove('modal-open');
             modal.classList.remove('active');
             loadAccountData(auth.currentUser);
             e.target.reset();
@@ -796,6 +799,7 @@ async function editAddress(index) {
         document.getElementById('addressForm').elements[8].value = address.city || '';
         document.getElementById('addressForm').elements[9].value = address.country || '';
         
+        document.body.classList.add('modal-open');
         modal.classList.add('active');
         
         const form = document.getElementById('addressForm');
@@ -817,6 +821,7 @@ async function editAddress(index) {
                 country: e.target[9].value
             };
             await updateDoc(doc(db, 'users', auth.currentUser.uid), { addresses });
+            document.body.classList.remove('modal-open');
             modal.classList.remove('active');
             loadAccountData(auth.currentUser);
             e.target.reset();
