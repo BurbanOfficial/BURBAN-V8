@@ -407,42 +407,28 @@ async function handlePayment(e) {
     
     if (window.firebaseAuth && window.firebaseAuth.currentUser) {
         try {
-            const { doc, setDoc, query, collection, where, getDocs } = window.firebaseModules;
+            const { doc, setDoc } = window.firebaseModules;
             const db = window.firebaseDb;
             
-            // Vérifier s'il existe déjà une commande temporaire pour cet utilisateur
-            const existingQuery = query(
-                collection(db, 'temp_orders'),
-                where('userId', '==', window.firebaseAuth.currentUser.uid),
-                where('status', '==', 'pending_payment')
-            );
-            const existingDocs = await getDocs(existingQuery);
+            // Générer ID temporaire unique
+            tempOrderId = 'TEMP_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
             
-            if (!existingDocs.empty) {
-                // Utiliser la commande temporaire existante
-                tempOrderId = existingDocs.docs[0].id;
-                console.log('Commande temporaire existante réutilisée:', tempOrderId);
-            } else {
-                // Générer nouvel ID temporaire
-                tempOrderId = 'TEMP_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
-                
-                // Créer nouvelle commande temporaire
-                const tempOrderData = {
-                    tempOrderId,
-                    userId: window.firebaseAuth.currentUser.uid,
-                    items: cart,
-                    total: finalTotal,
-                    discount: discount,
-                    shippingAddress: shippingData,
-                    billingAddress: JSON.stringify(billingData) !== JSON.stringify(shippingData) ? billingData : null,
-                    voucher: window.selectedVoucher,
-                    status: 'pending_payment',
-                    createdAt: new Date().toISOString()
-                };
-                
-                await setDoc(doc(db, 'temp_orders', tempOrderId), tempOrderData);
-                console.log('Nouvelle commande temporaire créée:', tempOrderId);
-            }
+            // Créer commande temporaire
+            const tempOrderData = {
+                tempOrderId,
+                userId: window.firebaseAuth.currentUser.uid,
+                items: cart,
+                total: finalTotal,
+                discount: discount,
+                shippingAddress: shippingData,
+                billingAddress: JSON.stringify(billingData) !== JSON.stringify(shippingData) ? billingData : null,
+                voucher: window.selectedVoucher,
+                status: 'pending_payment',
+                createdAt: new Date().toISOString()
+            };
+            
+            await setDoc(doc(db, 'temp_orders', tempOrderId), tempOrderData);
+            console.log('Commande temporaire créée:', tempOrderId);
         } catch (error) {
             console.error('Erreur création commande temporaire:', error);
         }
