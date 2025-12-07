@@ -139,6 +139,14 @@
                     <div class="admin-header">
                         <h2>Commandes</h2>
                     </div>
+                    <div style="margin-bottom: 24px; display: flex; gap: 12px; align-items: center;">
+                        <input type="text" id="orderSearch" placeholder="Rechercher (numéro, nom, email, téléphone, montant...)" style="flex: 1; padding: 12px; border: 1px solid var(--border);">
+                        <button class="admin-btn" onclick="filterOrders('all')" id="filter-all">Toutes</button>
+                        <button class="admin-btn" onclick="filterOrders('processing')" id="filter-processing">En traitement</button>
+                        <button class="admin-btn" onclick="filterOrders('shipped')" id="filter-shipped">Envoyées</button>
+                        <button class="admin-btn" onclick="filterOrders('delivered')" id="filter-delivered">Livrées</button>
+                        <button class="admin-btn" onclick="filterOrders('cancelled')" id="filter-cancelled">Annulées</button>
+                    </div>
                     <div class="admin-table">
                         <table>
                             <thead>
@@ -167,6 +175,7 @@
                             <select id="orderStatus">
                                 <option value="processing">En cours de traitement</option>
                                 <option value="shipped">Envoyé</option>
+                                <option value="delivered">Livré</option>
                             </select>
                             <button type="submit" class="btn-primary">Enregistrer</button>
                         </form>
