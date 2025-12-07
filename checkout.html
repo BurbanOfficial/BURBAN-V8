@@ -82,6 +82,8 @@
 
                     <!-- Étape 2: Paiement -->
                     <div id="step2" class="checkout-step" style="display: none;">
+                        <div class="checkout-section" id="vouchersContainer" style="display: none;"></div>
+                        
                         <div class="checkout-section">
                             <h3>Paiement</h3>
                             <div id="payment-element"></div>
@@ -106,6 +108,10 @@
                         <div class="summary-line">
                             <span>Livraison</span>
                             <span id="checkoutShipping">Gratuite</span>
+                        </div>
+                        <div class="summary-line" id="discountLine" style="display: none; color: #22c55e;">
+                            <span>Réduction</span>
+                            <span id="discount">0,00 €</span>
                         </div>
                         <div class="summary-line total">
                             <span>Total</span>
@@ -145,6 +151,7 @@
         window.firebaseReady = true;
     </script>
     <script src="js/app.js"></script>
+    <script src="js/loyalty-vouchers.js"></script>
     <script src="js/checkout.js"></script>
 </body>
 </html>

@@ -41,6 +41,88 @@
         </div>
     </footer>
 
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+        import { getAuth, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
+        import { getFirestore, doc, getDoc, updateDoc, arrayUnion } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+        
+        const firebaseConfig = {
+            apiKey: "AIzaSyDb4AOtRT7jGENnLZ2KNwpczaG2Z77G2rc",
+            authDomain: "burban-fidelity.firebaseapp.com",
+            projectId: "burban-fidelity",
+            storageBucket: "burban-fidelity.firebasestorage.app",
+            messagingSenderId: "830299174800",
+            appId: "1:830299174800:web:f50a4ec419e108f7f16515",
+            measurementId: "G-E4QD4PYLM5"
+        };
+        
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+        
+        // Attendre que l'utilisateur soit chargé
+        onAuthStateChanged(auth, async (user) => {
+            if (!user) {
+                console.log('Aucun utilisateur connecté');
+                return;
+            }
+            
+            console.log('Utilisateur connecté:', user.uid);
+            
+            // Gérer les points après paiement validé
+            const lastOrderData = sessionStorage.getItem('lastOrder');
+            console.log('lastOrder data:', lastOrderData);
+            
+            if (lastOrderData) {
+                const { order, voucher } = JSON.parse(lastOrderData);
+                console.log('Order:', order, 'Voucher:', voucher);
+                
+                try {
+                    const userRef = doc(db, 'users', user.uid);
+                    const userDoc = await getDoc(userRef);
+                    const userData = userDoc.data();
+                    
+                    const currentPoints = userData.points || 0;
+                    const pointsEarned = Math.floor(order.total * 10);
+                    let newPoints = currentPoints + pointsEarned;
+                    
+                    console.log('Points actuels:', currentPoints, 'Points gagnés:', pointsEarned);
+                    
+                    const updates = [];
+                    
+                    // Déduire les points du bon si utilisé
+                    if (voucher) {
+                        newPoints -= voucher.points;
+                        updates.push({
+                            points: -voucher.points,
+                            description: `Échange de ${voucher.points} points contre un bon de ${voucher.discount}€`,
+                            date: new Date().toISOString()
+                        });
+                        console.log('Bon utilisé:', voucher.points, 'points déduits');
+                    }
+                    
+                    // Ajouter les points gagnés
+                    updates.push({
+                        points: pointsEarned,
+                        description: `Ajout de ${pointsEarned} points suite à votre achat`,
+                        date: new Date().toISOString()
+                    });
+                    
+                    await updateDoc(userRef, {
+                        points: newPoints,
+                        pointsHistory: arrayUnion(...updates)
+                    });
+                    
+                    console.log('Points mis à jour avec succès! Nouveau total:', newPoints);
+                    
+                    // Nettoyer le sessionStorage
+                    sessionStorage.removeItem('lastOrder');
+                } catch (error) {
+                    console.error('Erreur mise à jour points:', error);
+                }
+            }
+        });
+    </script>
     <script src="js/app.js"></script>
 </body>
 </html>
