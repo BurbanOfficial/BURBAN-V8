@@ -455,7 +455,7 @@ async function checkAndNotifyStockIncrease(product) {
     if (!window.firebaseReady || !window.firebaseModules) return;
     
     try {
-        const { doc, getDoc, deleteDoc } = window.firebaseModules;
+        const { doc, getDoc, updateDoc, deleteField } = window.firebaseModules;
         const notifRef = doc(window.firebaseDb, 'stockNotifications', `${product.id}`);
         const notifDoc = await getDoc(notifRef);
         
@@ -463,24 +463,56 @@ async function checkAndNotifyStockIncrease(product) {
         
         const notifications = notifDoc.data();
         const variants = notifications.variants || {};
+        const variantsToDelete = [];
         
         // Vérifier chaque variante
         for (const [variantKey, subscribers] of Object.entries(variants)) {
             const stock = product.stockByVariant?.[variantKey] || 0;
             
             if (stock > 0 && subscribers && subscribers.length > 0) {
-                // Envoyer les emails (simulation)
-                console.log(`Envoi d'emails pour ${product.name} - ${variantKey}:`, subscribers);
-                subscribers.forEach(sub => {
-                    console.log(`Email envoyé à: ${sub.email}`);
-                });
+                const [color, size] = variantKey.split('-');
+                let successCount = 0;
                 
-                alert(`${subscribers.length} email(s) de notification envoyé(s) pour ${product.name} (${variantKey})`);
+                // Envoyer les emails via Cloud Function
+                for (const sub of subscribers) {
+                    try {
+                        const response = await fetch('https://us-central1-burban-fidelity.cloudfunctions.net/sendStockNotification', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                data: {
+                                    email: sub.email,
+                                    productName: product.name,
+                                    color: getColorName(color),
+                                    size: size
+                                }
+                            })
+                        });
+                        
+                        if (response.ok) {
+                            successCount++;
+                            console.log(`Email envoyé à: ${sub.email}`);
+                        }
+                    } catch (error) {
+                        console.error(`Erreur envoi email à ${sub.email}:`, error);
+                    }
+                }
+                
+                if (successCount > 0) {
+                    alert(`${successCount} email(s) envoyé(s) pour ${product.name} (${getColorName(color)}, ${size})`);
+                    variantsToDelete.push(variantKey);
+                }
             }
         }
         
-        // Supprimer toutes les notifications après envoi
-        await deleteDoc(notifRef);
+        // Supprimer uniquement les variantes dont les emails ont été envoyés
+        if (variantsToDelete.length > 0) {
+            const updates = {};
+            variantsToDelete.forEach(key => {
+                updates[`variants.${key}`] = deleteField();
+            });
+            await updateDoc(notifRef, updates);
+        }
         
     } catch (error) {
         console.error('Erreur notifications:', error);
