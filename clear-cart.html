@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Vider le panier</title>
+</head>
+<body>
+    <h1>Vider le panier</h1>
+    <button onclick="clearCart()">Vider complètement le panier</button>
+    <p id="status"></p>
+    
+    <script>
+        function clearCart() {
+            localStorage.removeItem('cart');
+            document.getElementById('status').textContent = 'Panier vidé !';
+            setTimeout(() => {
+                window.location.href = 'cart.html';
+            }, 1000);
+        }
+    </script>
+</body>
+</html>

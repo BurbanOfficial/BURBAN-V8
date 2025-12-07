@@ -5,8 +5,21 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mon Compte - BURBAN</title>
     <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/loader.css">
 </head>
 <body>
+    <!-- Loader -->
+    <div id="loader" class="loader">
+        <div class="loader-content">
+            <img src="https://i.imgur.com/Kl9kTBg.png" alt="BURBAN" class="loader-logo">
+            <div class="loader-dots">
+                <div class="loader-dot"></div>
+                <div class="loader-dot"></div>
+                <div class="loader-dot"></div>
+            </div>
+        </div>
+    </div>
+
     <nav class="nav">
         <div class="nav-container">
             <a href="index.html" class="logo"><img src="https://i.imgur.com/Kl9kTBg.png" alt="BURBAN"></a>
@@ -270,6 +283,7 @@
         window.firebaseReady = true;
         console.log('Firebase prêt');
     </script>
+    <script src="js/loader.js"></script>
     <script src="js/app.js"></script>
     <script src="js/account.js"></script>
 </body>
