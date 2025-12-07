@@ -1,6 +1,6 @@
 // Configuration Stripe
 const STRIPE_PUBLIC_KEY = 'pk_live_51Q9ORzRwel3656rYkt2acyiz7KoCl1mJA6ru04LPlGQmt5Iw9BcTQa16qv5O0Ozte9bMCtutah1qh4r6yds3l2p000MPG83KmB';
-const SERVER_URL = 'http://localhost:3000';
+const SERVER_URL = 'https://burban-v8.onrender.com';
 let stripe, elements;
 let currentStep = 1;
 let shippingData = null;
