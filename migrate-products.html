@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Migration Produits</title>
+</head>
+<body>
+    <h1>Migration des produits vers Firestore</h1>
+    <button id="migrateBtn" style="padding: 12px 24px; background: #000; color: #fff; border: none; cursor: pointer; font-size: 16px;">Migrer les produits</button>
+    <div id="status" style="margin-top: 20px; font-family: monospace;"></div>
+
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+        import { getFirestore, doc, setDoc } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+        
+        const firebaseConfig = {
+            apiKey: "AIzaSyDb4AOtRT7jGENnLZ2KNwpczaG2Z77G2rc",
+            authDomain: "burban-fidelity.firebaseapp.com",
+            projectId: "burban-fidelity"
+        };
+        
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        
+        document.getElementById('migrateBtn').addEventListener('click', async () => {
+            const status = document.getElementById('status');
+            status.innerHTML = 'Migration en cours...<br>';
+            
+            const products = JSON.parse(localStorage.getItem('adminProducts')) || [];
+            
+            if (products.length === 0) {
+                status.innerHTML += 'Aucun produit à migrer.<br>';
+                return;
+            }
+            
+            let success = 0;
+            let errors = 0;
+            
+            for (const product of products) {
+                try {
+                    await setDoc(doc(db, 'products', `${product.id}`), product);
+                    status.innerHTML += `✓ ${product.name} migré<br>`;
+                    success++;
+                } catch (error) {
+                    status.innerHTML += `✗ Erreur pour ${product.name}: ${error.message}<br>`;
+                    errors++;
+                }
+            }
+            
+            status.innerHTML += `<br><strong>Migration terminée: ${success} réussis, ${errors} erreurs</strong>`;
+        });
+    </script>
+</body>
+</html>
