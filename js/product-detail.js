@@ -5,6 +5,7 @@ let currentProduct = null;
 document.addEventListener('DOMContentLoaded', () => {
     const urlParams = new URLSearchParams(window.location.search);
     const productId = parseInt(urlParams.get('id'));
+    const products = JSON.parse(localStorage.getItem('adminProducts')) || [];
     const product = products.find(p => p.id === productId);
     currentProduct = product;
     

@@ -3,6 +3,7 @@ let currentCategory = 'all';
 
 function displayProducts() {
     const grid = document.getElementById('productsGrid');
+    const products = JSON.parse(localStorage.getItem('adminProducts')) || [];
     let filtered = products;
     
     if (currentGender !== 'all') {

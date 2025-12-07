@@ -1,5 +1,9 @@
-// Products Database
-let products = JSON.parse(localStorage.getItem('adminProducts')) || [
+// Products Database - Toujours charger depuis localStorage
+function getProducts() {
+    return JSON.parse(localStorage.getItem('adminProducts')) || defaultProducts;
+}
+
+const defaultProducts = [
     {
         id: 1,
         name: "T-shirt Essential",
@@ -115,8 +119,10 @@ let products = JSON.parse(localStorage.getItem('adminProducts')) || [
 
 // Sauvegarder les produits par défaut si aucun n'existe
 if (!localStorage.getItem('adminProducts')) {
-    localStorage.setItem('adminProducts', JSON.stringify(products));
+    localStorage.setItem('adminProducts', JSON.stringify(defaultProducts));
 }
+
+let products = getProducts();
 
 // Cart Management
 let cart = JSON.parse(localStorage.getItem('cart')) || [];
@@ -129,6 +135,7 @@ function updateCartCount() {
 }
 
 function addToCart(productId, size, color = null) {
+    products = getProducts();
     const product = products.find(p => p.id === productId);
     if (!product || !size) return;
 
