@@ -1,7 +1,7 @@
 document.addEventListener('DOMContentLoaded', async () => {
     const now = new Date();
     
-    // Attendre Firebase
+    // Attendre Firebase et charger les produits
     await new Promise(resolve => {
         const check = setInterval(() => {
             if (window.firebaseReady) {
@@ -10,6 +10,10 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
         }, 100);
     });
+    
+    // Charger les produits depuis Firestore
+    await loadProductsFromFirestore();
+    products = getProducts();
     
     // Récupérer les stats depuis Firestore
     let productViews = {};

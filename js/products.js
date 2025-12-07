@@ -46,7 +46,19 @@ function displayProducts() {
     }).join('');
 }
 
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
+    // Attendre Firebase et charger les produits
+    await new Promise(resolve => {
+        const check = setInterval(() => {
+            if (window.firebaseReady) {
+                clearInterval(check);
+                resolve();
+            }
+        }, 100);
+    });
+    
+    await loadProductsFromFirestore();
+    
     const urlParams = new URLSearchParams(window.location.search);
     const gender = urlParams.get('category');
     if (gender === 'men' || gender === 'women') {

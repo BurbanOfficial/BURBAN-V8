@@ -2,7 +2,19 @@ let selectedSize = null;
 let selectedColor = null;
 let currentProduct = null;
 
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
+    // Attendre Firebase et charger les produits
+    await new Promise(resolve => {
+        const check = setInterval(() => {
+            if (window.firebaseReady) {
+                clearInterval(check);
+                resolve();
+            }
+        }, 100);
+    });
+    
+    await loadProductsFromFirestore();
+    
     const urlParams = new URLSearchParams(window.location.search);
     const productId = parseInt(urlParams.get('id'));
     const products = JSON.parse(localStorage.getItem('adminProducts')) || [];
