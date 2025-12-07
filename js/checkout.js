@@ -150,6 +150,24 @@ function displayCheckoutSummary() {
     document.getElementById('paymentAmount').textContent = `${total.toFixed(2)} €`;
 }
 
+function updateCheckoutSummary() {
+    const subtotal = getCartTotal();
+    const discount = window.selectedVoucher ? window.selectedVoucher.discount : 0;
+    const total = Math.max(0, subtotal - discount);
+
+    document.getElementById('checkoutSubtotal').textContent = `${subtotal.toFixed(2)} €`;
+    if (window.selectedVoucher) {
+        document.getElementById('discount').textContent = `-${discount.toFixed(2)} €`;
+        document.getElementById('discountLine').style.display = 'flex';
+    } else {
+        document.getElementById('discountLine').style.display = 'none';
+    }
+    document.getElementById('checkoutTotal').textContent = `${total.toFixed(2)} €`;
+    document.getElementById('paymentAmount').textContent = `${total.toFixed(2)} €`;
+}
+
+window.updateCheckoutSummary = updateCheckoutSummary;
+
 function updateStepIndicator() {
     document.getElementById('stepIndicator1').classList.toggle('active', currentStep === 1);
     document.getElementById('stepIndicator2').classList.toggle('active', currentStep === 2);
@@ -209,6 +227,11 @@ function goToPaymentStep() {
     document.getElementById('step1').style.display = 'none';
     document.getElementById('step2').style.display = 'block';
     updateStepIndicator();
+    
+    // Afficher les bons de fidélité si connecté
+    if (window.displayVouchers) {
+        displayVouchers();
+    }
     
     // Initialiser Stripe Payment Element
     initializePayment();
@@ -308,6 +331,10 @@ async function handlePayment(e) {
 }
 
 async function processOrder() {
+    const cartTotal = getCartTotal();
+    const discount = window.selectedVoucher ? window.selectedVoucher.discount : 0;
+    const finalTotal = Math.max(0, cartTotal - discount);
+    
     const order = {
         id: Date.now(),
         date: new Date().toISOString(),
@@ -315,7 +342,9 @@ async function processOrder() {
             ...item,
             name: item.color ? `${item.name} - ${getColorName(item.color)}` : item.name
         })),
-        total: getCartTotal(),
+        subtotal: cartTotal,
+        discount: discount,
+        total: finalTotal,
         shipping: shippingData,
         billing: billingData,
         status: 'confirmed'
@@ -338,11 +367,31 @@ async function processOrder() {
         }
     }
     
+    // Sauvegarder les infos de commande dans sessionStorage pour success.html
+    const orderData = {
+        order,
+        voucher: window.selectedVoucher,
+        userId: window.firebaseAuth?.currentUser?.uid
+    };
+    console.log('Sauvegarde dans sessionStorage:', orderData);
+    sessionStorage.setItem('lastOrder', JSON.stringify(orderData));
+    console.log('Vérification sessionStorage:', sessionStorage.getItem('lastOrder'));
+    
     // Sauvegarder la commande si l'utilisateur est connecté
-    if (currentUser) {
-        const orders = currentUser.orders || [];
-        orders.push(order);
-        updateUser({ orders });
+    if (window.firebaseAuth && window.firebaseAuth.currentUser) {
+        try {
+            const { doc, getDoc, updateDoc } = window.firebaseModules;
+            const userRef = doc(window.firebaseDb, 'users', window.firebaseAuth.currentUser.uid);
+            const userDoc = await getDoc(userRef);
+            const userData = userDoc.data();
+            
+            const orders = userData.orders || [];
+            orders.push(order);
+            
+            await updateDoc(userRef, { orders });
+        } catch (error) {
+            console.error('Erreur sauvegarde commande:', error);
+        }
     }
     
     // Vider le panier
