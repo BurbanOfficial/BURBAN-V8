@@ -29,7 +29,20 @@ document.addEventListener('DOMContentLoaded', async () => {
     
     // Toggle adresse de facturation
     document.getElementById('sameBillingAddress').addEventListener('change', (e) => {
-        document.getElementById('billingAddressSection').style.display = e.target.checked ? 'none' : 'block';
+        const billingSection = document.getElementById('billingAddressSection');
+        const billingInputs = billingSection.querySelectorAll('input');
+        
+        if (e.target.checked) {
+            billingSection.style.display = 'none';
+            billingInputs.forEach(input => input.removeAttribute('required'));
+        } else {
+            billingSection.style.display = 'block';
+            billingInputs.forEach(input => {
+                if (input.id !== 'billingAddress2') {
+                    input.setAttribute('required', 'required');
+                }
+            });
+        }
     });
     
 
@@ -143,10 +156,24 @@ function updateStepIndicator() {
 }
 
 function goToPaymentStep() {
-    const form = document.getElementById('shippingForm');
-    if (!form.checkValidity()) {
-        form.reportValidity();
+    const shippingForm = document.getElementById('shippingForm');
+    if (!shippingForm.checkValidity()) {
+        shippingForm.reportValidity();
         return;
+    }
+    
+    // Vérifier le formulaire de facturation si différent
+    const sameBilling = document.getElementById('sameBillingAddress').checked;
+    if (!sameBilling) {
+        const billingInputs = document.querySelectorAll('#billingAddressSection input[required]');
+        let isValid = true;
+        billingInputs.forEach(input => {
+            if (!input.value.trim()) {
+                isValid = false;
+                input.reportValidity();
+            }
+        });
+        if (!isValid) return;
     }
     
     // Sauvegarder les données de livraison
@@ -163,7 +190,6 @@ function goToPaymentStep() {
     };
     
     // Sauvegarder les données de facturation si différentes
-    const sameBilling = document.getElementById('sameBillingAddress').checked;
     if (!sameBilling) {
         billingData = {
             firstName: document.getElementById('billingFirstName').value,

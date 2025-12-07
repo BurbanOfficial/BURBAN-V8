@@ -114,6 +114,7 @@ document.getElementById('productForm')?.addEventListener('submit', (e) => {
         publishDate: existingProduct ? existingProduct.publishDate : (document.getElementById('productPublishDate').value || new Date().toISOString()),
         unpublishDate: document.getElementById('productUnpublishDate').value || null,
         stock: document.getElementById('productStock').value ? parseInt(document.getElementById('productStock').value) : null,
+        stockByVariant: saveStockVariants(colors, product.sizes),
         promoActive: promoActive,
         originalPrice: promoActive ? parseFloat(document.getElementById('productOriginalPrice').value) : null,
         promoEndDate: promoActive && !document.getElementById('productPromoUnlimited').checked ? document.getElementById('productPromoEndDate').value : null,
@@ -129,6 +130,12 @@ document.getElementById('productForm')?.addEventListener('submit', (e) => {
     
     localStorage.setItem('adminProducts', JSON.stringify(products));
     window.products = products;
+    
+    // Envoyer les notifications si le stock a augmenté
+    if (id) {
+        checkAndNotifyStockIncrease(product);
+    }
+    
     loadProducts();
     document.getElementById('productModal').classList.remove('active');
 });
@@ -196,6 +203,9 @@ function editProduct(id) {
         document.getElementById('productPublishDate').value = product.publishDate || '';
         document.getElementById('productUnpublishDate').value = product.unpublishDate || '';
         document.getElementById('productStock').value = product.stock || '';
+        
+        // Charger le stock par variante
+        loadStockVariants(product);
         
         // Promo
         const promoActive = product.promoActive || false;
@@ -380,6 +390,116 @@ document.querySelectorAll('.modal-close').forEach(btn => {
     btn.addEventListener('click', function() {
         this.closest('.modal').classList.remove('active');
     });
+});
+
+// Gestion du stock par variante
+function loadStockVariants(product) {
+    const container = document.getElementById('stockVariantsContainer');
+    if (!container) return;
+    
+    const colors = product.colors || [];
+    const sizes = product.sizes || [];
+    const stockByVariant = product.stockByVariant || {};
+    
+    container.innerHTML = '<h4 style="margin: 16px 0 12px; font-size: 14px;">Stock par variante</h4>';
+    
+    colors.forEach(color => {
+        const colorName = getColorName(color);
+        container.innerHTML += `<div style="margin-bottom: 16px;"><strong>${colorName}</strong></div>`;
+        
+        sizes.forEach(size => {
+            const key = `${color}-${size}`;
+            const stock = stockByVariant[key] || 0;
+            container.innerHTML += `
+                <div style="display: flex; gap: 8px; align-items: center; margin-bottom: 8px;">
+                    <label style="width: 60px; font-size: 14px;">${size}:</label>
+                    <input type="number" min="0" value="${stock}" data-variant="${key}" class="variant-stock" style="width: 100px; padding: 8px;">
+                </div>
+            `;
+        });
+    });
+}
+
+function saveStockVariants(colors, sizes) {
+    const stockByVariant = {};
+    document.querySelectorAll('.variant-stock').forEach(input => {
+        const key = input.dataset.variant;
+        stockByVariant[key] = parseInt(input.value) || 0;
+    });
+    return stockByVariant;
+}
+
+function getColorName(hex) {
+    const colors = {
+        '#000000': 'Noir',
+        '#FFFFFF': 'Blanc',
+        '#808080': 'Gris',
+        '#FF0000': 'Rouge',
+        '#0000FF': 'Bleu',
+        '#008000': 'Vert',
+        '#FFFF00': 'Jaune',
+        '#FFA500': 'Orange',
+        '#800080': 'Violet',
+        '#FFC0CB': 'Rose',
+        '#A52A2A': 'Marron',
+        '#00FFFF': 'Cyan'
+    };
+    return colors[hex?.toUpperCase()] || hex;
+}
+
+async function checkAndNotifyStockIncrease(product) {
+    if (!window.firebaseReady || !window.firebaseModules) return;
+    
+    try {
+        const { doc, getDoc, deleteDoc } = window.firebaseModules;
+        const notifRef = doc(window.firebaseDb, 'stockNotifications', `${product.id}`);
+        const notifDoc = await getDoc(notifRef);
+        
+        if (!notifDoc.exists()) return;
+        
+        const notifications = notifDoc.data();
+        const variants = notifications.variants || {};
+        
+        // Vérifier chaque variante
+        for (const [variantKey, subscribers] of Object.entries(variants)) {
+            const stock = product.stockByVariant?.[variantKey] || 0;
+            
+            if (stock > 0 && subscribers && subscribers.length > 0) {
+                // Envoyer les emails (simulation)
+                console.log(`Envoi d'emails pour ${product.name} - ${variantKey}:`, subscribers);
+                subscribers.forEach(sub => {
+                    console.log(`Email envoyé à: ${sub.email}`);
+                });
+                
+                alert(`${subscribers.length} email(s) de notification envoyé(s) pour ${product.name} (${variantKey})`);
+            }
+        }
+        
+        // Supprimer toutes les notifications après envoi
+        await deleteDoc(notifRef);
+        
+    } catch (error) {
+        console.error('Erreur notifications:', error);
+    }
+}
+
+// Mettre à jour les couleurs/tailles pour générer les variantes
+document.getElementById('productColors')?.addEventListener('input', () => {
+    const product = {
+        colors: document.getElementById('productColors').value.split(',').map(c => c.trim()),
+        sizes: document.getElementById('productSizes').value.split(',').map(s => s.trim()),
+        stockByVariant: {}
+    };
+    loadStockVariants(product);
+});
+
+document.getElementById('productSizes')?.addEventListener('input', () => {
+    const product = {
+        colors: document.getElementById('productColors').value.split(',').map(c => c.trim()),
+        sizes: document.getElementById('productSizes').value.split(',').map(s => s.trim()),
+        stockByVariant: {}
+    };
+    loadStockVariants(product);
 });
 
 // Charger les catégories au démarrage

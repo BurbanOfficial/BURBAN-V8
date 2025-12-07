@@ -1,14 +1,28 @@
 let selectedSize = null;
 let selectedColor = null;
+let currentProduct = null;
 
 document.addEventListener('DOMContentLoaded', () => {
     const urlParams = new URLSearchParams(window.location.search);
     const productId = parseInt(urlParams.get('id'));
     const product = products.find(p => p.id === productId);
+    currentProduct = product;
     
     if (!product) {
         window.location.href = 'products.html';
         return;
+    }
+    
+    // Initialiser le stock par variante si inexistant
+    if (!product.stockByVariant) {
+        product.stockByVariant = {};
+        const colors = product.colors || ['#000000'];
+        const sizes = product.sizes || ['S', 'M', 'L', 'XL'];
+        colors.forEach(color => {
+            sizes.forEach(size => {
+                product.stockByVariant[`${color}-${size}`] = 10;
+            });
+        });
     }
     
     // Tracker les vues de produits dans Firestore
@@ -126,8 +140,58 @@ document.addEventListener('DOMContentLoaded', () => {
             // Update gallery with color images
             const colorImages = imagesByColor[selectedColor] || currentImages;
             updateGallery(colorImages);
+            
+            // Update size availability
+            updateSizeAvailability();
+            updateStockIndicator();
         });
     });
+    
+    function updateSizeAvailability() {
+        document.querySelectorAll('.size-btn').forEach(btn => {
+            const size = btn.dataset.size;
+            const stock = getStock(selectedColor, size);
+            btn.classList.toggle('out-of-stock', stock === 0);
+        });
+    }
+    
+    function getStock(color, size) {
+        if (!currentProduct || !currentProduct.stockByVariant) return 10;
+        return currentProduct.stockByVariant[`${color}-${size}`] || 0;
+    }
+    
+    function updateStockIndicator() {
+        if (!selectedSize || !selectedColor) return;
+        
+        const stock = getStock(selectedColor, selectedSize);
+        const indicator = document.getElementById('stockIndicator');
+        const dot = indicator.querySelector('.stock-dot');
+        const text = indicator.querySelector('.stock-text');
+        
+        indicator.style.display = 'flex';
+        dot.className = 'stock-dot';
+        
+        if (stock === 0) {
+            dot.classList.add('out-of-stock');
+            text.textContent = 'En rupture de stock';
+        } else if (stock >= 1 && stock <= 4) {
+            dot.classList.add('low-stock');
+            text.textContent = `Stock faible (${stock} restant${stock > 1 ? 's' : ''})`;
+        } else {
+            dot.classList.add('in-stock');
+            text.textContent = 'En stock';
+        }
+        
+        // Update button
+        const addBtn = document.getElementById('addToCart');
+        if (stock === 0) {
+            addBtn.textContent = 'M\'informer du retour de cet article';
+            addBtn.onclick = handleNotifyMe;
+        } else {
+            addBtn.textContent = 'Ajouter au panier';
+            addBtn.onclick = handleAddToCart;
+        }
+    }
     
     // Sizes
     const sizeOptions = document.getElementById('sizeOptions');
@@ -137,11 +201,15 @@ document.addEventListener('DOMContentLoaded', () => {
     
     document.querySelectorAll('.size-btn').forEach(btn => {
         btn.addEventListener('click', () => {
+            if (btn.classList.contains('out-of-stock')) return;
             document.querySelectorAll('.size-btn').forEach(b => b.classList.remove('selected'));
             btn.classList.add('selected');
             selectedSize = btn.dataset.size;
+            updateStockIndicator();
         });
     });
+    
+    updateSizeAvailability();
     
     // Size Guide
     const sizeGuideBtn = document.getElementById('sizeGuide');
@@ -153,14 +221,104 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     
     // Add to Cart
-    document.getElementById('addToCart').addEventListener('click', () => {
+    function handleAddToCart() {
         if (!selectedSize) {
             showMessage('Veuillez sélectionner une taille');
             return;
         }
-        addToCart(product.id, selectedSize);
+        const stock = getStock(selectedColor, selectedSize);
+        if (stock === 0) {
+            showMessage('Ce produit est en rupture de stock');
+            return;
+        }
+        addToCart(product.id, selectedSize, selectedColor);
         showCartConfirm();
-    });
+    }
+    
+    async function handleNotifyMe() {
+        if (!selectedSize || !selectedColor) {
+            showMessage('Veuillez sélectionner une couleur et une taille');
+            return;
+        }
+        
+        const variantKey = `${selectedColor}-${selectedSize}`;
+        
+        // Vérifier si connecté
+        if (window.firebaseAuth && window.firebaseAuth.currentUser) {
+            try {
+                const { doc, setDoc, arrayUnion } = window.firebaseModules;
+                const notifRef = doc(window.firebaseDb, 'stockNotifications', `${productId}`);
+                
+                await setDoc(notifRef, {
+                    productId: productId,
+                    productName: product.name,
+                    variants: {
+                        [variantKey]: arrayUnion({
+                            email: window.firebaseAuth.currentUser.email,
+                            color: selectedColor,
+                            size: selectedSize,
+                            timestamp: new Date().toISOString()
+                        })
+                    }
+                }, { merge: true });
+                
+                showMessage('Vous serez informé par email dès que cet article sera de nouveau disponible.');
+            } catch (error) {
+                console.error('Erreur notification:', error);
+                showMessage('Erreur lors de l\'enregistrement de votre demande');
+            }
+        } else {
+            // Demander l'email
+            document.body.classList.add('modal-open');
+            const modal = document.createElement('div');
+            modal.className = 'custom-modal active';
+            modal.innerHTML = `
+                <div class="custom-modal-content">
+                    <h3 style="font-size: 20px; font-weight: 400; margin-bottom: 16px;">M'informer du retour en stock</h3>
+                    <p style="margin-bottom: 24px; color: var(--gray);">Entrez votre email pour être notifié dès que cet article sera disponible.</p>
+                    <input type="email" id="notifyEmail" placeholder="Votre email" style="width: 100%; margin-bottom: 16px;">
+                    <div style="display: flex; gap: 12px; justify-content: center;">
+                        <button class="btn-secondary" onclick="document.body.classList.remove('modal-open'); this.closest('.custom-modal').remove();">Annuler</button>
+                        <button class="btn-primary" id="submitNotify">Valider</button>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(modal);
+            
+            document.getElementById('submitNotify').addEventListener('click', async () => {
+                const email = document.getElementById('notifyEmail').value;
+                if (!email || !email.includes('@')) {
+                    showMessage('Veuillez entrer une adresse email valide');
+                    return;
+                }
+                
+                try {
+                    const { doc, setDoc, arrayUnion } = window.firebaseModules;
+                    const notifRef = doc(window.firebaseDb, 'stockNotifications', `${productId}`);
+                    
+                    await setDoc(notifRef, {
+                        productId: productId,
+                        productName: product.name,
+                        variants: {
+                            [variantKey]: arrayUnion({
+                                email: email,
+                                color: selectedColor,
+                                size: selectedSize,
+                                timestamp: new Date().toISOString()
+                            })
+                        }
+                    }, { merge: true });
+                    
+                    modal.remove();
+                    document.body.classList.remove('modal-open');
+                    showMessage('Vous serez informé par email dès que cet article sera de nouveau disponible.');
+                } catch (error) {
+                    console.error('Erreur notification:', error);
+                    showMessage('Erreur lors de l\'enregistrement de votre demande');
+                }
+            });
+        }
+    }
     
     // Add to Favorites
     const favBtn = document.getElementById('addToFavorites');
