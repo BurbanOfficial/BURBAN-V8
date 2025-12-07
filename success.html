@@ -69,84 +69,98 @@
             
             console.log('Utilisateur connecté:', user.uid);
             
-            // Gérer les points après paiement validé
-            const lastOrderData = sessionStorage.getItem('lastOrder');
-            console.log('lastOrder data:', lastOrderData);
+            // Récupérer l'ID de commande temporaire depuis l'URL
+            const urlParams = new URLSearchParams(window.location.search);
+            const tempOrderId = urlParams.get('temp_order');
             
-            if (lastOrderData) {
-                const { order, voucher } = JSON.parse(lastOrderData);
-                console.log('Order:', order, 'Voucher:', voucher);
+            if (!tempOrderId) {
+                console.log('Aucune commande temporaire trouvée');
+                return;
+            }
+            
+            console.log('Traitement commande temporaire:', tempOrderId);
+            
+            try {
+                // Récupérer la commande temporaire
+                const tempOrderDoc = await getDoc(doc(db, 'temp_orders', tempOrderId));
+                if (!tempOrderDoc.exists()) {
+                    console.log('Commande temporaire introuvable');
+                    return;
+                }
                 
-                try {
-                    // Générer numéro de commande BR + 9 chiffres + 2 lettres
-                    const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-                    const orderNumber = 'BR' + String(Date.now()).slice(-9) + letters[Math.floor(Math.random() * 26)] + letters[Math.floor(Math.random() * 26)];
-                    
-                    // Déduire le stock
-                    const productsSnapshot = await getDocs(collection(db, 'products'));
-                    for (const item of order.items) {
-                        const productDoc = productsSnapshot.docs.find(d => d.data().id === item.id);
-                        if (productDoc) {
-                            const product = productDoc.data();
-                            const variantKey = `${item.color}-${item.size}`;
-                            const currentStock = product.stockByVariant[variantKey] || 0;
-                            product.stockByVariant[variantKey] = Math.max(0, currentStock - item.quantity);
-                            await setDoc(doc(db, 'products', `${product.id}`), product);
-                        }
+                const tempOrder = tempOrderDoc.data();
+                console.log('Commande temporaire:', tempOrder);
+                
+                // Générer numéro de commande BR + 9 chiffres + 2 lettres
+                const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+                const orderNumber = 'BR' + String(Date.now()).slice(-9) + letters[Math.floor(Math.random() * 26)] + letters[Math.floor(Math.random() * 26)];
+                
+                // Déduire le stock
+                const productsSnapshot = await getDocs(collection(db, 'products'));
+                for (const item of tempOrder.items) {
+                    const productDoc = productsSnapshot.docs.find(d => d.data().id === item.id);
+                    if (productDoc) {
+                        const product = productDoc.data();
+                        const variantKey = `${item.color}-${item.size}`;
+                        const currentStock = product.stockByVariant[variantKey] || 0;
+                        product.stockByVariant[variantKey] = Math.max(0, currentStock - item.quantity);
+                        await setDoc(doc(db, 'products', `${product.id}`), product);
                     }
-                    
-                    // Créer la commande dans Firestore
-                    const orderData = {
-                        orderNumber,
-                        userId: user.uid,
-                        userEmail: user.email,
-                        items: order.items,
-                        total: order.total,
-                        discount: voucher ? voucher.discount : 0,
-                        voucherPoints: voucher ? voucher.points : 0,
-                        status: 'processing',
-                        trackingUrl: null,
-                        date: new Date().toISOString(),
-                        shippingAddress: order.shippingAddress || null,
-                        billingAddress: order.billingAddress || null,
-                        cardLast4: order.cardLast4 || 'XXXX'
-                    };
-                    await setDoc(doc(db, 'orders', orderNumber), orderData);
-                    
-                    // Mettre à jour les points utilisateur
-                    const userRef = doc(db, 'users', user.uid);
-                    const userDoc = await getDoc(userRef);
-                    const userData = userDoc.data();
-                    
-                    const currentPoints = userData.points || 0;
-                    const pointsEarned = Math.floor(order.total * 10);
-                    let newPoints = currentPoints + pointsEarned;
-                    
-                    const updates = [];
-                    
-                    if (voucher) {
-                        newPoints -= voucher.points;
-                        updates.push({
-                            points: -voucher.points,
-                            description: `Échange de ${voucher.points} points contre un bon de ${voucher.discount}€`,
-                            date: new Date().toISOString()
-                        });
-                    }
-                    
+                }
+                
+                // Créer la commande définitive
+                const orderData = {
+                    orderNumber,
+                    userId: user.uid,
+                    userEmail: user.email,
+                    items: tempOrder.items,
+                    total: tempOrder.total,
+                    discount: tempOrder.discount,
+                    voucherPoints: tempOrder.voucher ? tempOrder.voucher.points : 0,
+                    status: 'processing',
+                    trackingUrl: null,
+                    date: new Date().toISOString(),
+                    shippingAddress: tempOrder.shippingAddress,
+                    billingAddress: tempOrder.billingAddress
+                };
+                await setDoc(doc(db, 'orders', orderNumber), orderData);
+                
+                // Mettre à jour les points utilisateur
+                const userRef = doc(db, 'users', user.uid);
+                const userDoc = await getDoc(userRef);
+                const userData = userDoc.data();
+                
+                const currentPoints = userData.points || 0;
+                const pointsEarned = Math.floor(tempOrder.total * 10);
+                let newPoints = currentPoints + pointsEarned;
+                
+                const updates = [];
+                
+                if (tempOrder.voucher) {
+                    newPoints -= tempOrder.voucher.points;
                     updates.push({
-                        points: pointsEarned,
-                        description: `Ajout de ${pointsEarned} points suite à votre achat`,
+                        points: -tempOrder.voucher.points,
+                        description: `Échange de ${tempOrder.voucher.points} points contre un bon de ${tempOrder.voucher.discount}€`,
                         date: new Date().toISOString()
                     });
-                    
-                    await updateDoc(userRef, {
-                        points: newPoints,
-                        pointsHistory: arrayUnion(...updates),
-                        orders: arrayUnion(orderNumber)
-                    });
-                    
-                    console.log('Commande créée:', orderNumber);
-                    sessionStorage.removeItem('lastOrder');
+                }
+                
+                updates.push({
+                    points: pointsEarned,
+                    description: `Ajout de ${pointsEarned} points suite à votre achat`,
+                    date: new Date().toISOString()
+                });
+                
+                await updateDoc(userRef, {
+                    points: newPoints,
+                    pointsHistory: arrayUnion(...updates),
+                    orders: arrayUnion(orderNumber)
+                });
+                
+                // Supprimer la commande temporaire
+                await setDoc(doc(db, 'temp_orders', tempOrderId), { deleted: true }, { merge: true });
+                
+                console.log('Commande finalisée:', orderNumber);
                 } catch (error) {
                     console.error('Erreur mise à jour points:', error);
                 }
