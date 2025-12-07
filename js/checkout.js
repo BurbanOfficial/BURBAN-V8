@@ -1,5 +1,6 @@
-// Configuration Stripe - Remplacez par votre clé publique
-const STRIPE_PUBLIC_KEY = 'pk_test_YOUR_STRIPE_PUBLIC_KEY';
+// Configuration Stripe
+const STRIPE_PUBLIC_KEY = 'pk_live_51Q9ORzRwel3656rYkt2acyiz7KoCl1mJA6ru04LPlGQmt5Iw9BcTQa16qv5O0Ozte9bMCtutah1qh4r6yds3l2p000MPG83KmB';
+const SERVER_URL = 'http://localhost:3000';
 let stripe, elements;
 let currentStep = 1;
 let shippingData = null;
@@ -15,7 +16,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
     
     // Code promo
-    document.getElementById('applyPromoBtn')?.addEventListener('click', () => {
+    document.getElementById('applyPromoBtn')?.addEventListener('click', async () => {
         const code = document.getElementById('promoCode').value.trim().toUpperCase();
         const msg = document.getElementById('promoMessage');
         
@@ -33,10 +34,28 @@ document.addEventListener('DOMContentLoaded', async () => {
             return;
         }
         
-        // Ici vous pouvez ajouter la logique de validation des codes promo
-        msg.style.display = 'block';
-        msg.style.color = '#ef4444';
-        msg.textContent = 'Code promotionnel invalide';
+        try {
+            const response = await fetch(`${SERVER_URL}/verify-promo-code`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ code })
+            });
+            const result = await response.json();
+            
+            if (result.valid) {
+                msg.style.display = 'block';
+                msg.style.color = '#22c55e';
+                msg.textContent = `Code appliqué: -${result.discount}${result.type === 'percentage' ? '%' : '€'}`;
+            } else {
+                msg.style.display = 'block';
+                msg.style.color = '#ef4444';
+                msg.textContent = 'Code promotionnel invalide';
+            }
+        } catch (error) {
+            msg.style.display = 'block';
+            msg.style.color = '#ef4444';
+            msg.textContent = 'Erreur de vérification du code';
+        }
     });
     
     updateStepIndicator();
@@ -279,23 +298,31 @@ function goToAddressStep() {
 }
 
 async function initializePayment() {
-    const total = getCartTotal();
+    const subtotal = getCartTotal();
+    const discount = window.selectedVoucher ? window.selectedVoucher.discount : 0;
+    const shipping = subtotal < 49 ? 5 : 0;
+    const total = Math.max(0, subtotal - discount + shipping);
     
     try {
         stripe = Stripe(STRIPE_PUBLIC_KEY);
         
-        // En production: créer un PaymentIntent côté serveur
-        // const response = await fetch('/create-payment-intent', {
-        //     method: 'POST',
-        //     headers: { 'Content-Type': 'application/json' },
-        //     body: JSON.stringify({ 
-        //         amount: total * 100, 
-        //         currency: 'eur',
-        //         shipping: shippingData,
-        //         billing: billingData
-        //     })
-        // });
-        // const { clientSecret } = await response.json();
+        // Créer un PaymentIntent côté serveur
+        const response = await fetch(`${SERVER_URL}/create-payment-intent`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ 
+                amount: total,
+                shippingAddress: shippingData,
+                billingAddress: JSON.stringify(billingData) !== JSON.stringify(shippingData) ? billingData : null,
+                promoCode: document.getElementById('promoCode').value.trim().toUpperCase() || null,
+                voucherDiscount: discount,
+                shippingFee: shipping,
+                items: cart,
+                userId: window.firebaseAuth?.currentUser?.uid || null
+            })
+        });
+        
+        const { clientSecret } = await response.json();
         
         const appearance = {
             theme: 'stripe',
@@ -309,45 +336,48 @@ async function initializePayment() {
             }
         };
         
-        // Mode démo: simuler l'interface
-        document.getElementById('payment-element').innerHTML = `
-            <div style="border: 1px solid #e0e0e0; padding: 16px; margin-bottom: 16px;">
-                <p style="font-size: 14px; color: #666; margin-bottom: 12px;">Informations de carte</p>
-                <input type="text" placeholder="1234 5678 9012 3456" style="width: 100%; margin-bottom: 12px; padding: 12px; border: 1px solid #e0e0e0;">
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
-                    <input type="text" placeholder="MM / AA" style="padding: 12px; border: 1px solid #e0e0e0;">
-                    <input type="text" placeholder="CVC" style="padding: 12px; border: 1px solid #e0e0e0;">
-                </div>
-            </div>
-            <p style="font-size: 12px; color: #666;">
-                <strong>Mode démo:</strong> Configurez Stripe avec votre clé API pour activer les paiements réels.
-            </p>
-        `;
-        
-        // elements = stripe.elements({ clientSecret, appearance });
-        // const paymentElement = elements.create('payment');
-        // paymentElement.mount('#payment-element');
+        elements = stripe.elements({ clientSecret, appearance });
+        const paymentElement = elements.create('payment');
+        paymentElement.mount('#payment-element');
         
     } catch (error) {
         console.error('Erreur Stripe:', error);
         document.getElementById('payment-message').textContent = 
-            'Configuration Stripe requise. Ajoutez votre clé publique dans checkout.js';
+            'Erreur de connexion au serveur de paiement. Vérifiez que le serveur est démarré.';
     }
 }
 
 async function handlePayment(e) {
     e.preventDefault();
     
+    if (!elements) {
+        document.getElementById('payment-message').textContent = 'Erreur: Paiement non initialisé';
+        return;
+    }
+    
     document.getElementById('submitPayment').disabled = true;
     document.getElementById('submitPayment').textContent = 'Traitement...';
     
-    // Mode démo: simuler le paiement
-    setTimeout(async () => {
-        await processOrder();
-    }, 1500);
+    // Sauvegarder les données de commande avant la redirection
+    const cartTotal = getCartTotal();
+    const discount = window.selectedVoucher ? window.selectedVoucher.discount : 0;
+    const shipping = cartTotal < 49 ? 5 : 0;
+    const finalTotal = Math.max(0, cartTotal - discount + shipping);
     
-    /* 
-    // Code pour paiement Stripe réel (décommenter quand configuré)
+    const orderData = {
+        items: cart,
+        subtotal: cartTotal,
+        discount: discount,
+        shipping: shipping,
+        total: finalTotal,
+        shippingAddress: shippingData,
+        billingAddress: JSON.stringify(billingData) !== JSON.stringify(shippingData) ? billingData : null,
+        voucher: window.selectedVoucher,
+        userId: window.firebaseAuth?.currentUser?.uid
+    };
+    
+    sessionStorage.setItem('pendingOrder', JSON.stringify(orderData));
+    
     const { error } = await stripe.confirmPayment({
         elements,
         confirmParams: {
@@ -361,7 +391,6 @@ async function handlePayment(e) {
         document.getElementById('submitPayment').disabled = false;
         document.getElementById('submitPayment').textContent = 'Payer ' + document.getElementById('paymentAmount').textContent;
     }
-    */
 }
 
 async function processOrder() {
