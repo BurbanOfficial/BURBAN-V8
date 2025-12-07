@@ -6,33 +6,7 @@ let currentStep = 1;
 let shippingData = null;
 let billingData = null;
 
-// Fonction pour nettoyer les commandes temporaires
-async function cleanupTempOrders() {
-    if (window.firebaseAuth && window.firebaseAuth.currentUser) {
-        try {
-            const { query, collection, where, getDocs, deleteDoc, doc } = window.firebaseModules;
-            const db = window.firebaseDb;
-            
-            const tempOrdersQuery = query(
-                collection(db, 'temp_orders'),
-                where('userId', '==', window.firebaseAuth.currentUser.uid),
-                where('status', '==', 'pending_payment')
-            );
-            const tempOrdersDocs = await getDocs(tempOrdersQuery);
-            
-            for (const tempDoc of tempOrdersDocs.docs) {
-                await deleteDoc(doc(db, 'temp_orders', tempDoc.id));
-                console.log('Commande temporaire supprimée:', tempDoc.id);
-            }
-        } catch (error) {
-            console.error('Erreur suppression commandes temporaires:', error);
-        }
-    }
-}
 
-// Nettoyer les commandes temporaires quand l'utilisateur quitte la page
-window.addEventListener('beforeunload', cleanupTempOrders);
-window.addEventListener('pagehide', cleanupTempOrders);
 
 document.addEventListener('DOMContentLoaded', async () => {
     console.log('Panier au checkout:', cart);
@@ -128,12 +102,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     document.getElementById('backToAddress').addEventListener('click', goToAddressStep);
     document.getElementById('submitPayment').addEventListener('click', handlePayment);
     
-    // Nettoyer les commandes temporaires existantes au chargement de la page
-    setTimeout(() => {
-        if (window.firebaseAuth && window.firebaseAuth.currentUser) {
-            cleanupTempOrders();
-        }
-    }, 2000);
+
 });
 
 function selectAddress(address) {
