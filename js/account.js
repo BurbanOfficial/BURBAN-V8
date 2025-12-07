@@ -505,7 +505,7 @@ async function loadOrders(orderNumbers = []) {
         
         for (const orderNumber of orderNumbers) {
             const orderDoc = await getDoc(doc(window.firebaseDb, 'orders', orderNumber));
-            if (orderDoc.exists() && orderDoc.data().status !== 'cancelled') {
+            if (orderDoc.exists()) {
                 orders.push(orderDoc.data());
             }
         }
@@ -513,14 +513,14 @@ async function loadOrders(orderNumbers = []) {
         orders.sort((a, b) => new Date(b.date) - new Date(a.date));
         
         ordersList.innerHTML = orders.map(order => {
-            const statusStep = order.status === 'processing' ? 1 : order.status === 'shipped' ? 2 : 3;
+            const statusStep = order.status === 'cancelled' ? 0 : order.status === 'processing' ? 1 : order.status === 'shipped' ? 2 : 3;
             return `
-            <div style="background: white; border: 1px solid var(--border); margin-bottom: 32px;">
+            <div style="background: white; border: 1px solid ${order.status === 'cancelled' ? '#ef4444' : 'var(--border)'}; margin-bottom: 32px;">
                 <!-- Barre de suivi -->
-                <div style="display: flex; height: 4px; background: var(--light-gray);">
-                    <div style="flex: 1; background: ${statusStep >= 1 ? 'var(--black)' : 'var(--light-gray)'};" title="En cours de traitement"></div>
-                    <div style="flex: 1; background: ${statusStep >= 2 ? 'var(--black)' : 'var(--light-gray)'};" title="Expédiée"></div>
-                    <div style="flex: 1; background: ${statusStep >= 3 ? 'var(--black)' : 'var(--light-gray)'};" title="Livrée"></div>
+                <div style="display: flex; height: 4px; background: ${order.status === 'cancelled' ? '#ef4444' : 'var(--light-gray)'};">
+                    <div style="flex: 1; background: ${order.status === 'cancelled' ? '#ef4444' : (statusStep >= 1 ? 'var(--black)' : 'var(--light-gray)')};" title="En cours de traitement"></div>
+                    <div style="flex: 1; background: ${order.status === 'cancelled' ? '#ef4444' : (statusStep >= 2 ? 'var(--black)' : 'var(--light-gray)')};" title="Expédiée"></div>
+                    <div style="flex: 1; background: ${order.status === 'cancelled' ? '#ef4444' : (statusStep >= 3 ? 'var(--black)' : 'var(--light-gray)')};" title="Livrée"></div>
                 </div>
                 
                 <!-- En-tête -->
@@ -544,7 +544,13 @@ async function loadOrders(orderNumbers = []) {
                 </div>
                 
                 <!-- Statut -->
-                <div style="padding: 16px 24px; background: var(--light-gray); display: flex; justify-content: space-between; align-items: center;">
+                <div style="padding: 16px 24px; background: ${order.status === 'cancelled' ? '#fee2e2' : 'var(--light-gray)'}; display: flex; justify-content: space-between; align-items: center;">
+                    ${order.status === 'cancelled' ? `
+                    <div style="display: flex; align-items: center; gap: 12px;">
+                        <span style="padding: 8px 16px; background: #ef4444; color: white; font-weight: 600; font-size: 13px;">Commande annulée</span>
+                        <span style="font-size: 13px; color: #991b1b;">Annulée le ${new Date(order.cancelledAt).toLocaleDateString('fr-FR')}</span>
+                    </div>
+                    ` : `
                     <div style="display: flex; gap: 16px; font-size: 13px;">
                         <span style="padding: 8px 16px; background: ${statusStep >= 1 ? 'white' : 'transparent'}; color: ${statusStep >= 1 ? 'var(--black)' : 'var(--gray)'}; font-weight: ${statusStep === 1 ? '600' : '400'}; box-shadow: ${statusStep >= 1 ? 'inset 0 2px 4px rgba(0,0,0,0.1)' : 'none'}; border: 1px solid ${statusStep >= 1 ? 'var(--border)' : 'transparent'}; display: inline-flex; align-items: center; gap: 6px;">
                             En traitement
@@ -559,6 +565,7 @@ async function loadOrders(orderNumbers = []) {
                             ${statusStep > 3 ? '<span style="color: #22c55e; font-size: 16px;">✓</span>' : ''}
                         </span>
                     </div>
+                    `}
                     <button onclick="toggleOrderDetails('${order.orderNumber}')" class="order-details-btn" style="background: var(--black); border: none; color: var(--white); font-size: 13px; cursor: pointer; padding: 8px 16px; transition: opacity 0.2s;" onmouseover="this.style.opacity='0.8'" onmouseout="this.style.opacity='1'">
                         Détails ▾
                     </button>
@@ -605,10 +612,12 @@ async function loadOrders(orderNumbers = []) {
                         `).join('')}
                     </div>
                     
+                    ${order.status !== 'cancelled' ? `
                     <div style="padding: 24px; border-top: 1px solid var(--border); display: flex; gap: 12px;">
                         ${order.trackingUrl ? `<a href="${order.trackingUrl}" target="_blank" class="btn-primary" style="flex: 1; text-align: center;">Suivre mon colis</a>` : ''}
                         ${order.status === 'processing' ? `<button onclick="cancelOrderConfirm('${order.orderNumber}')" class="btn-secondary" style="flex: 1; background: white; border: 1px solid var(--border); color: var(--black); transition: all 0.2s;" onmouseover="this.style.background='#ef4444'; this.style.color='white'; this.style.borderColor='#ef4444'" onmouseout="this.style.background='white'; this.style.color='var(--black)'; this.style.borderColor='var(--border)'">Annuler</button>` : ''}
                     </div>
+                    ` : ''}
                 </div>
             </div>
         `}).join('');
@@ -687,11 +696,10 @@ window.confirmCancelOrder = async function(orderNumber) {
             });
         }
         
-        const updatedOrders = (userData.orders || []).filter(o => o !== orderNumber);
+        // Garder la commande dans la liste des commandes de l'utilisateur
         
         // Utiliser updateDoc pour ne pas écraser les données existantes
         await updateDoc(userRef, { 
-            orders: updatedOrders,
             points: newPoints,
             pointsHistory: arrayUnion(...updates)
         });
