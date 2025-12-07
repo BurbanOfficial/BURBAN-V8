@@ -1,4 +1,18 @@
-// Products Database - Toujours charger depuis localStorage
+// Products Database - Charger depuis Firestore puis localStorage
+async function loadProductsFromFirestore() {
+    if (!window.firebaseReady) return;
+    try {
+        const { collection, getDocs } = window.firebaseModules;
+        const snapshot = await getDocs(collection(window.firebaseDb, 'products'));
+        const products = snapshot.docs.map(doc => doc.data());
+        if (products.length > 0) {
+            localStorage.setItem('adminProducts', JSON.stringify(products));
+        }
+    } catch (error) {
+        console.error('Erreur chargement Firestore:', error);
+    }
+}
+
 function getProducts() {
     return JSON.parse(localStorage.getItem('adminProducts')) || defaultProducts;
 }
@@ -435,6 +449,18 @@ function showSizeGuide(sizeGuideId) {
 
 // Initialize
 document.addEventListener('DOMContentLoaded', () => {
+    // Charger les produits depuis Firestore
+    const waitForFirebase = setInterval(() => {
+        if (window.firebaseReady) {
+            clearInterval(waitForFirebase);
+            loadProductsFromFirestore().then(() => {
+                products = getProducts();
+                // Recharger la page si nécessaire
+                if (typeof loadProducts === 'function') loadProducts();
+            });
+        }
+    }, 100);
+    
     updateCartCount();
     
     // Update account link

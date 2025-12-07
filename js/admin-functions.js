@@ -130,6 +130,9 @@ document.getElementById('productForm')?.addEventListener('submit', (e) => {
     
     localStorage.setItem('adminProducts', JSON.stringify(products));
     
+    // Sauvegarder dans Firestore
+    saveProductToFirestore(product);
+    
     // Envoyer les notifications si le stock a augmenté
     if (id) {
         checkAndNotifyStockIncrease(product);
@@ -138,6 +141,32 @@ document.getElementById('productForm')?.addEventListener('submit', (e) => {
     loadProducts();
     document.getElementById('productModal').classList.remove('active');
 });
+
+// Sauvegarder produit dans Firestore
+async function saveProductToFirestore(product) {
+    if (!window.firebaseReady) return;
+    try {
+        const { doc, setDoc } = window.firebaseModules;
+        await setDoc(doc(window.firebaseDb, 'products', `${product.id}`), product);
+        console.log('Produit sauvegardé dans Firestore');
+    } catch (error) {
+        console.error('Erreur Firestore:', error);
+    }
+}
+
+// Charger produits depuis Firestore
+async function loadProductsFromFirestore() {
+    if (!window.firebaseReady) return;
+    try {
+        const { collection, getDocs } = window.firebaseModules;
+        const snapshot = await getDocs(collection(window.firebaseDb, 'products'));
+        const products = snapshot.docs.map(doc => doc.data());
+        localStorage.setItem('adminProducts', JSON.stringify(products));
+        loadProducts();
+    } catch (error) {
+        console.error('Erreur chargement Firestore:', error);
+    }
+}
 
 // Mise à jour de loadProducts
 function loadProducts() {
@@ -219,11 +248,22 @@ function editProduct(id) {
     }
 }
 
-function deleteProduct(id) {
+async function deleteProduct(id) {
     if (confirm('Êtes-vous sûr de vouloir supprimer ce produit ?')) {
         let products = JSON.parse(localStorage.getItem('adminProducts')) || [];
         products = products.filter(p => p.id !== id);
         localStorage.setItem('adminProducts', JSON.stringify(products));
+        
+        // Supprimer de Firestore
+        if (window.firebaseReady) {
+            try {
+                const { doc, deleteDoc } = window.firebaseModules;
+                await deleteDoc(doc(window.firebaseDb, 'products', `${id}`));
+            } catch (error) {
+                console.error('Erreur suppression Firestore:', error);
+            }
+        }
+        
         loadProducts();
     }
 }
@@ -542,4 +582,12 @@ setTimeout(() => {
 if (document.getElementById('productCategory')) {
     loadCategories();
     loadSizeGuides();
+    
+    // Charger les produits depuis Firestore au démarrage
+    const waitForFirebase = setInterval(() => {
+        if (window.firebaseReady) {
+            clearInterval(waitForFirebase);
+            loadProductsFromFirestore();
+        }
+    }, 100);
 }
