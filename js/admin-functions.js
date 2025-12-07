@@ -129,7 +129,6 @@ document.getElementById('productForm')?.addEventListener('submit', (e) => {
     }
     
     localStorage.setItem('adminProducts', JSON.stringify(products));
-    window.products = products;
     
     // Envoyer les notifications si le stock a augmenté
     if (id) {
@@ -225,7 +224,6 @@ function deleteProduct(id) {
         let products = JSON.parse(localStorage.getItem('adminProducts')) || [];
         products = products.filter(p => p.id !== id);
         localStorage.setItem('adminProducts', JSON.stringify(products));
-        window.products = products;
         loadProducts();
     }
 }
