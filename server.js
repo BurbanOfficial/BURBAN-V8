@@ -5,8 +5,10 @@ const cors = require('cors');
 const app = express();
 
 app.use(cors({
-    origin: true,
-    credentials: true
+    origin: '*',
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+    credentials: false
 }));
 app.use(express.json());
 app.use(express.static('.'));
@@ -50,8 +52,8 @@ app.post('/create-payment-intent', async (req, res) => {
             discountAmount += voucherDiscount;
         }
 
-        // Calculer le montant final
-        finalAmount = Math.max(amount - discountAmount + (shippingFee || 0), 0);
+        // Calculer le montant final (amount contient déjà les frais de livraison)
+        finalAmount = Math.max(amount - discountAmount, 0);
 
         // Créer le Payment Intent avec 3D Secure automatique
         const paymentIntent = await stripe.paymentIntents.create({
