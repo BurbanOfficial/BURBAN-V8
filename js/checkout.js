@@ -6,6 +6,34 @@ let currentStep = 1;
 let shippingData = null;
 let billingData = null;
 
+// Fonction pour nettoyer les commandes temporaires
+async function cleanupTempOrders() {
+    if (window.firebaseAuth && window.firebaseAuth.currentUser) {
+        try {
+            const { query, collection, where, getDocs, deleteDoc, doc } = window.firebaseModules;
+            const db = window.firebaseDb;
+            
+            const tempOrdersQuery = query(
+                collection(db, 'temp_orders'),
+                where('userId', '==', window.firebaseAuth.currentUser.uid),
+                where('status', '==', 'pending_payment')
+            );
+            const tempOrdersDocs = await getDocs(tempOrdersQuery);
+            
+            for (const tempDoc of tempOrdersDocs.docs) {
+                await deleteDoc(doc(db, 'temp_orders', tempDoc.id));
+                console.log('Commande temporaire supprimée:', tempDoc.id);
+            }
+        } catch (error) {
+            console.error('Erreur suppression commandes temporaires:', error);
+        }
+    }
+}
+
+// Nettoyer les commandes temporaires quand l'utilisateur quitte la page
+window.addEventListener('beforeunload', cleanupTempOrders);
+window.addEventListener('pagehide', cleanupTempOrders);
+
 document.addEventListener('DOMContentLoaded', async () => {
     console.log('Panier au checkout:', cart);
     console.log('Total:', getCartTotal());
@@ -99,6 +127,13 @@ document.addEventListener('DOMContentLoaded', async () => {
     document.getElementById('continueToPayment').addEventListener('click', goToPaymentStep);
     document.getElementById('backToAddress').addEventListener('click', goToAddressStep);
     document.getElementById('submitPayment').addEventListener('click', handlePayment);
+    
+    // Nettoyer les commandes temporaires existantes au chargement de la page
+    setTimeout(() => {
+        if (window.firebaseAuth && window.firebaseAuth.currentUser) {
+            cleanupTempOrders();
+        }
+    }, 2000);
 });
 
 function selectAddress(address) {
@@ -362,30 +397,61 @@ async function handlePayment(e) {
     document.getElementById('submitPayment').disabled = true;
     document.getElementById('submitPayment').textContent = 'Traitement...';
     
-    // Sauvegarder les données de commande avant la redirection
+    // Créer une commande temporaire avant le paiement
     const cartTotal = getCartTotal();
     const discount = window.selectedVoucher ? window.selectedVoucher.discount : 0;
     const shipping = cartTotal < 49 ? 5 : 0;
     const finalTotal = Math.max(0, cartTotal - discount + shipping);
     
-    const orderData = {
-        items: cart,
-        subtotal: cartTotal,
-        discount: discount,
-        shipping: shipping,
-        total: finalTotal,
-        shippingAddress: shippingData,
-        billingAddress: JSON.stringify(billingData) !== JSON.stringify(shippingData) ? billingData : null,
-        voucher: window.selectedVoucher,
-        userId: window.firebaseAuth?.currentUser?.uid
-    };
+    let tempOrderId = null;
     
-    sessionStorage.setItem('pendingOrder', JSON.stringify(orderData));
+    if (window.firebaseAuth && window.firebaseAuth.currentUser) {
+        try {
+            const { doc, setDoc, query, collection, where, getDocs } = window.firebaseModules;
+            const db = window.firebaseDb;
+            
+            // Vérifier s'il existe déjà une commande temporaire pour cet utilisateur
+            const existingQuery = query(
+                collection(db, 'temp_orders'),
+                where('userId', '==', window.firebaseAuth.currentUser.uid),
+                where('status', '==', 'pending_payment')
+            );
+            const existingDocs = await getDocs(existingQuery);
+            
+            if (!existingDocs.empty) {
+                // Utiliser la commande temporaire existante
+                tempOrderId = existingDocs.docs[0].id;
+                console.log('Commande temporaire existante réutilisée:', tempOrderId);
+            } else {
+                // Générer nouvel ID temporaire
+                tempOrderId = 'TEMP_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+                
+                // Créer nouvelle commande temporaire
+                const tempOrderData = {
+                    tempOrderId,
+                    userId: window.firebaseAuth.currentUser.uid,
+                    items: cart,
+                    total: finalTotal,
+                    discount: discount,
+                    shippingAddress: shippingData,
+                    billingAddress: JSON.stringify(billingData) !== JSON.stringify(shippingData) ? billingData : null,
+                    voucher: window.selectedVoucher,
+                    status: 'pending_payment',
+                    createdAt: new Date().toISOString()
+                };
+                
+                await setDoc(doc(db, 'temp_orders', tempOrderId), tempOrderData);
+                console.log('Nouvelle commande temporaire créée:', tempOrderId);
+            }
+        } catch (error) {
+            console.error('Erreur création commande temporaire:', error);
+        }
+    }
     
     const { error } = await stripe.confirmPayment({
         elements,
         confirmParams: {
-            return_url: 'https://burbanofficial.github.io/BURBAN-V8/success.html',
+            return_url: `https://burbanofficial.github.io/BURBAN-V8/success.html?temp_order=${tempOrderId}`,
             receipt_email: shippingData.email,
         },
     });
