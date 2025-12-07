@@ -152,7 +152,11 @@ document.addEventListener('DOMContentLoaded', () => {
         document.querySelectorAll('.size-btn').forEach(btn => {
             const size = btn.dataset.size;
             const stock = getStock(selectedColor, size);
-            btn.classList.toggle('out-of-stock', stock === 0);
+            if (stock === 0) {
+                btn.style.opacity = '0.5';
+            } else {
+                btn.style.opacity = '1';
+            }
         });
     }
     
@@ -186,13 +190,16 @@ document.addEventListener('DOMContentLoaded', () => {
         // Update button
         const addBtn = document.getElementById('addToCart');
         if (stock === 0) {
-            addBtn.textContent = 'M\'informer du retour de cet article';
+            addBtn.textContent = 'Alertez moi dès son retour';
             addBtn.onclick = handleNotifyMe;
         } else {
             addBtn.textContent = 'Ajouter au panier';
             addBtn.onclick = handleAddToCart;
         }
     }
+    
+    // Initial button setup
+    document.getElementById('addToCart').onclick = handleAddToCart;
     
     // Sizes
     const sizeOptions = document.getElementById('sizeOptions');
@@ -202,7 +209,6 @@ document.addEventListener('DOMContentLoaded', () => {
     
     document.querySelectorAll('.size-btn').forEach(btn => {
         btn.addEventListener('click', () => {
-            if (btn.classList.contains('out-of-stock')) return;
             document.querySelectorAll('.size-btn').forEach(b => b.classList.remove('selected'));
             btn.classList.add('selected');
             selectedSize = btn.dataset.size;
@@ -263,7 +269,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
                 }, { merge: true });
                 
-                showMessage('Vous serez informé par email dès que cet article sera de nouveau disponible.');
+                showMessage('Vous êtes sur la liste ! Nous vous informerons dès son retour.');
             } catch (error) {
                 console.error('Erreur notification:', error);
                 showMessage('Erreur lors de l\'enregistrement de votre demande');
@@ -275,8 +281,8 @@ document.addEventListener('DOMContentLoaded', () => {
             modal.className = 'custom-modal active';
             modal.innerHTML = `
                 <div class="custom-modal-content">
-                    <h3 style="font-size: 20px; font-weight: 400; margin-bottom: 16px;">M'informer du retour en stock</h3>
-                    <p style="margin-bottom: 24px; color: var(--gray);">Entrez votre email pour être notifié dès que cet article sera disponible.</p>
+                    <h3 style="font-size: 20px; font-weight: 400; margin-bottom: 16px;">Alertez moi dès son retour</h3>
+                    <p style="margin-bottom: 24px; color: var(--gray); font-size: 14px;">Entrez votre email pour être notifié dès que cet article sera disponible.</p>
                     <input type="email" id="notifyEmail" placeholder="Votre email" style="width: 100%; margin-bottom: 16px;">
                     <div style="display: flex; gap: 12px; justify-content: center;">
                         <button class="btn-secondary" onclick="document.body.classList.remove('modal-open'); this.closest('.custom-modal').remove();">Annuler</button>
@@ -312,7 +318,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     
                     modal.remove();
                     document.body.classList.remove('modal-open');
-                    showMessage('Vous serez informé par email dès que cet article sera de nouveau disponible.');
+                    showMessage('Vous êtes sur la liste ! Nous vous informerons dès son retour.');
                 } catch (error) {
                     console.error('Erreur notification:', error);
                     showMessage('Erreur lors de l\'enregistrement de votre demande');
