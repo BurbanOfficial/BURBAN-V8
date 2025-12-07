@@ -466,11 +466,7 @@ input:focus, textarea:focus {
     border-color: var(--black);
 }
 
-.size-btn.out-of-stock {
-    opacity: 0.3;
-    cursor: not-allowed;
-    pointer-events: none;
-}
+
 
 /* Stock Indicator */
 .stock-indicator {
