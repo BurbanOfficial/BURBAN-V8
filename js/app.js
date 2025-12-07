@@ -1,12 +1,20 @@
 // Products Database - Charger depuis Firestore puis localStorage
 async function loadProductsFromFirestore() {
-    if (!window.firebaseReady) return;
+    if (!window.firebaseReady) {
+        console.log('Firebase pas prêt');
+        return;
+    }
     try {
+        console.log('Chargement produits depuis Firestore...');
         const { collection, getDocs } = window.firebaseModules;
         const snapshot = await getDocs(collection(window.firebaseDb, 'products'));
         const products = snapshot.docs.map(doc => doc.data());
+        console.log('Produits chargés:', products.length);
         if (products.length > 0) {
             localStorage.setItem('adminProducts', JSON.stringify(products));
+            console.log('Produits sauvegardés dans localStorage');
+        } else {
+            console.log('Aucun produit trouvé dans Firestore');
         }
     } catch (error) {
         console.error('Erreur chargement Firestore:', error);
@@ -130,6 +138,18 @@ const defaultProducts = [
         sizes: ["XS", "S", "M", "L"]
     }
 ];
+
+// Charger depuis Firestore au démarrage
+if (window.firebaseReady) {
+    loadProductsFromFirestore();
+} else {
+    const waitForFirebase = setInterval(() => {
+        if (window.firebaseReady) {
+            clearInterval(waitForFirebase);
+            loadProductsFromFirestore();
+        }
+    }, 100);
+}
 
 // Sauvegarder les produits par défaut si aucun n'existe
 if (!localStorage.getItem('adminProducts')) {
@@ -449,18 +469,6 @@ function showSizeGuide(sizeGuideId) {
 
 // Initialize
 document.addEventListener('DOMContentLoaded', () => {
-    // Charger les produits depuis Firestore
-    const waitForFirebase = setInterval(() => {
-        if (window.firebaseReady) {
-            clearInterval(waitForFirebase);
-            loadProductsFromFirestore().then(() => {
-                products = getProducts();
-                // Recharger la page si nécessaire
-                if (typeof loadProducts === 'function') loadProducts();
-            });
-        }
-    }, 100);
-    
     updateCartCount();
     
     // Update account link

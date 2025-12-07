@@ -3,8 +3,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     
     // Attendre Firebase et charger les produits
     await new Promise(resolve => {
+        let attempts = 0;
         const check = setInterval(() => {
-            if (window.firebaseReady) {
+            attempts++;
+            if (window.firebaseReady || attempts > 50) {
                 clearInterval(check);
                 resolve();
             }
@@ -13,7 +15,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     
     // Charger les produits depuis Firestore
     await loadProductsFromFirestore();
-    products = getProducts();
+    let products = getProducts();
     
     // Récupérer les stats depuis Firestore
     let productViews = {};
