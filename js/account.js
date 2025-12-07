@@ -561,10 +561,13 @@ async function deleteAddress(index) {
 
 window.deleteAddress = deleteAddress;
 
+let historyDisplayCount = 3;
+
 function loadLoyalty(points, history) {
     document.getElementById('loyaltyPoints').textContent = points;
     
-    // History toggle - remove old listener
+    const sortedHistory = [...history].sort((a, b) => new Date(b.date) - new Date(a.date));
+    
     const historyBtn = document.getElementById('showHistoryBtn');
     const newHistoryBtn = historyBtn.cloneNode(true);
     historyBtn.parentNode.replaceChild(newHistoryBtn, historyBtn);
@@ -574,18 +577,25 @@ function loadLoyalty(points, history) {
         if (historyDiv.style.display === 'none') {
             historyDiv.style.display = 'block';
             this.textContent = 'Masquer l\'historique';
+            historyDisplayCount = 3;
+            renderHistory(sortedHistory);
         } else {
             historyDiv.style.display = 'none';
             this.textContent = 'Voir l\'historique';
         }
     });
     
-    // Load history
-    const historyList = document.getElementById('loyaltyHistoryList');
-    if (history.length === 0) {
-        historyList.innerHTML = '<p class="empty-state">Aucun historique pour le moment</p>';
-    } else {
-        historyList.innerHTML = history.map(entry => {
+    function renderHistory(sortedHistory) {
+        const historyList = document.getElementById('loyaltyHistoryList');
+        if (sortedHistory.length === 0) {
+            historyList.innerHTML = '<p class="empty-state">Aucun historique pour le moment</p>';
+            return;
+        }
+        
+        const displayedHistory = sortedHistory.slice(0, historyDisplayCount);
+        const hasMore = sortedHistory.length > historyDisplayCount;
+        
+        historyList.innerHTML = displayedHistory.map(entry => {
             const isPositive = entry.points > 0;
             return `
                 <div style="border-bottom: 1px solid var(--border); padding: 16px 0; display: flex; justify-content: space-between; align-items: center;">
@@ -598,7 +608,17 @@ function loadLoyalty(points, history) {
                     </span>
                 </div>
             `;
-        }).join('');
+        }).join('') + (hasMore ? `
+            <button id="loadMoreHistory" class="btn-secondary" style="width: 100%; margin-top: 16px;">Voir plus</button>
+        ` : '');
+        
+        if (hasMore) {
+            document.getElementById('loadMoreHistory').addEventListener('click', function() {
+                historyDisplayCount += 5;
+                renderHistory(sortedHistory);
+            });
+        }
     }
     
+    renderHistory(sortedHistory);
 }
