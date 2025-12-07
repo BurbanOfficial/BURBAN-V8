@@ -155,7 +155,7 @@ document.getElementById('orderForm')?.addEventListener('submit', async (e) => {
         });
         
         document.getElementById('orderModal').classList.remove('active');
-        loadOrders();
+        setTimeout(() => loadOrders(), 500);
         alert('Commande mise à jour');
     } catch (error) {
         console.error('Erreur:', error);
@@ -179,11 +179,19 @@ setTimeout(() => {
         filterOrders(currentFilter);
     });
     
-    // Activer le filtre "Toutes" par défaut
+    // Activer le filtre "Toutes" par défaut et initialiser les boutons
     setTimeout(() => {
-        if (document.getElementById('filter-all')) {
-            document.getElementById('filter-all').style.background = 'var(--black)';
-            document.getElementById('filter-all').style.color = 'var(--white)';
+        const filterAll = document.getElementById('filter-all');
+        if (filterAll) {
+            filterAll.style.background = 'var(--black)';
+            filterAll.style.color = 'var(--white)';
+            
+            // Attacher les événements aux boutons de filtre
+            document.getElementById('filter-all')?.addEventListener('click', () => filterOrders('all'));
+            document.getElementById('filter-processing')?.addEventListener('click', () => filterOrders('processing'));
+            document.getElementById('filter-shipped')?.addEventListener('click', () => filterOrders('shipped'));
+            document.getElementById('filter-delivered')?.addEventListener('click', () => filterOrders('delivered'));
+            document.getElementById('filter-cancelled')?.addEventListener('click', () => filterOrders('cancelled'));
         }
     }, 1000);
 }, 500);
