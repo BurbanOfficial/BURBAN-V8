@@ -1,7 +1,14 @@
 // Gestion des clients
 let allClients = [];
+let firebaseAuthenticated = false;
 
 async function loadClients() {
+    // Vérifier si l'utilisateur est authentifié avec Firebase
+    if (!firebaseAuthenticated) {
+        document.getElementById('firebaseAuthModal').classList.add('active');
+        return;
+    }
+    
     try {
         const { collection, getDocs } = window.firebaseModules;
         const db = window.firebaseDb;
@@ -15,8 +22,33 @@ async function loadClients() {
         displayClients(allClients);
     } catch (error) {
         console.error('Erreur chargement clients:', error);
+        alert('Erreur: ' + error.message);
     }
 }
+
+// Authentification Firebase
+document.getElementById('firebaseAuthForm')?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    const email = document.getElementById('firebaseEmail').value;
+    const password = document.getElementById('firebasePassword').value;
+    const error = document.getElementById('firebaseAuthError');
+    
+    try {
+        const { signInWithEmailAndPassword } = window.firebaseModules;
+        await signInWithEmailAndPassword(window.firebaseAuth, email, password);
+        
+        firebaseAuthenticated = true;
+        document.getElementById('firebaseAuthModal').classList.remove('active');
+        error.textContent = '';
+        
+        // Charger les clients
+        loadClients();
+    } catch (firebaseError) {
+        console.error('Erreur Firebase:', firebaseError);
+        error.textContent = 'Email ou mot de passe incorrect';
+    }
+});
 
 function displayClients(clients) {
     const tbody = document.getElementById('clientsTableBody');
