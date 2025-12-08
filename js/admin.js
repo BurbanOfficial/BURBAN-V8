@@ -1,37 +1,48 @@
-// Admin credentials
-const ADMIN_CREDENTIALS = {
-    email: 'direction@burbanofficial.com',
-    password: 'CMS_TEAM_BURBAN'
-};
-
-let isAuthenticated = false;
-let twoFAVerified = false;
+let currentUser = null;
+let userRole = null;
 let totpInstance = null;
 
-// Login
-document.getElementById('loginForm').addEventListener('submit', (e) => {
+// Login avec Firebase
+document.getElementById('loginForm').addEventListener('submit', async (e) => {
     e.preventDefault();
     const email = document.getElementById('adminEmail').value;
     const password = document.getElementById('adminPassword').value;
     const error = document.getElementById('loginError');
     
-    if (email === ADMIN_CREDENTIALS.email && password === ADMIN_CREDENTIALS.password) {
-        isAuthenticated = true;
+    try {
+        const { getAuth, signInWithEmailAndPassword } = await import('https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js');
+        const auth = getAuth();
+        
+        const userCredential = await signInWithEmailAndPassword(auth, email, password);
+        currentUser = userCredential.user;
+        
+        const { doc, getDoc } = window.firebaseModules;
+        const crewDoc = await getDoc(doc(window.firebaseDb, 'crew', currentUser.uid));
+        
+        if (!crewDoc.exists()) {
+            error.textContent = 'Accès non autorisé';
+            auth.signOut();
+            return;
+        }
+        
+        userRole = crewDoc.data().role;
+        sessionStorage.setItem('userRole', userRole);
+        sessionStorage.setItem('userId', currentUser.uid);
+        
         document.getElementById('adminLogin').style.display = 'none';
         document.getElementById('admin2FA').style.display = 'block';
         error.textContent = '';
         
-        // Initialize TOTP
         initializeTOTP();
-    } else {
+    } catch (err) {
         error.textContent = 'Email ou mot de passe incorrect';
     }
 });
 
 // Initialize TOTP (Google Authenticator)
 function initializeTOTP() {
-    const email = ADMIN_CREDENTIALS.email;
-    const secretKey = 'totp_secret_burban_cms';
+    const email = currentUser.email;
+    const secretKey = `totp_secret_${currentUser.uid}`;
     let secretBase32 = localStorage.getItem(secretKey);
     
     if (!secretBase32) {
@@ -91,15 +102,14 @@ document.getElementById('twoFAForm').addEventListener('submit', (e) => {
         return;
     }
     
-    // Vérifier le code (avec fenêtre de tolérance de ±1 période)
     const delta = totpInstance.validate({ token: code, window: 1 });
     
     if (delta !== null) {
-        twoFAVerified = true;
         sessionStorage.setItem('adminAuth', 'true');
         localStorage.setItem('adminAuthExpiry', (Date.now() + 24 * 60 * 60 * 1000).toString());
         document.getElementById('admin2FA').style.display = 'none';
         document.getElementById('adminDashboard').style.display = 'block';
+        applyRolePermissions();
         loadDashboard();
         error.textContent = '';
     } else {
@@ -118,13 +128,35 @@ document.getElementById('logoutBtn').addEventListener('click', () => {
 // Check auth on load
 const authExpiry = localStorage.getItem('adminAuthExpiry');
 if (sessionStorage.getItem('adminAuth') === 'true' && authExpiry && Date.now() < parseInt(authExpiry)) {
+    userRole = sessionStorage.getItem('userRole');
     document.getElementById('adminLogin').style.display = 'none';
     document.getElementById('admin2FA').style.display = 'none';
     document.getElementById('adminDashboard').style.display = 'block';
+    applyRolePermissions();
     loadDashboard();
 } else {
     sessionStorage.removeItem('adminAuth');
     localStorage.removeItem('adminAuthExpiry');
+}
+
+// Appliquer les permissions selon le rôle
+function applyRolePermissions() {
+    const role = userRole || sessionStorage.getItem('userRole');
+    
+    if (role === 'customer_support') {
+        // Masquer sections
+        document.querySelector('[data-section="categories"]').style.display = 'none';
+        document.querySelector('[data-section="users"]').style.display = 'none';
+        document.querySelector('[data-section="settings"]').style.display = 'none';
+        
+        // Désactiver modifications
+        document.querySelectorAll('.admin-btn-delete, #addProductBtn, #addSizeGuideBtn').forEach(el => el.style.display = 'none');
+    } else if (role === 'limited_operator') {
+        // Masquer sections
+        document.querySelector('[data-section="orders"]').style.display = 'none';
+        document.querySelector('[data-section="users"]').style.display = 'none';
+        document.querySelector('[data-section="settings"]').style.display = 'none';
+    }
 }
 
 // Menu navigation
@@ -136,9 +168,10 @@ document.querySelectorAll('.admin-menu-link').forEach(link => {
         link.classList.add('active');
         document.getElementById(link.dataset.section + 'Section').classList.add('active');
         
-        // Charger les clients uniquement quand on clique sur la section
         if (link.dataset.section === 'clients' && typeof loadClients === 'function') {
             loadClients();
+        } else if (link.dataset.section === 'users' && typeof loadCrewUsers === 'function') {
+            loadCrewUsers();
         }
     });
 });
@@ -147,8 +180,8 @@ document.querySelectorAll('.admin-menu-link').forEach(link => {
 function loadDashboard() {
     loadProducts();
     loadOrders();
-    loadUsers();
     if (typeof loadClients === 'function') loadClients();
+    if (typeof loadCrewUsers === 'function') loadCrewUsers();
     if (typeof loadSizeGuides === 'function') loadSizeGuides();
 }
 
@@ -277,25 +310,10 @@ function loadOrders() {
     `).join('');
 }
 
-// Users Management
-function loadUsers() {
-    const tbody = document.getElementById('usersTableBody');
-    const users = JSON.parse(localStorage.getItem('users')) || [];
-    
-    if (users.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="4" style="text-align: center; color: var(--gray);">Aucun utilisateur</td></tr>';
-        return;
-    }
-    
-    tbody.innerHTML = users.map(user => `
-        <tr>
-            <td>${user.firstName} ${user.lastName}</td>
-            <td>${user.email}</td>
-            <td>${user.orders ? user.orders.length : 0}</td>
-            <td>${new Date(user.id).toLocaleDateString()}</td>
-        </tr>
-    `).join('');
-}
+// Bouton ajouter crew user
+document.getElementById('addCrewUserBtn')?.addEventListener('click', () => {
+    window.open('create-crew.html', '_blank');
+});
 
 // Modal close
 document.querySelector('.modal-close').addEventListener('click', () => {
