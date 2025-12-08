@@ -43,8 +43,29 @@ function displayCrewUsers(users) {
 }
 
 async function editCrewUser(userId) {
-    // À implémenter si besoin
-    alert('Fonctionnalité à venir');
+    try {
+        const { doc, getDoc } = window.firebaseModules;
+        const userDoc = await getDoc(doc(window.firebaseDb, 'crew', userId));
+        
+        if (!userDoc.exists()) {
+            alert('Utilisateur introuvable');
+            return;
+        }
+        
+        const user = userDoc.data();
+        
+        document.getElementById('crewUserId').value = userId;
+        document.getElementById('crewUserFirstname').value = user.firstname || '';
+        document.getElementById('crewUserLastname').value = user.lastname || '';
+        document.getElementById('crewUserEmail').value = user.email || '';
+        document.getElementById('crewUserRole').value = user.role || '';
+        document.getElementById('crewUserActive').checked = user.active !== false;
+        
+        document.getElementById('crewUserModal').classList.add('active');
+    } catch (error) {
+        console.error('Erreur:', error);
+        alert('Erreur lors du chargement');
+    }
 }
 
 async function deleteCrewUser(userId) {
@@ -60,6 +81,34 @@ async function deleteCrewUser(userId) {
         alert('Erreur lors de la suppression');
     }
 }
+
+document.getElementById('crewUserForm')?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    const userId = document.getElementById('crewUserId').value;
+    const userData = {
+        firstname: document.getElementById('crewUserFirstname').value,
+        lastname: document.getElementById('crewUserLastname').value,
+        role: document.getElementById('crewUserRole').value,
+        active: document.getElementById('crewUserActive').checked
+    };
+    
+    try {
+        const { doc, updateDoc } = window.firebaseModules;
+        await updateDoc(doc(window.firebaseDb, 'crew', userId), userData);
+        
+        alert('Utilisateur mis à jour');
+        document.getElementById('crewUserModal').classList.remove('active');
+        loadCrewUsers();
+    } catch (error) {
+        console.error('Erreur:', error);
+        alert('Erreur lors de la mise à jour');
+    }
+});
+
+document.querySelector('#crewUserModal .modal-close')?.addEventListener('click', () => {
+    document.getElementById('crewUserModal').classList.remove('active');
+});
 
 window.loadCrewUsers = loadCrewUsers;
 window.editCrewUser = editCrewUser;
