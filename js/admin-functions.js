@@ -172,6 +172,7 @@ async function loadProductsFromFirestore() {
 function loadProducts() {
     const tbody = document.getElementById('productsTableBody');
     const products = JSON.parse(localStorage.getItem('adminProducts')) || [];
+    const role = sessionStorage.getItem('userRole');
     
     // Filtrer les produits selon les dates
     const now = new Date();
@@ -193,10 +194,12 @@ function loadProducts() {
                 <td>${product.category}</td>
                 <td>${stockText}</td>
                 <td>
+                    ${role === 'customer_support' ? '<span style="color: var(--gray);">Lecture seule</span>' : `
                     <div class="admin-actions">
                         <button class="admin-btn" onclick="editProduct(${product.id})">Modifier</button>
                         <button class="admin-btn admin-btn-delete" onclick="deleteProduct(${product.id})">Supprimer</button>
                     </div>
+                    `}
                 </td>
             </tr>
         `;
@@ -204,6 +207,12 @@ function loadProducts() {
 }
 
 function editProduct(id) {
+    const role = sessionStorage.getItem('userRole');
+    if (role === 'customer_support') {
+        alert('Vous n\'avez pas les permissions pour modifier les produits');
+        return;
+    }
+    
     const products = JSON.parse(localStorage.getItem('adminProducts')) || [];
     const product = products.find(p => p.id === id);
     
@@ -249,6 +258,12 @@ function editProduct(id) {
 }
 
 async function deleteProduct(id) {
+    const role = sessionStorage.getItem('userRole');
+    if (role === 'customer_support') {
+        alert('Vous n\'avez pas les permissions pour supprimer les produits');
+        return;
+    }
+    
     if (confirm('Êtes-vous sûr de vouloir supprimer ce produit ?')) {
         let products = JSON.parse(localStorage.getItem('adminProducts')) || [];
         products = products.filter(p => p.id !== id);

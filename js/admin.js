@@ -145,22 +145,18 @@ function applyRolePermissions() {
     
     if (role === 'customer_support') {
         // Masquer sections
-        document.querySelector('[data-section="categories"]')?.style.setProperty('display', 'none');
-        document.querySelector('[data-section="users"]')?.style.setProperty('display', 'none');
-        document.querySelector('[data-section="settings"]')?.style.setProperty('display', 'none');
+        document.querySelector('[data-section="categories"]').style.display = 'none';
+        document.querySelector('[data-section="users"]').style.display = 'none';
+        document.querySelector('[data-section="settings"]').style.display = 'none';
         
-        // Masquer bouton ajouter produit
-        const addBtn = document.getElementById('addProductBtn');
-        if (addBtn) addBtn.style.display = 'none';
-        
-        const addSizeBtn = document.getElementById('addSizeGuideBtn');
-        if (addSizeBtn) addSizeBtn.style.display = 'none';
+        // Désactiver modifications produits
+        document.querySelectorAll('#productsSection .admin-btn-delete, #productsSection .admin-btn, #addProductBtn, #addSizeGuideBtn').forEach(el => el.style.display = 'none');
     } else if (role === 'limited_operator') {
         // Masquer sections
-        document.querySelector('[data-section="orders"]')?.style.setProperty('display', 'none');
-        document.querySelector('[data-section="clients"]')?.style.setProperty('display', 'none');
-        document.querySelector('[data-section="users"]')?.style.setProperty('display', 'none');
-        document.querySelector('[data-section="settings"]')?.style.setProperty('display', 'none');
+        document.querySelector('[data-section="orders"]').style.display = 'none';
+        document.querySelector('[data-section="clients"]').style.display = 'none';
+        document.querySelector('[data-section="users"]').style.display = 'none';
+        document.querySelector('[data-section="settings"]').style.display = 'none';
     }
 }
 
@@ -177,8 +173,6 @@ document.querySelectorAll('.admin-menu-link').forEach(link => {
             loadClients();
         } else if (link.dataset.section === 'users' && typeof loadCrewUsers === 'function') {
             loadCrewUsers();
-        } else if (link.dataset.section === 'products') {
-            loadProducts();
         }
     });
 });
@@ -190,7 +184,6 @@ function loadDashboard() {
     if (typeof loadClients === 'function') loadClients();
     if (typeof loadCrewUsers === 'function') loadCrewUsers();
     if (typeof loadSizeGuides === 'function') loadSizeGuides();
-    applyRolePermissions();
 }
 
 // Products Management
