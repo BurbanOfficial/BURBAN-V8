@@ -143,6 +143,7 @@ function loadDashboard() {
     loadProducts();
     loadOrders();
     loadUsers();
+    if (typeof loadClients === 'function') loadClients();
     if (typeof loadSizeGuides === 'function') loadSizeGuides();
 }
 
