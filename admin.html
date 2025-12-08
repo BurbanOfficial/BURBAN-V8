@@ -209,6 +209,20 @@
                     </div>
                 </div>
 
+                <!-- Firebase Auth Modal -->
+                <div class="modal" id="firebaseAuthModal">
+                    <div class="modal-content" style="max-width: 400px;">
+                        <h3>Authentification Firebase</h3>
+                        <p style="color: var(--gray); margin-bottom: 24px;">Connectez-vous avec votre compte Firebase pour accéder aux données clients</p>
+                        <form id="firebaseAuthForm" class="admin-form">
+                            <input type="email" id="firebaseEmail" placeholder="Email Firebase" required>
+                            <input type="password" id="firebasePassword" placeholder="Mot de passe Firebase" required>
+                            <button type="submit" class="btn-primary">Se connecter</button>
+                            <p class="form-error" id="firebaseAuthError"></p>
+                        </form>
+                    </div>
+                </div>
+
                 <!-- Client Modal -->
                 <div class="modal" id="clientModal">
                     <div class="modal-content" style="max-width: 700px; max-height: 90vh; overflow-y: auto;">
@@ -395,7 +409,8 @@
 
     <script type="module">
         import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
-        import { getFirestore, doc, getDoc, setDoc, deleteDoc, arrayUnion, updateDoc, deleteField, collection, getDocs } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+        import { getAuth, signInWithEmailAndPassword } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
+        import { getFirestore, doc, getDoc, setDoc, deleteDoc, arrayUnion, updateDoc, deleteField, collection, getDocs, query, where } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
         
         const firebaseConfig = {
             apiKey: "AIzaSyDb4AOtRT7jGENnLZ2KNwpczaG2Z77G2rc",
@@ -404,8 +419,9 @@
         };
         
         const app = initializeApp(firebaseConfig);
+        window.firebaseAuth = getAuth(app);
         window.firebaseDb = getFirestore(app);
-        window.firebaseModules = { doc, getDoc, setDoc, deleteDoc, arrayUnion, updateDoc, deleteField, collection, getDocs };
+        window.firebaseModules = { doc, getDoc, setDoc, deleteDoc, arrayUnion, updateDoc, deleteField, collection, getDocs, query, where, signInWithEmailAndPassword };
         window.firebaseReady = true;
     </script>
     <script src="js/admin.js"></script>
