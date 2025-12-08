@@ -135,6 +135,11 @@ document.querySelectorAll('.admin-menu-link').forEach(link => {
         document.querySelectorAll('.admin-section').forEach(s => s.classList.remove('active'));
         link.classList.add('active');
         document.getElementById(link.dataset.section + 'Section').classList.add('active');
+        
+        // Charger les clients uniquement quand on clique sur la section
+        if (link.dataset.section === 'clients' && typeof loadClients === 'function') {
+            loadClients();
+        }
     });
 });
 
