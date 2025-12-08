@@ -65,6 +65,7 @@
                 <a href="#" class="admin-menu-link" data-section="categories">Catégories</a>
                 <a href="#" class="admin-menu-link" data-section="sizeguides">Guides des tailles</a>
                 <a href="#" class="admin-menu-link" data-section="orders">Commandes</a>
+                <a href="#" class="admin-menu-link" data-section="clients">Clients</a>
                 <a href="#" class="admin-menu-link" data-section="users">Utilisateurs</a>
                 <a href="#" class="admin-menu-link" data-section="settings">Paramètres</a>
             </aside>
@@ -182,10 +183,35 @@
                     </div>
                 </div>
 
+                <!-- Clients Section -->
+                <div class="admin-section" id="clientsSection">
+                    <div class="admin-header">
+                        <h2>Clients</h2>
+                    </div>
+                    <input type="text" id="clientSearch" placeholder="Rechercher un client..." style="width: 100%; padding: 12px; border: 1px solid var(--border); margin-bottom: 24px;">
+                    <div class="admin-table">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Nom</th>
+                                    <th>Email</th>
+                                    <th>Téléphone</th>
+                                    <th>Points</th>
+                                    <th>Commandes</th>
+                                    <th>Inscrit le</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="clientsTableBody"></tbody>
+                        </table>
+                    </div>
+                </div>
+
                 <!-- Users Section -->
                 <div class="admin-section" id="usersSection">
                     <div class="admin-header">
-                        <h2>Utilisateurs</h2>
+                        <h2>Utilisateurs du personnel</h2>
+                        <button class="btn-primary" id="addCrewUserBtn">Ajouter un utilisateur</button>
                     </div>
                     <div class="admin-table">
                         <table>
@@ -193,8 +219,9 @@
                                 <tr>
                                     <th>Nom</th>
                                     <th>Email</th>
-                                    <th>Commandes</th>
+                                    <th>Rôle</th>
                                     <th>Inscrit le</th>
+                                    <th>Actions</th>
                                 </tr>
                             </thead>
                             <tbody id="usersTableBody"></tbody>
@@ -300,6 +327,36 @@
         </div>
     </div>
 
+    <!-- Client Modal -->
+    <div class="modal" id="clientModal">
+        <div class="modal-content" style="max-width: 800px; max-height: 90vh; overflow-y: auto;">
+            <span class="modal-close">&times;</span>
+            <h3>Détails du client</h3>
+            <form id="clientForm" class="admin-form">
+                <input type="hidden" id="clientId">
+                <input type="text" id="clientFirstname" placeholder="Prénom" required>
+                <input type="text" id="clientLastname" placeholder="Nom" required>
+                <input type="email" id="clientEmail" placeholder="Email" required readonly>
+                <input type="text" id="clientPhone" placeholder="Téléphone">
+                <input type="text" id="clientCountry" placeholder="Pays">
+                <input type="date" id="clientBirthday" placeholder="Date de naissance">
+                <input type="number" id="clientPoints" placeholder="Points" min="0">
+                <label style="display: flex; align-items: center; gap: 8px;">
+                    <input type="checkbox" id="clientNewsletter" style="width: auto;">
+                    <span>Abonné à la newsletter</span>
+                </label>
+                <button type="submit" class="btn-primary">Enregistrer</button>
+                <button type="button" class="btn-secondary" id="resetPasswordBtn" style="margin-top: 8px;">Réinitialiser le mot de passe</button>
+            </form>
+            
+            <h4 style="margin-top: 32px; margin-bottom: 16px;">Adresses</h4>
+            <div id="clientAddresses"></div>
+            
+            <h4 style="margin-top: 32px; margin-bottom: 16px;">Commandes</h4>
+            <div id="clientOrders"></div>
+        </div>
+    </div>
+
     <!-- Size Guide Modal -->
     <div class="modal" id="sizeGuideModal">
         <div class="modal-content" style="max-width: 900px;">
@@ -343,6 +400,8 @@
     <script src="js/admin.js"></script>
     <script src="js/admin-functions.js"></script>
     <script src="js/admin-orders.js"></script>
+    <script src="js/admin-clients.js"></script>
+    <script src="js/admin-crew.js"></script>
     <script src="js/email-service.js"></script>
     <script>
         // Toggle promo fields

@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Créer un compte Crew - BURBAN</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <section style="min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 24px;">
+        <div style="max-width: 500px; width: 100%; border: 1px solid var(--border); padding: 48px; background: white;">
+            <img src="https://i.imgur.com/Kl9kTBg.png" alt="BURBAN" style="height: 40px; margin-bottom: 32px;">
+            <h1 style="margin-bottom: 8px;">Créer un compte Crew</h1>
+            <p style="color: var(--gray); margin-bottom: 32px;">Réservé au personnel BURBAN</p>
+            
+            <form id="crewForm" style="display: flex; flex-direction: column; gap: 16px;">
+                <input type="text" id="firstname" placeholder="Prénom" required style="padding: 12px; border: 1px solid var(--border);">
+                <input type="text" id="lastname" placeholder="Nom" required style="padding: 12px; border: 1px solid var(--border);">
+                <input type="email" id="email" placeholder="Email professionnel" required style="padding: 12px; border: 1px solid var(--border);">
+                <input type="password" id="password" placeholder="Mot de passe (min. 6 caractères)" required minlength="6" style="padding: 12px; border: 1px solid var(--border);">
+                <select id="role" required style="padding: 12px; border: 1px solid var(--border);">
+                    <option value="">Sélectionner un rôle</option>
+                    <option value="admin_manager">Admin Manager</option>
+                    <option value="customer_support">Customer Support Agent</option>
+                    <option value="limited_operator">Limited Operator</option>
+                </select>
+                <button type="submit" class="btn-primary" style="margin-top: 16px;">Créer le compte</button>
+                <p id="message" style="margin-top: 16px; text-align: center;"></p>
+            </form>
+        </div>
+    </section>
+
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+        import { getAuth, createUserWithEmailAndPassword } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
+        import { getFirestore, doc, setDoc } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+        
+        const firebaseConfig = {
+            apiKey: "AIzaSyDb4AOtRT7jGENnLZ2KNwpczaG2Z77G2rc",
+            authDomain: "burban-fidelity.firebaseapp.com",
+            projectId: "burban-fidelity"
+        };
+        
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+        
+        document.getElementById('crewForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const firstname = document.getElementById('firstname').value;
+            const lastname = document.getElementById('lastname').value;
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const role = document.getElementById('role').value;
+            const message = document.getElementById('message');
+            
+            try {
+                const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+                const user = userCredential.user;
+                
+                await setDoc(doc(db, 'crew', user.uid), {
+                    firstname,
+                    lastname,
+                    email,
+                    role,
+                    createdAt: new Date().toISOString(),
+                    active: true
+                });
+                
+                message.style.color = '#22c55e';
+                message.textContent = 'Compte créé avec succès !';
+                document.getElementById('crewForm').reset();
+                
+                setTimeout(() => auth.signOut(), 2000);
+            } catch (error) {
+                message.style.color = '#ef4444';
+                if (error.code === 'auth/email-already-in-use') {
+                    message.textContent = 'Cet email est déjà utilisé';
+                } else {
+                    message.textContent = 'Erreur: ' + error.message;
+                }
+            }
+        });
+    </script>
+</body>
+</html>
