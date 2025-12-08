@@ -190,6 +190,7 @@ function loadDashboard() {
 function loadProducts() {
     const tbody = document.getElementById('productsTableBody');
     const products = JSON.parse(localStorage.getItem('adminProducts')) || window.products || [];
+    const role = sessionStorage.getItem('userRole');
     
     tbody.innerHTML = products.map(product => `
         <tr>
@@ -199,10 +200,12 @@ function loadProducts() {
             <td>${product.category}</td>
             <td>${product.gender === 'men' ? 'Homme' : 'Femme'}</td>
             <td>
+                ${role === 'customer_support' ? '<span style="color: var(--gray);">Lecture seule</span>' : `
                 <div class="admin-actions">
                     <button class="admin-btn" onclick="editProduct(${product.id})">Modifier</button>
                     <button class="admin-btn admin-btn-delete" onclick="deleteProduct(${product.id})">Supprimer</button>
                 </div>
+                `}
             </td>
         </tr>
     `).join('');
