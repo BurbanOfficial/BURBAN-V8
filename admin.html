@@ -327,6 +327,30 @@
         </div>
     </div>
 
+    <!-- Crew User Modal -->
+    <div class="modal" id="crewUserModal">
+        <div class="modal-content">
+            <span class="modal-close">&times;</span>
+            <h3 id="crewUserModalTitle">Modifier l'utilisateur</h3>
+            <form id="crewUserForm" class="admin-form">
+                <input type="hidden" id="crewUserId">
+                <input type="text" id="crewUserFirstname" placeholder="Prénom" required>
+                <input type="text" id="crewUserLastname" placeholder="Nom" required>
+                <input type="email" id="crewUserEmail" placeholder="Email" required readonly>
+                <select id="crewUserRole" required>
+                    <option value="admin_manager">Admin Manager</option>
+                    <option value="customer_support">Customer Support Agent</option>
+                    <option value="limited_operator">Limited Operator</option>
+                </select>
+                <label style="display: flex; align-items: center; gap: 8px;">
+                    <input type="checkbox" id="crewUserActive" style="width: auto;">
+                    <span>Compte actif</span>
+                </label>
+                <button type="submit" class="btn-primary">Enregistrer</button>
+            </form>
+        </div>
+    </div>
+
     <!-- Client Modal -->
     <div class="modal" id="clientModal">
         <div class="modal-content" style="max-width: 800px; max-height: 90vh; overflow-y: auto;">
