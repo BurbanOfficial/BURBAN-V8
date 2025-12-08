@@ -213,6 +213,12 @@ function loadProducts() {
 
 // Add Product
 document.getElementById('addProductBtn').addEventListener('click', () => {
+    const role = sessionStorage.getItem('userRole');
+    if (role === 'customer_support') {
+        alert('Vous n\'avez pas les permissions pour ajouter des produits');
+        return;
+    }
+    
     document.getElementById('productModalTitle').textContent = 'Ajouter un produit';
     document.getElementById('productForm').reset();
     document.getElementById('productId').value = '';
@@ -252,6 +258,12 @@ document.getElementById('productForm').addEventListener('submit', (e) => {
 });
 
 function editProduct(id) {
+    const role = sessionStorage.getItem('userRole');
+    if (role === 'customer_support') {
+        alert('Vous n\'avez pas les permissions pour modifier les produits');
+        return;
+    }
+    
     const products = JSON.parse(localStorage.getItem('adminProducts')) || window.products || [];
     const product = products.find(p => p.id === id);
     
@@ -271,6 +283,12 @@ function editProduct(id) {
 }
 
 function deleteProduct(id) {
+    const role = sessionStorage.getItem('userRole');
+    if (role === 'customer_support') {
+        alert('Vous n\'avez pas les permissions pour supprimer les produits');
+        return;
+    }
+    
     if (confirm('Êtes-vous sûr de vouloir supprimer ce produit ?')) {
         let products = JSON.parse(localStorage.getItem('adminProducts')) || window.products || [];
         products = products.filter(p => p.id !== id);
