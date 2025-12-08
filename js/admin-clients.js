@@ -19,7 +19,6 @@ async function loadClients() {
 
 function displayClients(clients) {
     const tbody = document.getElementById('clientsTableBody');
-    const role = sessionStorage.getItem('userRole');
     
     tbody.innerHTML = clients.map(client => `
         <tr>
@@ -30,7 +29,7 @@ function displayClients(clients) {
             <td>${client.orders?.length || 0}</td>
             <td>${client.createdAt ? new Date(client.createdAt).toLocaleDateString('fr-FR') : '-'}</td>
             <td>
-                ${role !== 'customer_support' ? `<button class="admin-btn" onclick="editClient('${client.id}')">Modifier</button>` : '<span style="color: var(--gray);">Lecture seule</span>'}
+                <button class="admin-btn" onclick="editClient('${client.id}')">Modifier</button>
             </td>
         </tr>
     `).join('');
@@ -48,12 +47,6 @@ document.getElementById('clientSearch')?.addEventListener('input', (e) => {
 });
 
 async function editClient(clientId) {
-    const role = sessionStorage.getItem('userRole');
-    if (role === 'customer_support') {
-        alert('Vous n\'avez pas les permissions pour modifier les clients');
-        return;
-    }
-    
     try {
         const { doc, getDoc } = window.firebaseModules;
         const clientDoc = await getDoc(doc(window.firebaseDb, 'users', clientId));

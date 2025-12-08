@@ -149,11 +149,12 @@ function applyRolePermissions() {
         document.querySelector('[data-section="users"]').style.display = 'none';
         document.querySelector('[data-section="settings"]').style.display = 'none';
         
-        // Désactiver modifications
-        document.querySelectorAll('.admin-btn-delete, #addProductBtn, #addSizeGuideBtn').forEach(el => el.style.display = 'none');
+        // Désactiver modifications produits
+        document.querySelectorAll('#productsSection .admin-btn-delete, #productsSection .admin-btn, #addProductBtn, #addSizeGuideBtn').forEach(el => el.style.display = 'none');
     } else if (role === 'limited_operator') {
         // Masquer sections
         document.querySelector('[data-section="orders"]').style.display = 'none';
+        document.querySelector('[data-section="clients"]').style.display = 'none';
         document.querySelector('[data-section="users"]').style.display = 'none';
         document.querySelector('[data-section="settings"]').style.display = 'none';
     }
