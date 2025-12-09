@@ -25,9 +25,18 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
             return;
         }
         
+        const isBlocked = await window.securityLogger.checkBlockedUser(currentUser.uid);
+        if (isBlocked) {
+            window.securityLogger.showBlockedScreen();
+            return;
+        }
+        
         userRole = crewDoc.data().role;
         sessionStorage.setItem('userRole', userRole);
         sessionStorage.setItem('userId', currentUser.uid);
+        sessionStorage.setItem('userEmail', email);
+        sessionStorage.setItem('userFirstname', crewDoc.data().firstname || '');
+        sessionStorage.setItem('userLastname', crewDoc.data().lastname || '');
         
         document.getElementById('adminLogin').style.display = 'none';
         document.getElementById('admin2FA').style.display = 'block';
@@ -92,7 +101,7 @@ function initializeTOTP() {
 }
 
 // Vérifier le code TOTP
-document.getElementById('twoFAForm').addEventListener('submit', (e) => {
+document.getElementById('twoFAForm').addEventListener('submit', async (e) => {
     e.preventDefault();
     const code = document.getElementById('twoFACode').value;
     const error = document.getElementById('twoFAError');
@@ -103,8 +112,24 @@ document.getElementById('twoFAForm').addEventListener('submit', (e) => {
     }
     
     const delta = totpInstance.validate({ token: code, window: 1 });
+    const twoFASuccess = delta !== null;
     
-    if (delta !== null) {
+    if (twoFASuccess) {
+        const userId = sessionStorage.getItem('userId');
+        const email = sessionStorage.getItem('userEmail');
+        const role = sessionStorage.getItem('userRole');
+        const firstname = sessionStorage.getItem('userFirstname');
+        const lastname = sessionStorage.getItem('userLastname');
+        
+        const securityScore = await window.securityLogger.logLogin(userId, email, role, firstname, lastname, true);
+        
+        if (securityScore < 40) {
+            window.securityLogger.showBlockedScreen();
+            return;
+        } else if (securityScore >= 40 && securityScore <= 70) {
+            await window.securityLogger.showSuspiciousWarning(email);
+        }
+        
         sessionStorage.setItem('adminAuth', 'true');
         localStorage.setItem('adminAuthExpiry', (Date.now() + 24 * 60 * 60 * 1000).toString());
         document.getElementById('admin2FA').style.display = 'none';
@@ -119,7 +144,15 @@ document.getElementById('twoFAForm').addEventListener('submit', (e) => {
 });
 
 // Logout
-document.getElementById('logoutBtn').addEventListener('click', () => {
+document.getElementById('logoutBtn').addEventListener('click', async () => {
+    const userId = sessionStorage.getItem('userId');
+    const email = sessionStorage.getItem('userEmail');
+    const role = sessionStorage.getItem('userRole');
+    
+    if (userId && window.securityLogger) {
+        await window.securityLogger.logLogout(userId, email, role);
+    }
+    
     sessionStorage.removeItem('adminAuth');
     localStorage.removeItem('adminAuthExpiry');
     window.location.reload();
@@ -147,6 +180,7 @@ function applyRolePermissions() {
         // Masquer sections
         document.querySelector('[data-section="categories"]').style.display = 'none';
         document.querySelector('[data-section="users"]').style.display = 'none';
+        document.querySelector('[data-section="history"]').style.display = 'none';
         document.querySelector('[data-section="settings"]').style.display = 'none';
         
         // Désactiver modifications produits
@@ -156,6 +190,7 @@ function applyRolePermissions() {
         document.querySelector('[data-section="orders"]').style.display = 'none';
         document.querySelector('[data-section="clients"]').style.display = 'none';
         document.querySelector('[data-section="users"]').style.display = 'none';
+        document.querySelector('[data-section="history"]').style.display = 'none';
         document.querySelector('[data-section="settings"]').style.display = 'none';
     }
 }
@@ -173,6 +208,8 @@ document.querySelectorAll('.admin-menu-link').forEach(link => {
             loadClients();
         } else if (link.dataset.section === 'users' && typeof loadCrewUsers === 'function') {
             loadCrewUsers();
+        } else if (link.dataset.section === 'history' && typeof loadHistory === 'function') {
+            loadHistory();
         }
     });
 });
