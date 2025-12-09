@@ -155,32 +155,11 @@ document.getElementById('orderForm')?.addEventListener('submit', async (e) => {
     const status = document.getElementById('orderStatus').value;
     
     try {
-        const { doc, updateDoc, getDoc } = window.firebaseModules;
-        const orderDoc = await getDoc(doc(window.firebaseDb, 'orders', orderNumber));
-        const order = orderDoc.data();
-        
+        const { doc, updateDoc } = window.firebaseModules;
         await updateDoc(doc(window.firebaseDb, 'orders', orderNumber), {
             trackingUrl,
             status
         });
-        
-        // Envoyer email selon le statut
-        const customerName = `${order.shippingAddress.firstName} ${order.shippingAddress.lastName}`;
-        
-        if (status === 'shipped' && window.mailrelay) {
-            await window.mailrelay.sendOrderShipped({
-                email: order.userEmail,
-                customerName: customerName,
-                orderNumber: orderNumber,
-                trackingUrl: trackingUrl
-            });
-        } else if (status === 'delivered' && window.mailrelay) {
-            await window.mailrelay.sendOrderDelivered({
-                email: order.userEmail,
-                customerName: customerName,
-                orderNumber: orderNumber
-            });
-        }
         
         document.getElementById('orderModal').classList.remove('active');
         setTimeout(() => loadOrders(), 500);
