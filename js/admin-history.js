@@ -83,8 +83,17 @@ async function viewHistoryDetails(entryId) {
     document.getElementById('detailSecurityScore').textContent = `${entry.securityScore} - ${securityLevel.label}`;
     document.getElementById('detailSecurityScore').style.color = securityLevel.color;
     
+    const { doc, getDoc } = window.firebaseModules;
+    const blockedDoc = await getDoc(doc(window.firebaseDb, 'blocked_users', entry.userId));
+    const isBlocked = blockedDoc.exists();
+    
     document.getElementById('blockUserBtn').setAttribute('data-user-id', entry.userId);
     document.getElementById('blockUserBtn').setAttribute('data-email', entry.email);
+    document.getElementById('blockUserBtn').style.display = isBlocked ? 'none' : 'block';
+    
+    document.getElementById('unblockUserBtn').setAttribute('data-user-id', entry.userId);
+    document.getElementById('unblockUserBtn').setAttribute('data-email', entry.email);
+    document.getElementById('unblockUserBtn').style.display = isBlocked ? 'block' : 'none';
     
     document.getElementById('historyDetailModal').classList.add('active');
 }
@@ -108,6 +117,24 @@ document.getElementById('blockUserBtn')?.addEventListener('click', async functio
     } catch (error) {
         console.error('Erreur:', error);
         alert('Erreur lors du blocage');
+    }
+});
+
+document.getElementById('unblockUserBtn')?.addEventListener('click', async function() {
+    const userId = this.getAttribute('data-user-id');
+    const email = this.getAttribute('data-email');
+    
+    if (!confirm(`Débloquer l'accès de ${email} ?`)) return;
+    
+    try {
+        const { doc, deleteDoc } = window.firebaseModules;
+        await deleteDoc(doc(window.firebaseDb, 'blocked_users', userId));
+        
+        alert('Utilisateur débloqué avec succès');
+        document.getElementById('historyDetailModal').classList.remove('active');
+    } catch (error) {
+        console.error('Erreur:', error);
+        alert('Erreur lors du déblocage');
     }
 });
 

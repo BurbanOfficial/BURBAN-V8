@@ -158,6 +158,29 @@ document.getElementById('logoutBtn').addEventListener('click', async () => {
     window.location.reload();
 });
 
+// Logger la déconnexion lors de la fermeture de l'onglet
+window.addEventListener('beforeunload', () => {
+    const userId = sessionStorage.getItem('userId');
+    const email = sessionStorage.getItem('userEmail');
+    const role = sessionStorage.getItem('userRole');
+    
+    if (userId && sessionStorage.getItem('adminAuth') === 'true' && window.securityLogger) {
+        navigator.sendBeacon(
+            'https://firestore.googleapis.com/v1/projects/burban-fidelity/databases/(default)/documents/login_history',
+            JSON.stringify({
+                fields: {
+                    userId: { stringValue: userId },
+                    email: { stringValue: email },
+                    role: { stringValue: role },
+                    timestamp: { stringValue: new Date().toISOString() },
+                    event: { stringValue: 'logout' },
+                    securityScore: { integerValue: 100 }
+                }
+            })
+        );
+    }
+});
+
 // Check auth on load
 const authExpiry = localStorage.getItem('adminAuthExpiry');
 if (sessionStorage.getItem('adminAuth') === 'true' && authExpiry && Date.now() < parseInt(authExpiry)) {
