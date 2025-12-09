@@ -54,6 +54,16 @@ input:focus, textarea:focus {
     border-color: var(--black);
 }
 
+input[type="checkbox"],
+input[type="radio"] {
+    accent-color: var(--black);
+}
+
+select:focus {
+    border-color: var(--black);
+    outline: none;
+}
+
 /* Layout */
 .container {
     max-width: 1200px;
