@@ -41,6 +41,7 @@
         </div>
     </footer>
 
+    <script src="js/mailrelay.js"></script>
     <script type="module">
         import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
         import { getAuth, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
@@ -155,6 +156,18 @@
                     points: newPoints,
                     pointsHistory: arrayUnion(...updates),
                     orders: arrayUnion(orderNumber)
+                });
+                
+                // Envoyer email de confirmation
+                const customerEmail = tempOrder.shippingAddress.email || user.email;
+                await window.mailrelay.sendOrderConfirmation({
+                    email: customerEmail,
+                    customerName: `${tempOrder.shippingAddress.firstName} ${tempOrder.shippingAddress.lastName}`,
+                    orderNumber: orderNumber,
+                    orderDate: new Date().toLocaleDateString('fr-FR'),
+                    items: tempOrder.items,
+                    total: tempOrder.total,
+                    shippingAddress: tempOrder.shippingAddress
                 });
                 
                 // Supprimer la commande temporaire
