@@ -213,6 +213,17 @@
                     <div class="admin-header">
                         <h2>Historique des connexions</h2>
                     </div>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr 200px 200px; gap: 12px; margin-bottom: 24px;">
+                        <input type="text" id="historySearch" placeholder="Rechercher (nom, prénom, email)" style="padding: 12px; border: 1px solid var(--border);">
+                        <select id="historyRoleFilter" style="padding: 12px; border: 1px solid var(--border);">
+                            <option value="">Tous les rôles</option>
+                            <option value="admin_manager">Admin Manager</option>
+                            <option value="customer_support">Support Client</option>
+                            <option value="limited_operator">Opérateur</option>
+                        </select>
+                        <input type="datetime-local" id="historyDateFrom" placeholder="Date début" style="padding: 12px; border: 1px solid var(--border);">
+                        <input type="datetime-local" id="historyDateTo" placeholder="Date fin" style="padding: 12px; border: 1px solid var(--border);">
+                    </div>
                     <div class="admin-table">
                         <table>
                             <thead>
