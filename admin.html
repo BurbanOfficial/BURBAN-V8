@@ -67,6 +67,7 @@
                 <a href="#" class="admin-menu-link" data-section="orders">Commandes</a>
                 <a href="#" class="admin-menu-link" data-section="clients">Clients</a>
                 <a href="#" class="admin-menu-link" data-section="users">Utilisateurs</a>
+                <a href="#" class="admin-menu-link" data-section="history">Historique</a>
                 <a href="#" class="admin-menu-link" data-section="settings">Paramètres</a>
             </aside>
 
@@ -207,6 +208,28 @@
                     </div>
                 </div>
 
+                <!-- History Section -->
+                <div class="admin-section" id="historySection">
+                    <div class="admin-header">
+                        <h2>Historique des connexions</h2>
+                    </div>
+                    <div class="admin-table">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Utilisateur</th>
+                                    <th>Email</th>
+                                    <th>Rôle</th>
+                                    <th>Date/Heure</th>
+                                    <th>Sécurité</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="historyTableBody"></tbody>
+                        </table>
+                    </div>
+                </div>
+
                 <!-- Users Section -->
                 <div class="admin-section" id="usersSection">
                     <div class="admin-header">
@@ -327,6 +350,29 @@
         </div>
     </div>
 
+    <!-- History Detail Modal -->
+    <div class="modal" id="historyDetailModal">
+        <div class="modal-content" style="max-width: 700px;">
+            <span class="modal-close">&times;</span>
+            <h3>Détails de la connexion</h3>
+            <div style="display: grid; gap: 16px; margin: 24px 0;">
+                <div style="display: grid; grid-template-columns: 150px 1fr; gap: 8px;">
+                    <strong>User ID:</strong><span id="detailUserId"></span>
+                    <strong>Email:</strong><span id="detailEmail"></span>
+                    <strong>Rôle:</strong><span id="detailRole"></span>
+                    <strong>Timestamp:</strong><span id="detailTimestamp"></span>
+                    <strong>IP:</strong><span id="detailIP"></span>
+                    <strong>Localisation:</strong><span id="detailLocation"></span>
+                    <strong>2FA:</strong><span id="detail2FA"></span>
+                    <strong>Session ID:</strong><span id="detailSessionId"></span>
+                    <strong>Évènement:</strong><span id="detailEvent"></span>
+                    <strong>Score sécurité:</strong><span id="detailSecurityScore"></span>
+                </div>
+            </div>
+            <button class="btn-primary" id="blockUserBtn" style="background: #ef4444; margin-top: 16px;">Bloquer l'utilisateur</button>
+        </div>
+    </div>
+
     <!-- Crew User Modal -->
     <div class="modal" id="crewUserModal">
         <div class="modal-content">
@@ -408,7 +454,7 @@
 
     <script type="module">
         import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
-        import { getFirestore, doc, getDoc, setDoc, deleteDoc, arrayUnion, updateDoc, deleteField, collection, getDocs } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+        import { getFirestore, doc, getDoc, setDoc, deleteDoc, arrayUnion, updateDoc, deleteField, collection, getDocs, query, orderBy } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
         
         const firebaseConfig = {
             apiKey: "AIzaSyDb4AOtRT7jGENnLZ2KNwpczaG2Z77G2rc",
@@ -418,14 +464,16 @@
         
         const app = initializeApp(firebaseConfig);
         window.firebaseDb = getFirestore(app);
-        window.firebaseModules = { doc, getDoc, setDoc, deleteDoc, arrayUnion, updateDoc, deleteField, collection, getDocs };
+        window.firebaseModules = { doc, getDoc, setDoc, deleteDoc, arrayUnion, updateDoc, deleteField, collection, getDocs, query, orderBy };
         window.firebaseReady = true;
     </script>
+    <script src="js/security-logger.js"></script>
     <script src="js/admin.js"></script>
     <script src="js/admin-functions.js"></script>
     <script src="js/admin-orders.js"></script>
     <script src="js/admin-clients.js"></script>
     <script src="js/admin-crew.js"></script>
+    <script src="js/admin-history.js"></script>
     <script src="js/email-service.js"></script>
     <script>
         // Toggle promo fields
