@@ -22,6 +22,39 @@ async function loadHistory() {
     }
 }
 
+function applyFilters() {
+    const search = document.getElementById('historySearch')?.value.toLowerCase() || '';
+    const roleFilter = document.getElementById('historyRoleFilter')?.value || '';
+    const dateFrom = document.getElementById('historyDateFrom')?.value || '';
+    const dateTo = document.getElementById('historyDateTo')?.value || '';
+    
+    let filtered = allHistory;
+    
+    if (search) {
+        filtered = filtered.filter(entry => 
+            (entry.firstname?.toLowerCase().includes(search)) ||
+            (entry.lastname?.toLowerCase().includes(search)) ||
+            (entry.email?.toLowerCase().includes(search))
+        );
+    }
+    
+    if (roleFilter) {
+        filtered = filtered.filter(entry => entry.role === roleFilter);
+    }
+    
+    if (dateFrom) {
+        const fromDate = new Date(dateFrom);
+        filtered = filtered.filter(entry => new Date(entry.timestamp) >= fromDate);
+    }
+    
+    if (dateTo) {
+        const toDate = new Date(dateTo);
+        filtered = filtered.filter(entry => new Date(entry.timestamp) <= toDate);
+    }
+    
+    displayHistory(filtered);
+}
+
 function displayHistory(history) {
     const tbody = document.getElementById('historyTableBody');
     
@@ -141,6 +174,11 @@ document.getElementById('unblockUserBtn')?.addEventListener('click', async funct
 document.querySelector('#historyDetailModal .modal-close')?.addEventListener('click', () => {
     document.getElementById('historyDetailModal').classList.remove('active');
 });
+
+document.getElementById('historySearch')?.addEventListener('input', applyFilters);
+document.getElementById('historyRoleFilter')?.addEventListener('change', applyFilters);
+document.getElementById('historyDateFrom')?.addEventListener('change', applyFilters);
+document.getElementById('historyDateTo')?.addEventListener('change', applyFilters);
 
 window.viewHistoryDetails = viewHistoryDetails;
 window.loadHistory = loadHistory;

@@ -131,7 +131,7 @@ document.getElementById('twoFAForm').addEventListener('submit', async (e) => {
         }
         
         sessionStorage.setItem('adminAuth', 'true');
-        localStorage.setItem('adminAuthExpiry', (Date.now() + 24 * 60 * 60 * 1000).toString());
+        localStorage.setItem('adminAuthExpiry', (Date.now() + 365 * 24 * 60 * 60 * 1000).toString());
         document.getElementById('admin2FA').style.display = 'none';
         document.getElementById('adminDashboard').style.display = 'block';
         applyRolePermissions();
@@ -159,25 +159,30 @@ document.getElementById('logoutBtn').addEventListener('click', async () => {
 });
 
 // Logger la déconnexion lors de la fermeture de l'onglet
-window.addEventListener('beforeunload', () => {
+window.addEventListener('beforeunload', (e) => {
     const userId = sessionStorage.getItem('userId');
     const email = sessionStorage.getItem('userEmail');
     const role = sessionStorage.getItem('userRole');
     
-    if (userId && sessionStorage.getItem('adminAuth') === 'true' && window.securityLogger) {
-        navigator.sendBeacon(
-            'https://firestore.googleapis.com/v1/projects/burban-fidelity/databases/(default)/documents/login_history',
-            JSON.stringify({
-                fields: {
-                    userId: { stringValue: userId },
-                    email: { stringValue: email },
-                    role: { stringValue: role },
-                    timestamp: { stringValue: new Date().toISOString() },
-                    event: { stringValue: 'logout' },
-                    securityScore: { integerValue: 100 }
-                }
-            })
-        );
+    if (userId && sessionStorage.getItem('adminAuth') === 'true') {
+        e.preventDefault();
+        e.returnValue = '';
+        
+        if (window.securityLogger) {
+            navigator.sendBeacon(
+                'https://firestore.googleapis.com/v1/projects/burban-fidelity/databases/(default)/documents/login_history',
+                JSON.stringify({
+                    fields: {
+                        userId: { stringValue: userId },
+                        email: { stringValue: email },
+                        role: { stringValue: role },
+                        timestamp: { stringValue: new Date().toISOString() },
+                        event: { stringValue: 'logout' },
+                        securityScore: { integerValue: 100 }
+                    }
+                })
+            );
+        }
     }
 });
 
