@@ -121,7 +121,7 @@ async function viewOrderDetails(orderNumber) {
             <h4 style="margin: 24px 0 12px;">Articles</h4>
             ${order.items.map(item => `
                 <div style="display: flex; justify-content: space-between; padding: 12px; border: 1px solid var(--border); margin-bottom: 8px;">
-                    <span>${item.name} - Taille ${item.size} x${item.quantity}</span>
+                    <span>${item.name}${item.color ? ` - <span style="display: inline-block; width: 12px; height: 12px; background: ${item.color}; border: 1px solid #ddd; border-radius: 2px; vertical-align: middle;"></span>` : ''} - Taille ${item.size} x${item.quantity}</span>
                     <span>${(item.price * item.quantity).toFixed(2)} €</span>
                 </div>
             `).join('')}
