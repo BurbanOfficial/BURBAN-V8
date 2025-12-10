@@ -189,13 +189,13 @@ function loadProducts() {
         let rowColor = '';
         if (product.stockByVariant) {
             const stocks = Object.values(product.stockByVariant);
-            const allZero = stocks.every(s => s === 0);
+            const allZero = stocks.length > 0 && stocks.every(s => s === 0);
             const someZero = stocks.some(s => s === 0);
             
             if (allZero) {
-                rowColor = 'background: #fee2e2;';
+                rowColor = ' background: #fee2e2;';
             } else if (someZero) {
-                rowColor = 'background: #fed7aa;';
+                rowColor = ' background: #fed7aa;';
             }
         }
         
