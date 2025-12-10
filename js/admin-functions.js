@@ -186,8 +186,21 @@ function loadProducts() {
         const isVisible = visibleProducts.includes(product);
         const stockText = 'Variantes';
         
+        let rowColor = '';
+        if (product.stockByVariant) {
+            const stocks = Object.values(product.stockByVariant);
+            const allZero = stocks.every(s => s === 0);
+            const someZero = stocks.some(s => s === 0);
+            
+            if (allZero) {
+                rowColor = 'background: #fee2e2;';
+            } else if (someZero) {
+                rowColor = 'background: #fed7aa;';
+            }
+        }
+        
         return `
-            <tr style="${!isVisible ? 'opacity: 0.5;' : ''}">
+            <tr style="${!isVisible ? 'opacity: 0.5;' : ''}${rowColor}">
                 <td><img src="${product.image || product.images?.[0]}" alt="${product.name}"></td>
                 <td>${product.name}${!isVisible ? ' <small>(Non publié)</small>' : ''}</td>
                 <td>${product.price.toFixed(2)} €</td>
