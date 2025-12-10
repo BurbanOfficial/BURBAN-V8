@@ -190,10 +190,16 @@ app.post('/send-mailrelay-email', (req, res) => {
     const { email, orderData } = req.body;
     
     const postData = JSON.stringify({
-        from: 'noreply@burbanofficial.com',
-        to: email,
+        from: {
+            email: 'noreply@burbanofficial.com',
+            name: 'Burban Official'
+        },
+        to: [{
+            email: email,
+            name: orderData.customerName
+        }],
         subject: `Confirmation de commande ${orderData.orderNumber}`,
-        html: `
+        html_part: `
             <h1>Commande ${orderData.orderNumber}</h1>
             <p>Bonjour ${orderData.customerName},</p>
             <p>Votre commande a été confirmée.</p>
