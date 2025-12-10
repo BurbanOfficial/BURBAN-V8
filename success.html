@@ -163,12 +163,28 @@
                 // Vider le panier
                 localStorage.removeItem('cart');
                 
+                // Envoyer email de confirmation
+                const customerEmail = tempOrder.shippingAddress.email || user.email;
+                const customerName = `${tempOrder.shippingAddress.firstName} ${tempOrder.shippingAddress.lastName}`;
+                
+                if (window.mailrelayService) {
+                    await window.mailrelayService.sendOrderConfirmationEmail(customerEmail, {
+                        customerName: customerName,
+                        orderNumber: orderNumber,
+                        orderDate: new Date().toLocaleDateString('fr-FR'),
+                        items: tempOrder.items,
+                        total: tempOrder.total,
+                        shippingAddress: tempOrder.shippingAddress
+                    });
+                }
+                
                 console.log('Commande finalisée:', orderNumber);
             } catch (error) {
                 console.error('Erreur mise à jour points:', error);
             }
         });
     </script>
+    <script src="js/mailrelay-service.js"></script>
     <script src="js/app.js"></script>
 </body>
 </html>
