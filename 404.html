@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>404 - Page non trouvée | BURBAN</title>
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        .error-container {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 20px;
+        }
+        .error-code {
+            font-size: 120px;
+            font-weight: 300;
+            margin: 0;
+            line-height: 1;
+        }
+        .error-message {
+            font-size: 24px;
+            font-weight: 300;
+            margin: 20px 0;
+            color: var(--gray);
+        }
+        .error-text {
+            font-size: 16px;
+            color: var(--gray);
+            margin-bottom: 40px;
+        }
+        @media (max-width: 768px) {
+            .error-code {
+                font-size: 80px;
+            }
+            .error-message {
+                font-size: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- USP Bar -->
+    <div class="usp-bar">
+        <div class="usp-container">
+            <div class="usp-item">
+                <span>✓</span> Retour sous 30 jours
+            </div>
+            <div class="usp-item">
+                <span>✓</span> Livraison gratuite dès 50€
+            </div>
+            <div class="usp-item">
+                <span>✓</span> Paiement sécurisé
+            </div>
+        </div>
+    </div>
+
+    <!-- Navigation -->
+    <nav class="nav">
+        <div class="nav-container">
+            <a href="index.html" class="logo"><img src="https://i.imgur.com/Kl9kTBg.png" alt="BURBAN"></a>
+            <button class="hamburger">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                    <line class="line line1" x1="3" y1="6" x2="21" y2="6"/>
+                    <line class="line line2" x1="3" y1="12" x2="21" y2="12"/>
+                    <line class="line line3" x1="3" y1="18" x2="21" y2="18"/>
+                </svg>
+            </button>
+            <div class="nav-links">
+                <a href="products.html?category=men" data-text="Men"><span class="link-text">Men</span></a>
+                <a href="products.html?category=women" data-text="Women"><span class="link-text">Women</span></a>
+                <a href="contact.html" data-text="Contact Us"><span class="link-text">Contact Us</span></a>
+                <span class="nav-separator"></span>
+                <button class="search-btn" id="searchBtn">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="11" cy="11" r="8"/>
+                        <path d="m21 21-4.35-4.35"/>
+                    </svg>
+                </button>
+                <a href="account.html" id="accountLink" data-text="Account"><span class="link-text">Account</span></a>
+                <a href="cart.html" class="cart-link" data-text="Cart"><span class="link-text">Cart</span> <span class="cart-count">0</span></a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Error Content -->
+    <div class="error-container">
+        <h1 class="error-code">404</h1>
+        <p class="error-message">Page non trouvée</p>
+        <p class="error-text">La page que vous recherchez n'existe pas ou a été déplacée.</p>
+        <a href="index.html" class="btn-primary">Retour à l'accueil</a>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-col">
+                    <h3>BURBAN</h3>
+                    <p>Streetwear minimaliste</p>
+                </div>
+                <div class="footer-col">
+                    <h4>Liens</h4>
+                    <a href="products.html">Collection</a>
+                    <a href="#">À propos</a>
+                    <a href="#">Contact</a>
+                </div>
+                <div class="footer-col">
+                    <h4>Légal</h4>
+                    <a href="#">CGV</a>
+                    <a href="#">Mentions légales</a>
+                    <a href="#">Confidentialité</a>
+                </div>
+            </div>
+            <p class="footer-copy">&copy; 2024 BURBAN. Tous droits réservés.</p>
+        </div>
+    </footer>
+
+    <!-- Search Modal -->
+    <div class="search-modal" id="searchModal">
+        <div class="search-modal-content">
+            <button class="search-close" id="searchClose">&times;</button>
+            <input type="text" id="searchInput" placeholder="Rechercher un produit...">
+            <div id="searchResults"></div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+        import { getFirestore } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+        
+        const firebaseConfig = {
+            apiKey: "AIzaSyDb4AOtRT7jGENnLZ2KNwpczaG2Z77G2rc",
+            authDomain: "burban-fidelity.firebaseapp.com",
+            projectId: "burban-fidelity"
+        };
+        
+        const app = initializeApp(firebaseConfig);
+        window.firebaseDb = getFirestore(app);
+        window.firebaseReady = true;
+    </script>
+    <script src="js/app.js"></script>
+    <script src="js/search.js"></script>
+</body>
+</html>
