@@ -160,6 +160,9 @@
                 // Supprimer la commande temporaire
                 await setDoc(doc(db, 'temp_orders', tempOrderId), { deleted: true }, { merge: true });
                 
+                // Vider le panier
+                localStorage.removeItem('cart');
+                
                 console.log('Commande finalisée:', orderNumber);
             } catch (error) {
                 console.error('Erreur mise à jour points:', error);

@@ -142,4 +142,19 @@ const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
     console.log(`Serveur Stripe démarré sur le port ${PORT}`);
     console.log(`URL: http://localhost:${PORT}`);
+    
+    // Self-ping toutes les minutes pour éviter l'inactivité
+    setInterval(() => {
+        const https = require('https');
+        https.get('https://burban-v8.onrender.com/health', (res) => {
+            console.log(`Self-ping: ${res.statusCode}`);
+        }).on('error', (err) => {
+            console.error('Erreur self-ping:', err.message);
+        });
+    }, 60 * 1000);
+});
+
+// Endpoint health check
+app.get('/health', (req, res) => {
+    res.status(200).json({ status: 'ok', timestamp: new Date().toISOString() });
 });
