@@ -182,6 +182,9 @@ function loadProducts() {
         return true;
     });
     
+    let hasOrange = false;
+    let hasRed = false;
+    
     tbody.innerHTML = products.map(product => {
         const isVisible = visibleProducts.includes(product);
         const stockText = 'Variantes';
@@ -194,8 +197,10 @@ function loadProducts() {
             
             if (allZero) {
                 rowColor = ' background: #fee2e2;';
+                hasRed = true;
             } else if (someZero) {
                 rowColor = ' background: #fed7aa;';
+                hasOrange = true;
             }
         }
         
@@ -217,6 +222,29 @@ function loadProducts() {
             </tr>
         `;
     }).join('');
+    
+    // Mettre à jour l'indicateur de stock
+    updateStockIndicator(hasRed, hasOrange);
+}
+
+function updateStockIndicator(hasRed, hasOrange) {
+    const productsLink = document.querySelector('[data-section="products"]');
+    if (!productsLink) return;
+    
+    const existingIndicator = productsLink.querySelector('.stock-indicator-icon');
+    if (existingIndicator) existingIndicator.remove();
+    
+    if (hasRed || hasOrange) {
+        const color = hasRed ? '#ef4444' : '#f59e0b';
+        const indicator = document.createElement('span');
+        indicator.className = 'stock-indicator-icon';
+        indicator.innerHTML = `
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="${color}" style="vertical-align: middle; margin-left: 8px;">
+                <path d="M12 2L1 21h22L12 2zm0 4l8.5 15h-17L12 6zm-1 5v4h2v-4h-2zm0 6v2h2v-2h-2z"/>
+            </svg>
+        `;
+        productsLink.appendChild(indicator);
+    }
 }
 
 function editProduct(id) {
