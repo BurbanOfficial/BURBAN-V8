@@ -466,7 +466,7 @@ function loadStockVariants(product) {
         
         sizes.forEach(size => {
             const key = `${color}-${size}`;
-            const stock = stockByVariant[key] || 10;
+            const stock = stockByVariant.hasOwnProperty(key) ? stockByVariant[key] : 10;
             html += `
                 <div style="display: flex; gap: 8px; align-items: center; margin-bottom: 8px;">
                     <label style="width: 60px; font-size: 14px;">${size}:</label>
@@ -483,7 +483,8 @@ function saveStockVariants(colors, sizes) {
     const stockByVariant = {};
     document.querySelectorAll('.variant-stock').forEach(input => {
         const key = input.dataset.variant;
-        stockByVariant[key] = parseInt(input.value) || 0;
+        const value = input.value.trim();
+        stockByVariant[key] = value === '' ? 0 : parseInt(value);
     });
     return stockByVariant;
 }
