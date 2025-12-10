@@ -2,7 +2,6 @@ const express = require('express');
 const stripe = require('stripe')('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');
 const cors = require('cors');
 const https = require('https');
-const fetch = require('node-fetch');
 
 const app = express();
 
@@ -161,42 +160,57 @@ app.get('/health', (req, res) => {
 });
 
 // Proxy Mailrelay
-app.post('/send-mailrelay-email', async (req, res) => {
-    try {
-        const { email, orderData } = req.body;
-        
-        const response = await fetch('https://burbanofficial.ipzmarketing.com/ccm/admin/api/version/2/send_emails', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-AUTH-TOKEN': 'fxZ5kwQ_gVfaAqpYTS2qNfox7vsiGrkzyzdyy_Wd'
-            },
-            body: JSON.stringify({
-                template_id: 1,
-                recipients: [email],
-                subject: `Confirmation de commande ${orderData.orderNumber}`,
-                variables: {
-                    customerName: orderData.customerName,
-                    orderNumber: orderData.orderNumber,
-                    orderDate: orderData.orderDate,
-                    items: orderData.items.map(item => 
-                        `${item.name} - Taille ${item.size} x${item.quantity} - ${(item.price * item.quantity).toFixed(2)} €`
-                    ).join('\n'),
-                    total: orderData.total.toFixed(2),
-                    shippingFirstName: orderData.shippingAddress.firstName,
-                    shippingLastName: orderData.shippingAddress.lastName,
-                    shippingAddress: orderData.shippingAddress.address,
-                    shippingPostal: orderData.shippingAddress.postal,
-                    shippingCity: orderData.shippingAddress.city,
-                    shippingCountry: orderData.shippingAddress.country
-                }
-            })
+app.post('/send-mailrelay-email', (req, res) => {
+    const { email, orderData } = req.body;
+    
+    const postData = JSON.stringify({
+        template_id: 1,
+        recipients: [email],
+        subject: `Confirmation de commande ${orderData.orderNumber}`,
+        variables: {
+            customerName: orderData.customerName,
+            orderNumber: orderData.orderNumber,
+            orderDate: orderData.orderDate,
+            items: orderData.items.map(item => 
+                `${item.name} - Taille ${item.size} x${item.quantity} - ${(item.price * item.quantity).toFixed(2)} €`
+            ).join('\n'),
+            total: orderData.total.toFixed(2),
+            shippingFirstName: orderData.shippingAddress.firstName,
+            shippingLastName: orderData.shippingAddress.lastName,
+            shippingAddress: orderData.shippingAddress.address,
+            shippingPostal: orderData.shippingAddress.postal,
+            shippingCity: orderData.shippingAddress.city,
+            shippingCountry: orderData.shippingAddress.country
+        }
+    });
+    
+    const options = {
+        hostname: 'burbanofficial.ipzmarketing.com',
+        path: '/ccm/admin/api/version/2/send_emails',
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-AUTH-TOKEN': 'fxZ5kwQ_gVfaAqpYTS2qNfox7vsiGrkzyzdyy_Wd',
+            'Content-Length': Buffer.byteLength(postData)
+        }
+    };
+    
+    const mailreq = https.request(options, (mailres) => {
+        let data = '';
+        mailres.on('data', chunk => data += chunk);
+        mailres.on('end', () => {
+            try {
+                res.json({ success: true, data: JSON.parse(data) });
+            } catch (e) {
+                res.json({ success: true, data: data });
+            }
         });
-        
-        const result = await response.json();
-        res.json({ success: true, data: result });
-    } catch (error) {
-        console.error('Erreur Mailrelay:', error);
+    });
+    
+    mailreq.on('error', (error) => {
         res.status(500).json({ success: false, error: error.message });
-    }
+    });
+    
+    mailreq.write(postData);
+    mailreq.end();
 });
