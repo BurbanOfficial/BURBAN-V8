@@ -20,6 +20,21 @@
         </div>
     </div>
 
+    <!-- USP Bar -->
+    <div class="usp-bar">
+        <div class="usp-container">
+            <div class="usp-item">
+                <span>✓</span> Retour sous 30 jours
+            </div>
+            <div class="usp-item">
+                <span>✓</span> Livraison gratuite dès 50€
+            </div>
+            <div class="usp-item">
+                <span>✓</span> Paiement sécurisé
+            </div>
+        </div>
+    </div>
+
     <nav class="nav">
         <div class="nav-container">
             <a href="index.html" class="logo"><img src="https://i.imgur.com/Kl9kTBg.png" alt="BURBAN"></a>
@@ -35,6 +50,12 @@
                 <a href="products.html?category=women" data-text="Women"><span class="link-text">Women</span></a>
                 <a href="contact.html" data-text="Contact Us"><span class="link-text">Contact Us</span></a>
                 <span class="nav-separator"></span>
+                <button class="search-btn" id="searchBtn">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="11" cy="11" r="8"/>
+                        <path d="m21 21-4.35-4.35"/>
+                    </svg>
+                </button>
                 <a href="account.html" id="accountLink" data-text="Account"><span class="link-text">Account</span></a>
                 <a href="cart.html" class="cart-link" data-text="Cart"><span class="link-text">Cart</span> <span class="cart-count">0</span></a>
             </div>
@@ -102,8 +123,18 @@
         </div>
     </footer>
 
+    <!-- Search Modal -->
+    <div class="search-modal" id="searchModal">
+        <div class="search-modal-content">
+            <button class="search-close" id="searchClose">&times;</button>
+            <input type="text" id="searchInput" placeholder="Rechercher un produit..." autofocus>
+            <div id="searchResults"></div>
+        </div>
+    </div>
+
     <script src="js/loader.js"></script>
     <script src="js/app.js"></script>
     <script src="js/contact.js"></script>
+    <script src="js/search.js"></script>
 </body>
 </html>
