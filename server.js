@@ -190,24 +190,26 @@ app.post('/send-mailrelay-email', (req, res) => {
     const { email, orderData } = req.body;
     
     const postData = JSON.stringify({
-        template_id: 1,
-        recipients: [email],
+        from: 'noreply@burbanofficial.com',
+        to: email,
         subject: `Confirmation de commande ${orderData.orderNumber}`,
-        variables: {
-            customerName: orderData.customerName,
-            orderNumber: orderData.orderNumber,
-            orderDate: orderData.orderDate,
-            items: orderData.items.map(item => 
-                `${item.name} - Taille ${item.size} x${item.quantity} - ${(item.price * item.quantity).toFixed(2)} €`
-            ).join('\n'),
-            total: orderData.total.toFixed(2),
-            shippingFirstName: orderData.shippingAddress.firstName,
-            shippingLastName: orderData.shippingAddress.lastName,
-            shippingAddress: orderData.shippingAddress.address,
-            shippingPostal: orderData.shippingAddress.postal,
-            shippingCity: orderData.shippingAddress.city,
-            shippingCountry: orderData.shippingAddress.country
-        }
+        html: `
+            <h1>Commande ${orderData.orderNumber}</h1>
+            <p>Bonjour ${orderData.customerName},</p>
+            <p>Votre commande a été confirmée.</p>
+            <h2>Détails:</h2>
+            <ul>
+                ${orderData.items.map(item => 
+                    `<li>${item.name} - Taille ${item.size} x${item.quantity} - ${(item.price * item.quantity).toFixed(2)} €</li>`
+                ).join('')}
+            </ul>
+            <p><strong>Total: ${orderData.total.toFixed(2)} €</strong></p>
+            <p>Adresse de livraison:<br>
+            ${orderData.shippingAddress.firstName} ${orderData.shippingAddress.lastName}<br>
+            ${orderData.shippingAddress.address}<br>
+            ${orderData.shippingAddress.postal} ${orderData.shippingAddress.city}<br>
+            ${orderData.shippingAddress.country}</p>
+        `
     });
     
     const options = {
