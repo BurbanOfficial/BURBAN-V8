@@ -387,7 +387,7 @@ select:focus {
     justify-content: center;
     text-align: center;
     background: var(--light-gray);
-    margin-top: 93px;
+    padding-top: 125px;
 }
 
 .hero-title {
@@ -408,7 +408,7 @@ select:focus {
 /* Products Grid */
 .featured, .products-page {
     padding: 80px 0;
-    margin-top: 93px;
+    padding-top: 125px;
 }
 
 .section-title {
@@ -489,7 +489,7 @@ select:focus {
 
 /* Product Detail */
 .product-detail {
-    padding: 120px 0 80px;
+    padding: 180px 0 80px;
 }
 
 .product-layout {
@@ -793,7 +793,7 @@ select:focus {
 
 /* Cart */
 .cart-page {
-    padding: 120px 0 80px;
+    padding: 180px 0 80px;
     min-height: 70vh;
 }
 
@@ -881,7 +881,7 @@ select:focus {
     padding: 32px;
     height: fit-content;
     position: sticky;
-    top: 100px;
+    top: 125px;
 }
 
 .cart-summary h3 {
@@ -925,7 +925,7 @@ select:focus {
 
 /* Account */
 .auth-section {
-    padding: 120px 0 80px;
+    padding: 180px 0 80px;
     min-height: 70vh;
 }
 
@@ -971,7 +971,7 @@ select:focus {
 }
 
 .account-section {
-    padding: 120px 0 80px;
+    padding: 125px 0 80px;
 }
 
 .account-layout {
@@ -1247,7 +1247,7 @@ body.modal-open {
 
 /* Checkout */
 .checkout-page {
-    padding: 120px 0 80px;
+    padding: 180px 0 80px;
 }
 
 .checkout-layout {
@@ -1399,7 +1399,7 @@ body.modal-open {
 
 /* Success Page */
 .success-page {
-    padding: 120px 0 80px;
+    padding: 180px 0 80px;
     min-height: 70vh;
     display: flex;
     align-items: center;
@@ -1502,7 +1502,7 @@ body.modal-open {
 
 /* Contact Page */
 .contact-page {
-    padding: 120px 0 80px;
+    padding: 180px 0 80px;
     min-height: 70vh;
 }
 
@@ -1715,9 +1715,10 @@ body.modal-open {
     }
 
     .hero {
-        margin-top: 89px;
+        padding-top: 121px;
         height: 70vh;
-        padding: 0 16px;
+        padding-left: 16px;
+        padding-right: 16px;
     }
 
     .hero-title {
@@ -1730,7 +1731,7 @@ body.modal-open {
 
     .featured, .products-page {
         padding: 48px 0;
-        margin-top: 89px;
+        padding-top: 121px;
     }
 
     .section-title {
@@ -1774,7 +1775,7 @@ body.modal-open {
     }
 
     .product-detail {
-        padding: 80px 0 48px;
+        padding: 135px 0 48px;
     }
 
     .product-layout {
@@ -1817,7 +1818,7 @@ body.modal-open {
     }
 
     .cart-page {
-        padding: 80px 0 48px;
+        padding: 135px 0 48px;
     }
 
     .cart-page h1 {
@@ -1861,7 +1862,7 @@ body.modal-open {
     }
 
     .checkout-page {
-        padding: 80px 0 48px;
+        padding: 135px 0 48px;
     }
 
     .checkout-form h1 {
@@ -1889,7 +1890,7 @@ body.modal-open {
     }
 
     .account-section {
-        padding: 80px 0 48px;
+        padding: 88px 0 48px 0;
     }
 
     .account-section .container {
@@ -1903,19 +1904,18 @@ body.modal-open {
 
     .account-sidebar {
         position: sticky;
-        top: 89px;
+        top: 88px;
         background: var(--white);
         z-index: 100;
-        padding-bottom: 16px;
+        padding: 0 16px 16px 16px;
         border-bottom: 1px solid var(--border);
-        margin: 0 -16px;
-        padding-left: 16px;
-        padding-right: 16px;
+        margin: 0 -16px 0 -16px;
     }
 
     .account-sidebar h2 {
         font-size: 20px;
-        margin-bottom: 16px;
+        margin: 0 0 16px 0;
+        padding-top: 28px;
     }
 
     .account-nav {
@@ -1924,11 +1924,28 @@ body.modal-open {
         gap: 8px;
     }
 
+    .account-nav a {
+        display: block;
+    }
+
     .account-nav-link {
         white-space: nowrap;
         font-size: 12px;
         text-align: center;
         padding: 8px 4px;
+    }
+
+    #logoutBtn {
+        color: #ef4444;
+        font-size: 12px;
+        text-align: center;
+        padding: 8px 4px;
+        white-space: nowrap;
+        background: none;
+        border: none;
+        cursor: pointer;
+        display: block;
+        width: 100%;
     }
 
     .account-nav-link:nth-child(5),
@@ -1974,7 +1991,7 @@ body.modal-open {
     }
 
     .auth-section {
-        padding: 80px 0 48px;
+        padding: 135px 0 48px;
     }
 
     .auth-tabs {
@@ -1990,7 +2007,7 @@ body.modal-open {
     }
 
     .contact-page {
-        padding: 80px 0 48px;
+        padding: 135px 0 48px;
     }
 
     .contact-page h1 {
@@ -2029,7 +2046,7 @@ body.modal-open {
     }
 
     .success-page {
-        padding: 80px 0 48px;
+        padding: 135px 0 48px;
     }
 
     .success-content h1 {
