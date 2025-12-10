@@ -186,23 +186,9 @@ function loadProducts() {
         const isVisible = visibleProducts.includes(product);
         const stockText = 'Variantes';
         
-        // Calculer l'état du stock
-        let stockColor = '';
-        if (product.stockByVariant) {
-            const stocks = Object.values(product.stockByVariant);
-            const allZero = stocks.every(s => s === 0);
-            const someZero = stocks.some(s => s === 0);
-            
-            if (allZero) {
-                stockColor = 'background: #fee2e2;';
-            } else if (someZero) {
-                stockColor = 'background: #fed7aa;';
-            }
-        }
-        
         return `
             <tr style="${!isVisible ? 'opacity: 0.5;' : ''}">
-                <td style="${stockColor}"><img src="${product.image || product.images?.[0]}" alt="${product.name}"></td>
+                <td><img src="${product.image || product.images?.[0]}" alt="${product.name}"></td>
                 <td>${product.name}${!isVisible ? ' <small>(Non publié)</small>' : ''}</td>
                 <td>${product.price.toFixed(2)} €</td>
                 <td>${product.category}</td>
@@ -480,7 +466,7 @@ function loadStockVariants(product) {
         
         sizes.forEach(size => {
             const key = `${color}-${size}`;
-            const stock = stockByVariant[key] !== undefined ? stockByVariant[key] : 10;
+            const stock = stockByVariant[key] || 10;
             html += `
                 <div style="display: flex; gap: 8px; align-items: center; margin-bottom: 8px;">
                     <label style="width: 60px; font-size: 14px;">${size}:</label>

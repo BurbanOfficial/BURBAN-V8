@@ -249,6 +249,34 @@ function loadDashboard() {
     if (typeof loadClients === 'function') loadClients();
     if (typeof loadCrewUsers === 'function') loadCrewUsers();
     if (typeof loadSizeGuides === 'function') loadSizeGuides();
+    setupRealtimeListeners();
+}
+
+// Écoute en temps réel des changements Firestore
+function setupRealtimeListeners() {
+    if (!window.firebaseReady) return;
+    
+    const { collection, onSnapshot } = window.firebaseModules;
+    
+    // Écouter les commandes
+    onSnapshot(collection(window.firebaseDb, 'orders'), () => {
+        if (typeof loadOrders === 'function') loadOrders();
+    });
+    
+    // Écouter les utilisateurs
+    onSnapshot(collection(window.firebaseDb, 'users'), () => {
+        if (typeof loadClients === 'function') loadClients();
+    });
+    
+    // Écouter les produits
+    onSnapshot(collection(window.firebaseDb, 'products'), () => {
+        if (typeof loadProducts === 'function') loadProducts();
+    });
+    
+    // Écouter le personnel
+    onSnapshot(collection(window.firebaseDb, 'crew'), () => {
+        if (typeof loadCrewUsers === 'function') loadCrewUsers();
+    });
 }
 
 // Products Management
