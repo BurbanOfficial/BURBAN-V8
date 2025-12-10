@@ -191,8 +191,8 @@ app.post('/send-mailrelay-email', (req, res) => {
     
     const postData = JSON.stringify({
         from: {
-            email: 'noreply@burbanofficial.com',
-            name: 'Burban Official'
+            email: 'burban@ipzmarketing.com',
+            name: 'BURBAN'
         },
         to: [{
             email: email,
