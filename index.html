@@ -101,8 +101,21 @@
         </div>
     </section>
 
+    <!-- Membership Banner -->
+    <section id="membershipBanner" class="membership-banner" style="background: linear-gradient(135deg, #000 0%, #1a1a1a 100%); color: var(--white); padding: 80px 20px 80px 20px; text-align: center; position: relative; overflow: hidden; margin: 0; display: block;">
+        <div class="container" style="position: relative; z-index: 2;">
+            <div style="display: inline-block; background: rgba(255,255,255,0.1); padding: 8px 20px; border-radius: 30px; margin-bottom: 24px; font-size: 14px; letter-spacing: 1px;">OFFRE EXCLUSIVE</div>
+            <h2 style="font-size: 48px; font-weight: 300; margin-bottom: 20px; line-height: 1.2;">Rejoins le club BURBAN</h2>
+            <p style="font-size: 20px; margin-bottom: 12px; font-weight: 500;">🎁 200 points offerts à l'inscription</p>
+            <p style="font-size: 16px; margin-bottom: 40px; opacity: 0.8;">Accède à des avantages exclusifs, des réductions et des lancements en avant-première</p>
+            <a href="account.html" class="btn-primary" style="background: var(--white); color: var(--black); padding: 16px 48px; font-size: 16px; font-weight: 500; transition: transform 0.3s;">Créer mon compte gratuitement</a>
+        </div>
+        <div style="position: absolute; top: -50%; right: -10%; width: 500px; height: 500px; background: radial-gradient(circle, rgba(255,255,255,0.05) 0%, transparent 70%); border-radius: 50%;"></div>
+        <div style="position: absolute; bottom: -50%; left: -10%; width: 500px; height: 500px; background: radial-gradient(circle, rgba(255,255,255,0.05) 0%, transparent 70%); border-radius: 50%;"></div>
+    </section>
+
     <!-- Footer -->
-    <footer class="footer">
+    <footer class="footer" style="margin: 0; padding: 60px 0 24px 0;">
         <div class="container">
             <div class="footer-content">
                 <div class="footer-col">
@@ -129,6 +142,7 @@
     <script type="module">
         import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
         import { getFirestore, doc, getDoc, collection, getDocs, setDoc } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+        import { getAuth, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
         
         const firebaseConfig = {
             apiKey: "AIzaSyDb4AOtRT7jGENnLZ2KNwpczaG2Z77G2rc",
@@ -138,8 +152,15 @@
         
         const app = initializeApp(firebaseConfig);
         window.firebaseDb = getFirestore(app);
-        window.firebaseModules = { doc, getDoc, collection, getDocs, setDoc };
+        window.firebaseAuth = getAuth(app);
+        window.firebaseModules = { doc, getDoc, collection, getDocs, setDoc, onAuthStateChanged };
         window.firebaseReady = true;
+        
+        // Masquer la bannière si l'utilisateur est connecté
+        onAuthStateChanged(window.firebaseAuth, (user) => {
+            const banner = document.getElementById('membershipBanner');
+            if (banner && user) banner.style.display = 'none';
+        });
     </script>
     <!-- Search Modal -->
     <div class="search-modal" id="searchModal">
