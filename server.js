@@ -159,6 +159,32 @@ app.get('/health', (req, res) => {
     res.status(200).json({ status: 'ok', timestamp: new Date().toISOString() });
 });
 
+// Test Mailrelay API
+app.get('/test-mailrelay', (req, res) => {
+    const options = {
+        hostname: 'burbanofficial.ipzmarketing.com',
+        path: '/api/v1/groups',
+        method: 'GET',
+        headers: {
+            'X-AUTH-TOKEN': 'fxZ5kwQ_gVfaAqpYTS2qNfox7vsiGrkzyzdyy_Wd'
+        }
+    };
+    
+    const mailreq = https.request(options, (mailres) => {
+        let data = '';
+        mailres.on('data', chunk => data += chunk);
+        mailres.on('end', () => {
+            res.json({ status: mailres.statusCode, data: data });
+        });
+    });
+    
+    mailreq.on('error', (error) => {
+        res.status(500).json({ error: error.message });
+    });
+    
+    mailreq.end();
+});
+
 // Proxy Mailrelay
 app.post('/send-mailrelay-email', (req, res) => {
     const { email, orderData } = req.body;
@@ -186,7 +212,7 @@ app.post('/send-mailrelay-email', (req, res) => {
     
     const options = {
         hostname: 'burbanofficial.ipzmarketing.com',
-        path: '/ccm/admin/api/version/2/send_emails',
+        path: '/api/v1/send_emails',
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
