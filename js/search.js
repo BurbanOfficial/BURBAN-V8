@@ -1,14 +1,18 @@
 const searchBtn = document.getElementById('searchBtn');
+const searchBtnMobile = document.getElementById('searchBtnMobile');
 const searchModal = document.getElementById('searchModal');
 const searchClose = document.getElementById('searchClose');
 const searchInput = document.getElementById('searchInput');
 const searchResults = document.getElementById('searchResults');
 
-searchBtn?.addEventListener('click', () => {
+const openSearch = () => {
     searchModal.classList.add('active');
     document.body.classList.add('modal-open');
     searchInput.focus();
-});
+};
+
+searchBtn?.addEventListener('click', openSearch);
+searchBtnMobile?.addEventListener('click', openSearch);
 
 searchClose?.addEventListener('click', () => {
     searchModal.classList.remove('active');

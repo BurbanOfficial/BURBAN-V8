@@ -41,6 +41,10 @@ function displayProducts() {
                 </div>
                 <h3 class="product-name">${product.name}</h3>
                 <p class="product-price">${priceHTML}</p>
+                <div style="display: flex; align-items: center; gap: 8px; margin-top: 8px;">
+                    ${product.colors && product.colors.length > 0 ? `<div style="display: flex; gap: 6px;">${product.colors.map(color => `<a href="product-detail.html?id=${product.id}&color=${encodeURIComponent(color)}" onclick="event.stopPropagation()" style="width: 16px; height: 16px; border-radius: 50%; background: ${color}; border: 1px solid var(--border); cursor: pointer; transition: transform 0.2s; display: block;" onmouseover="this.style.transform='scale(1.2)'" onmouseout="this.style.transform='scale(1)'"></a>`).join('')}</div>` : ''}
+                    ${product.sizes && product.sizes.length > 0 ? `<p style="font-size: 12px; color: var(--gray); margin: 0; margin-left: auto;">${product.sizes.join(' · ')}</p>` : ''}
+                </div>
             </div>
         `;
     }).join('');
