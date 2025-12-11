@@ -62,13 +62,35 @@
     <nav class="nav">
         <div class="nav-container">
             <a href="index.html" class="logo"><img src="https://i.imgur.com/Kl9kTBg.png" alt="BURBAN"></a>
-            <button class="hamburger">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
-                    <line class="line line1" x1="3" y1="6" x2="21" y2="6"/>
-                    <line class="line line2" x1="3" y1="12" x2="21" y2="12"/>
-                    <line class="line line3" x1="3" y1="18" x2="21" y2="18"/>
-                </svg>
-            </button>
+            <div class="mobile-icons">
+                <button class="mobile-icon-link" id="searchBtnMobile">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                        <circle cx="11" cy="11" r="8"/>
+                        <path d="m21 21-4.35-4.35"/>
+                    </svg>
+                </button>
+                <a href="account.html" class="mobile-icon-link">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                        <circle cx="12" cy="7" r="4"/>
+                    </svg>
+                </a>
+                <a href="cart.html" class="mobile-icon-link cart-mobile">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/>
+                        <line x1="3" y1="6" x2="21" y2="6"/>
+                        <path d="M16 10a4 4 0 0 1-8 0"/>
+                    </svg>
+                    <span class="cart-count">0</span>
+                </a>
+                <button class="hamburger">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                        <line class="line line1" x1="3" y1="6" x2="21" y2="6"/>
+                        <line class="line line2" x1="3" y1="12" x2="21" y2="12"/>
+                        <line class="line line3" x1="3" y1="18" x2="21" y2="18"/>
+                    </svg>
+                </button>
+            </div>
             <div class="nav-links">
                 <a href="products.html?category=men" data-text="Men"><span class="link-text">Men</span></a>
                 <a href="products.html?category=women" data-text="Women"><span class="link-text">Women</span></a>
@@ -80,8 +102,8 @@
                         <path d="m21 21-4.35-4.35"/>
                     </svg>
                 </button>
-                <a href="account.html" id="accountLink" data-text="Account"><span class="link-text">Account</span></a>
-                <a href="cart.html" class="cart-link" data-text="Cart"><span class="link-text">Cart</span> <span class="cart-count">0</span></a>
+                <a href="account.html" id="accountLink" class="icon-link"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></a>
+                <a href="cart.html" class="cart-link icon-link"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg><span class="cart-count">0</span></a>
             </div>
         </div>
     </nav>
