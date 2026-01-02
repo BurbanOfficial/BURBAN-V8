@@ -38,7 +38,6 @@ app.post('/create-payment-intent', async (req, res) => {
         let finalAmount = amount;
         let discountAmount = 0;
 
-        // Appliquer le code promo si présent
         if (promoCode && promoCodes[promoCode]) {
             const promo = promoCodes[promoCode];
             if (promo.type === 'percentage') {
@@ -48,17 +47,17 @@ app.post('/create-payment-intent', async (req, res) => {
             }
         }
 
-        // Appliquer le bon de réduction fidélité
         if (voucherDiscount) {
             discountAmount += voucherDiscount;
         }
 
-        // Calculer le montant final (amount contient déjà les frais de livraison)
         finalAmount = Math.max(amount - discountAmount, 0);
 
-        // Créer le Payment Intent avec 3D Secure automatique
+        const countryMap = { 'France': 'FR', 'Belgique': 'BE', 'Suisse': 'CH', 'Luxembourg': 'LU' };
+        const countryCode = countryMap[shippingAddress.country] || 'FR';
+
         const paymentIntent = await stripe.paymentIntents.create({
-            amount: Math.round(finalAmount * 100), // Stripe utilise les centimes
+            amount: Math.round(finalAmount * 100),
             currency: 'eur',
             automatic_payment_methods: {
                 enabled: true,
@@ -96,7 +95,7 @@ app.post('/create-payment-intent', async (req, res) => {
                     line2: shippingAddress.address2 || '',
                     postal_code: shippingAddress.postal,
                     city: shippingAddress.city,
-                    country: shippingAddress.country
+                    country: countryCode
                 }
             }
         });
