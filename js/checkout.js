@@ -314,7 +314,6 @@ async function initializePayment() {
     try {
         stripe = Stripe(STRIPE_PUBLIC_KEY);
         
-        // Créer un PaymentIntent côté serveur
         const response = await fetch(`${SERVER_URL}/create-payment-intent`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -330,7 +329,10 @@ async function initializePayment() {
             })
         });
         
-        const { clientSecret } = await response.json();
+        if (!response.ok) throw new Error('Erreur serveur');
+        
+        const data = await response.json();
+        if (!data.clientSecret) throw new Error('Client secret manquant');
         
         const appearance = {
             theme: 'stripe',
@@ -344,7 +346,7 @@ async function initializePayment() {
             }
         };
         
-        elements = stripe.elements({ clientSecret, appearance });
+        elements = stripe.elements({ clientSecret: data.clientSecret, appearance });
         const paymentElement = elements.create('payment');
         paymentElement.mount('#payment-element');
         
