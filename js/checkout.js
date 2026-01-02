@@ -329,10 +329,18 @@ async function initializePayment() {
             })
         });
         
-        if (!response.ok) throw new Error('Erreur serveur');
+        if (!response.ok) {
+            console.error('Erreur serveur:', response.status, response.statusText);
+            throw new Error('Erreur serveur');
+        }
         
         const data = await response.json();
-        if (!data.clientSecret) throw new Error('Client secret manquant');
+        console.log('Réponse serveur:', data);
+        
+        if (!data.clientSecret) {
+            console.error('Client secret manquant dans la réponse');
+            throw new Error('Client secret manquant');
+        }
         
         const appearance = {
             theme: 'stripe',
