@@ -721,7 +721,23 @@ window.confirmCancelOrder = async function(orderNumber) {
             cancelledAt: new Date().toISOString()
         });
         
-        showMessage('Votre commande a bien été annulée. Vous recevrez un remboursement ou un avoir couvrant l\'intégralité du montant que vous avez payé.');
+        // Demander le remboursement Stripe
+        try {
+            const response = await fetch('https://burban-v8.onrender.com/refund-order', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ orderNumber })
+            });
+            const result = await response.json();
+            if (result.success) {
+                showMessage('Votre commande a bien été annulée. Le remboursement de ${order.total.toFixed(2)} € sera effectué sous 5-10 jours ouvrables.');
+            } else {
+                showMessage('Commande annulée. Le remboursement sera traité manuellement.');
+            }
+        } catch (error) {
+            console.error('Erreur remboursement:', error);
+            showMessage('Commande annulée. Le remboursement sera traité manuellement.');
+        }
         
         // Recharger après un court délai pour s'assurer que Firestore est à jour
         setTimeout(() => {
