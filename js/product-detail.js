@@ -250,6 +250,21 @@ document.addEventListener('DOMContentLoaded', async () => {
             showMessage('Ce produit est en rupture de stock');
             return;
         }
+        
+        // Vérifier quantité déjà dans le panier
+        const cart = JSON.parse(localStorage.getItem('cart')) || [];
+        const existingItem = cart.find(item => 
+            item.id === product.id && 
+            item.size === selectedSize && 
+            item.color === selectedColor
+        );
+        const currentQty = existingItem ? existingItem.quantity : 0;
+        
+        if (currentQty >= stock) {
+            showStockError(stock);
+            return;
+        }
+        
         addToCart(product.id, selectedSize, selectedColor);
         showCartConfirm();
     }

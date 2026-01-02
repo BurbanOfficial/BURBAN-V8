@@ -282,8 +282,27 @@ function setupRealtimeListeners() {
 // Products Management
 function loadProducts() {
     const tbody = document.getElementById('productsTableBody');
-    const products = JSON.parse(localStorage.getItem('adminProducts')) || window.products || [];
+    let products = JSON.parse(localStorage.getItem('adminProducts')) || window.products || [];
     const role = sessionStorage.getItem('userRole');
+    const now = new Date();
+    
+    // Vérifier et désactiver les promos expirées
+    let updated = false;
+    products = products.map(product => {
+        if (product.promoActive && product.promoEndDate && new Date(product.promoEndDate) < now) {
+            product.promoActive = false;
+            product.price = product.originalPrice;
+            product.originalPrice = null;
+            product.promoEndDate = null;
+            updated = true;
+        }
+        return product;
+    });
+    
+    if (updated) {
+        localStorage.setItem('adminProducts', JSON.stringify(products));
+        window.products = products;
+    }
     
     tbody.innerHTML = products.map(product => `
         <tr>
