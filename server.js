@@ -64,6 +64,7 @@ app.post('/create-payment-intent', async (req, res) => {
                 enabled: true,
             },
             metadata: {
+                orderNumber: 'PENDING',
                 userId: userId || 'guest',
                 shippingFirstName: shippingAddress.firstName,
                 shippingLastName: shippingAddress.lastName,
@@ -139,6 +140,45 @@ app.get('/payment-details/:paymentIntentId', async (req, res) => {
         });
     } catch (error) {
         res.status(500).json({ error: error.message });
+    }
+});
+
+// Endpoint pour rembourser une commande
+app.post('/refund-order', async (req, res) => {
+    try {
+        const { orderNumber } = req.body;
+        
+        const paymentIntents = await stripe.paymentIntents.list({ limit: 100 });
+        const paymentIntent = paymentIntents.data.find(pi => 
+            pi.metadata.orderNumber === orderNumber
+        );
+        
+        if (!paymentIntent) {
+            return res.json({ success: false, error: 'PaymentIntent introuvable' });
+        }
+        
+        const refund = await stripe.refunds.create({
+            payment_intent: paymentIntent.id,
+            reason: 'requested_by_customer'
+        });
+        
+        res.json({ success: true, refund });
+    } catch (error) {
+        console.error('Erreur remboursement:', error);
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
+// Endpoint pour mettre à jour le PaymentIntent avec le orderNumber
+app.post('/update-payment-intent/:paymentIntentId', async (req, res) => {
+    try {
+        const { orderNumber } = req.body;
+        await stripe.paymentIntents.update(req.params.paymentIntentId, {
+            metadata: { orderNumber }
+        });
+        res.json({ success: true });
+    } catch (error) {
+        res.status(500).json({ success: false, error: error.message });
     }
 });
 
