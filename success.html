@@ -139,16 +139,6 @@
                 };
                 await setDoc(doc(db, 'orders', orderNumber), orderData);
                 
-                // Mettre à jour le PaymentIntent avec le orderNumber
-                const paymentIntentId = urlParams.get('payment_intent');
-                if (paymentIntentId) {
-                    await fetch(`https://burban-v8.onrender.com/update-payment-intent/${paymentIntentId}`, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ orderNumber })
-                    });
-                }
-                
                 // Mettre à jour les points utilisateur
                 const userRef = doc(db, 'users', user.uid);
                 const userDoc = await getDoc(userRef);

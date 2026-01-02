@@ -38,6 +38,7 @@ app.post('/create-payment-intent', async (req, res) => {
         let finalAmount = amount;
         let discountAmount = 0;
 
+        // Appliquer le code promo si présent
         if (promoCode && promoCodes[promoCode]) {
             const promo = promoCodes[promoCode];
             if (promo.type === 'percentage') {
@@ -47,23 +48,22 @@ app.post('/create-payment-intent', async (req, res) => {
             }
         }
 
+        // Appliquer le bon de réduction fidélité
         if (voucherDiscount) {
             discountAmount += voucherDiscount;
         }
 
+        // Calculer le montant final (amount contient déjà les frais de livraison)
         finalAmount = Math.max(amount - discountAmount, 0);
 
-        const countryMap = { 'France': 'FR', 'Belgique': 'BE', 'Suisse': 'CH', 'Luxembourg': 'LU' };
-        const countryCode = countryMap[shippingAddress.country] || 'FR';
-
+        // Créer le Payment Intent avec 3D Secure automatique
         const paymentIntent = await stripe.paymentIntents.create({
-            amount: Math.round(finalAmount * 100),
+            amount: Math.round(finalAmount * 100), // Stripe utilise les centimes
             currency: 'eur',
             automatic_payment_methods: {
                 enabled: true,
             },
             metadata: {
-                orderNumber: 'PENDING',
                 userId: userId || 'guest',
                 shippingFirstName: shippingAddress.firstName,
                 shippingLastName: shippingAddress.lastName,
@@ -95,7 +95,7 @@ app.post('/create-payment-intent', async (req, res) => {
                     line2: shippingAddress.address2 || '',
                     postal_code: shippingAddress.postal,
                     city: shippingAddress.city,
-                    country: countryCode
+                    country: shippingAddress.country
                 }
             }
         });
@@ -139,45 +139,6 @@ app.get('/payment-details/:paymentIntentId', async (req, res) => {
         });
     } catch (error) {
         res.status(500).json({ error: error.message });
-    }
-});
-
-// Endpoint pour rembourser une commande
-app.post('/refund-order', async (req, res) => {
-    try {
-        const { orderNumber } = req.body;
-        
-        const paymentIntents = await stripe.paymentIntents.list({ limit: 100 });
-        const paymentIntent = paymentIntents.data.find(pi => 
-            pi.metadata.orderNumber === orderNumber
-        );
-        
-        if (!paymentIntent) {
-            return res.json({ success: false, error: 'PaymentIntent introuvable' });
-        }
-        
-        const refund = await stripe.refunds.create({
-            payment_intent: paymentIntent.id,
-            reason: 'requested_by_customer'
-        });
-        
-        res.json({ success: true, refund });
-    } catch (error) {
-        console.error('Erreur remboursement:', error);
-        res.status(500).json({ success: false, error: error.message });
-    }
-});
-
-// Endpoint pour mettre à jour le PaymentIntent avec le orderNumber
-app.post('/update-payment-intent/:paymentIntentId', async (req, res) => {
-    try {
-        const { orderNumber } = req.body;
-        await stripe.paymentIntents.update(req.params.paymentIntentId, {
-            metadata: { orderNumber }
-        });
-        res.json({ success: true });
-    } catch (error) {
-        res.status(500).json({ success: false, error: error.message });
     }
 });
 
