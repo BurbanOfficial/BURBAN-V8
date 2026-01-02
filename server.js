@@ -129,10 +129,13 @@ app.post('/verify-promo-code', (req, res) => {
 app.get('/payment-details/:paymentIntentId', async (req, res) => {
     try {
         const paymentIntent = await stripe.paymentIntents.retrieve(req.params.paymentIntentId);
+        const paymentMethod = await stripe.paymentMethods.retrieve(paymentIntent.payment_method);
+        
         res.json({
             status: paymentIntent.status,
             metadata: paymentIntent.metadata,
-            amount: paymentIntent.amount / 100
+            amount: paymentIntent.amount / 100,
+            cardLast4: paymentMethod.card?.last4 || 'XXXX'
         });
     } catch (error) {
         res.status(500).json({ error: error.message });

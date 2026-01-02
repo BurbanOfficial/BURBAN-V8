@@ -108,6 +108,19 @@
                     }
                 }
                 
+                // Récupérer les 4 derniers chiffres de la carte depuis Stripe
+                let cardLast4 = 'XXXX';
+                try {
+                    const paymentIntentId = urlParams.get('payment_intent');
+                    if (paymentIntentId) {
+                        const response = await fetch(`https://burban-v8.onrender.com/payment-details/${paymentIntentId}`);
+                        const paymentData = await response.json();
+                        cardLast4 = paymentData.cardLast4 || 'XXXX';
+                    }
+                } catch (error) {
+                    console.error('Erreur récupération carte:', error);
+                }
+                
                 // Créer la commande définitive
                 const orderData = {
                     orderNumber,
@@ -117,6 +130,7 @@
                     total: tempOrder.total,
                     discount: tempOrder.discount,
                     voucherPoints: tempOrder.voucher ? tempOrder.voucher.points : 0,
+                    cardLast4: cardLast4,
                     status: 'processing',
                     trackingUrl: null,
                     date: new Date().toISOString(),
