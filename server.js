@@ -24,14 +24,19 @@ const promoCodes = {
 // Endpoint pour créer un Payment Intent
 app.post('/create-payment-intent', async (req, res) => {
     try {
+        console.log('Requête reçue:', JSON.stringify(req.body, null, 2));
+        
         const { amount, shippingAddress, userId } = req.body;
 
         if (!amount || !shippingAddress) {
+            console.error('Données manquantes - amount:', amount, 'shippingAddress:', shippingAddress);
             return res.status(400).json({ error: 'Montant et adresse requis' });
         }
 
         const countryMap = { 'France': 'FR', 'Belgique': 'BE', 'Suisse': 'CH', 'Luxembourg': 'LU' };
         const countryCode = countryMap[shippingAddress.country] || 'FR';
+
+        console.log('Création PaymentIntent - amount:', amount, 'country:', countryCode);
 
         const paymentIntent = await stripe.paymentIntents.create({
             amount: Math.round(amount * 100),
@@ -52,12 +57,14 @@ app.post('/create-payment-intent', async (req, res) => {
             }
         });
 
+        console.log('PaymentIntent créé avec succès:', paymentIntent.id);
+
         res.json({
             clientSecret: paymentIntent.client_secret,
             paymentIntentId: paymentIntent.id
         });
     } catch (error) {
-        console.error('Erreur:', error.message);
+        console.error('Erreur complète:', error);
         res.status(500).json({ error: error.message });
     }
 });
