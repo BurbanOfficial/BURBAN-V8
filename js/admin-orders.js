@@ -41,6 +41,7 @@ function displayOrders(orders) {
                     <div class="admin-actions">
                         <button class="admin-btn" onclick="viewOrderDetails('${order.orderNumber}')">Voir</button>
                         ${order.status !== 'cancelled' && order.status !== 'delivered' ? `<button class="admin-btn" onclick="editOrder('${order.orderNumber}')">Gérer</button>` : ''}
+                        ${order.status === 'processing' ? `<button class="admin-btn" style="background: #ef4444;" onclick="cancelOrderAdmin('${order.orderNumber}')">Annuler</button>` : ''}
                     </div>
                 </td>
             </tr>
@@ -145,6 +146,87 @@ async function editOrder(orderNumber) {
 }
 
 window.editOrder = editOrder;
+
+window.cancelOrderAdmin = async function(orderNumber) {
+    if (!confirm('Annuler cette commande et rembourser le client ?')) return;
+    
+    try {
+        const { doc, getDoc, updateDoc, collection, getDocs, setDoc, arrayUnion } = window.firebaseModules;
+        const orderDoc = await getDoc(doc(window.firebaseDb, 'orders', orderNumber));
+        const order = orderDoc.data();
+        
+        // Restaurer le stock
+        const productsSnapshot = await getDocs(collection(window.firebaseDb, 'products'));
+        for (const item of order.items) {
+            const productDoc = productsSnapshot.docs.find(d => d.data().id === item.id);
+            if (productDoc) {
+                const product = productDoc.data();
+                const variantKey = `${item.color}-${item.size}`;
+                product.stockByVariant[variantKey] = (product.stockByVariant[variantKey] || 0) + item.quantity;
+                await setDoc(doc(window.firebaseDb, 'products', `${product.id}`), product);
+            }
+        }
+        
+        // Annuler les points si utilisateur connecté
+        if (order.userId && order.userId !== 'guest') {
+            const userRef = doc(window.firebaseDb, 'users', order.userId);
+            const userDoc = await getDoc(userRef);
+            if (userDoc.exists()) {
+                const userData = userDoc.data();
+                const pointsEarned = Math.floor(order.total * 10);
+                const pointsSpent = order.discount > 0 ? Math.floor(order.discount * 100) : 0;
+                const newPoints = userData.points - pointsEarned + pointsSpent;
+                
+                const updates = [];
+                if (pointsEarned > 0) {
+                    updates.push({
+                        points: -pointsEarned,
+                        description: 'Annulation de commande (admin)',
+                        date: new Date().toISOString()
+                    });
+                }
+                if (pointsSpent > 0) {
+                    updates.push({
+                        points: pointsSpent,
+                        description: 'Remboursement bon de réduction',
+                        date: new Date().toISOString()
+                    });
+                }
+                
+                await updateDoc(userRef, { 
+                    points: newPoints,
+                    pointsHistory: arrayUnion(...updates)
+                });
+            }
+        }
+        
+        // Marquer comme annulée
+        await updateDoc(doc(window.firebaseDb, 'orders', orderNumber), {
+            status: 'cancelled',
+            cancelledAt: new Date().toISOString(),
+            cancelledBy: 'admin'
+        });
+        
+        // Remboursement Stripe
+        const response = await fetch('https://burban-v8.onrender.com/refund-order', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ orderNumber })
+        });
+        const result = await response.json();
+        
+        if (result.success) {
+            alert(`Commande annulée et remboursée (${result.amount.toFixed(2)} €)`);
+        } else {
+            alert('Commande annulée (remboursement manuel requis)');
+        }
+        
+        loadOrders();
+    } catch (error) {
+        console.error('Erreur:', error);
+        alert('Erreur lors de l\'annulation');
+    }
+}
 
 // Sauvegarder les modifications
 document.getElementById('orderForm')?.addEventListener('submit', async (e) => {
