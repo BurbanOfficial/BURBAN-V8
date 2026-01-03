@@ -721,9 +721,23 @@ window.confirmCancelOrder = async function(orderNumber) {
             cancelledAt: new Date().toISOString()
         });
         
-        showMessage('Votre commande a bien été annulée.');
+        // Remboursement automatique
+        try {
+            const response = await fetch('https://burban-v8.onrender.com/refund-order', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ orderNumber })
+            });
+            const result = await response.json();
+            if (result.success) {
+                showMessage(`Commande annulée. Remboursement de ${result.amount.toFixed(2)} € en cours (5-10 jours).`);
+            } else {
+                showMessage('Commande annulée.');
+            }
+        } catch (error) {
+            showMessage('Commande annulée.');
+        }
         
-        // Recharger après un court délai pour s'assurer que Firestore est à jour
         setTimeout(() => {
             loadAccountData(auth.currentUser);
         }, 500);
