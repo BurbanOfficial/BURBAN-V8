@@ -721,7 +721,7 @@ window.confirmCancelOrder = async function(orderNumber) {
             cancelledAt: new Date().toISOString()
         });
         
-        showMessage('Votre commande a bien été annulée. Vous recevrez un remboursement ou un avoir couvrant l\'intégralité du montant que vous avez payé.');
+        showMessage('Votre commande a bien été annulée.');
         
         // Recharger après un court délai pour s'assurer que Firestore est à jour
         setTimeout(() => {
