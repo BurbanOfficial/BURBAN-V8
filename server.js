@@ -24,10 +24,14 @@ const promoCodes = {
 // Endpoint pour créer un Payment Intent
 app.post('/create-payment-intent', async (req, res) => {
     try {
-        const { amount, shippingAddress } = req.body;
+        const { amount, shippingAddress, userId } = req.body;
+
+        if (!amount || !shippingAddress) {
+            return res.status(400).json({ error: 'Montant et adresse requis' });
+        }
 
         const countryMap = { 'France': 'FR', 'Belgique': 'BE', 'Suisse': 'CH', 'Luxembourg': 'LU' };
-        const countryCode = countryMap[shippingAddress?.country] || 'FR';
+        const countryCode = countryMap[shippingAddress.country] || 'FR';
 
         const paymentIntent = await stripe.paymentIntents.create({
             amount: Math.round(amount * 100),
@@ -35,7 +39,7 @@ app.post('/create-payment-intent', async (req, res) => {
             automatic_payment_methods: { enabled: true },
             metadata: {
                 orderNumber: 'PENDING',
-                userId: req.body.userId || 'guest'
+                userId: userId || 'guest'
             },
             shipping: {
                 name: `${shippingAddress.firstName} ${shippingAddress.lastName}`,
