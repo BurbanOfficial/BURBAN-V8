@@ -99,7 +99,12 @@
                                     <input type="text" id="shippingPostal" placeholder="Code postal" required>
                                     <input type="text" id="shippingCity" placeholder="Ville" required>
                                 </div>
-                                <input type="text" id="shippingCountry" placeholder="Pays" value="France" required>
+                                <select id="shippingCountry" required style="width: 100%; padding: 12px; border: 1px solid var(--border); background: white;">
+                                    <option value="France">France</option>
+                                    <option value="Belgique">Belgique</option>
+                                    <option value="Suisse">Suisse</option>
+                                    <option value="Luxembourg">Luxembourg</option>
+                                </select>
                             </form>
                         </div>
 
@@ -122,7 +127,12 @@
                                         <input type="text" id="billingPostal" placeholder="Code postal">
                                         <input type="text" id="billingCity" placeholder="Ville">
                                     </div>
-                                    <input type="text" id="billingCountry" placeholder="Pays" value="France">
+                                    <select id="billingCountry" style="width: 100%; padding: 12px; border: 1px solid var(--border); background: white;">
+                                        <option value="France">France</option>
+                                        <option value="Belgique">Belgique</option>
+                                        <option value="Suisse">Suisse</option>
+                                        <option value="Luxembourg">Luxembourg</option>
+                                    </select>
                                 </form>
                             </div>
                         </div>
