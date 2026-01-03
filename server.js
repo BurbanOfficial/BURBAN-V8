@@ -101,6 +101,38 @@ app.get('/payment-details/:paymentIntentId', async (req, res) => {
     }
 });
 
+app.post('/refund-order', async (req, res) => {
+    try {
+        const { orderNumber } = req.body;
+        const paymentIntents = await stripe.paymentIntents.list({ limit: 100 });
+        const paymentIntent = paymentIntents.data.find(pi => pi.metadata.orderNumber === orderNumber);
+        
+        if (!paymentIntent) {
+            return res.json({ success: false, error: 'Paiement introuvable' });
+        }
+        
+        const refund = await stripe.refunds.create({
+            payment_intent: paymentIntent.id
+        });
+        
+        res.json({ success: true, amount: refund.amount / 100 });
+    } catch (error) {
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
+app.post('/update-payment-intent/:paymentIntentId', async (req, res) => {
+    try {
+        const { orderNumber } = req.body;
+        await stripe.paymentIntents.update(req.params.paymentIntentId, {
+            metadata: { orderNumber }
+        });
+        res.json({ success: true });
+    } catch (error) {
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
     console.log(`Serveur Stripe démarré sur le port ${PORT}`);
