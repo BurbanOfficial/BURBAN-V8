@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>BURBAN Music Player</title>
+</head>
+<body style="margin:0; padding:0; background:none;">
+
+<audio id="siteMusic" autoplay></audio>
+
+<script>
+const playlist = [
+  "music/Baby Dont Forget.mp3",
+  "music/Birdie in the Sand.mp3",
+  "music/Way You Are.mp3"
+];
+
+let shuffledPlaylist = [];
+let index = 0;
+
+// Mélange la playlist
+function shuffle(array) {
+  let arr = [...array];
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+
+// Initialise le player
+function initPlaylist() {
+  shuffledPlaylist = shuffle(playlist);
+  index = 0;
+}
+
+// Joue le morceau actuel
+function playMusic() {
+  if (index >= shuffledPlaylist.length) {
+    initPlaylist(); // remélange si tout a été joué
+  }
+  const music = document.getElementById("siteMusic");
+  music.src = shuffledPlaylist[index];
+  music.play();
+}
+
+// Passe au morceau suivant à la fin
+document.getElementById("siteMusic").addEventListener("ended", () => {
+  index++;
+  playMusic();
+});
+
+initPlaylist();
+playMusic();
+</script>
+
+</body>
+</html>

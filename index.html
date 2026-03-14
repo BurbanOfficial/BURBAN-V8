@@ -207,18 +207,9 @@
         </div>
     </section>
 
-<!-- Music Choice Modal -->
-<div id="musicModal" class="custom-modal">
-    <div class="custom-modal-content">
-        <p>Souhaitez-vous faire vos achats avec de la musique ?</p>
-        <div style="display:flex; gap:12px; justify-content:center;">
-            <button id="musicYes" class="btn-primary">Oui</button>
-            <button id="musicNo" class="btn-secondary">Non</button>
-        </div>
-    </div>
-</div>
-
-<audio id="siteMusic"></audio>
+    <iframe src="music-player.html" 
+        style="position:fixed; bottom:0; left:0; width:1px; height:1px; border:none; pointer-events:none; z-index:9999;">
+    </iframe>
 
     <!-- Footer -->
     <footer class="footer" style="margin: 0; padding: 60px 0 24px 0;">
@@ -303,79 +294,5 @@
             nav.style.borderBottom = '1px solid transparent';
         }
     </script>
-    
-    <script>
-
-const playlist = [
-"music/Baby Dont Forget.mp3",
-"music/Birdie in the Sand.mp3",
-"music/Way You Are.mp3"
-];
-
-const music = document.getElementById("siteMusic");
-
-let shuffledPlaylist = [];
-let index = 0;
-
-// Mélanger playlist
-function shuffle(array) {
-    let arr = [...array];
-    for (let i = arr.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [arr[i], arr[j]] = [arr[j], arr[i]];
-    }
-    return arr;
-}
-
-function initPlaylist(){
-    shuffledPlaylist = shuffle(playlist);
-}
-
-// jouer musique
-function playMusic(){
-    music.src = shuffledPlaylist[index];
-
-    const savedTime = sessionStorage.getItem("musicTime");
-
-    music.addEventListener("loadedmetadata", () => {
-        if(savedTime){
-            music.currentTime = savedTime;
-        }
-    });
-
-    music.play();
-}
-
-// musique suivante
-music.addEventListener("ended", () => {
-
-    index++;
-
-    if(index >= shuffledPlaylist.length){
-        shuffledPlaylist = shuffle(playlist);
-        index = 0;
-    }
-
-    playMusic();
-});
-
-// sauvegarder position avant quitter page
-window.addEventListener("beforeunload", () => {
-
-    sessionStorage.setItem("musicTime", music.currentTime);
-    sessionStorage.setItem("musicIndex", index);
-
-});
-
-// restaurer index
-const savedIndex = sessionStorage.getItem("musicIndex");
-
-if(savedIndex){
-    index = parseInt(savedIndex);
-}
-
-initPlaylist();
-
-</script>
 </body>
 </html>
