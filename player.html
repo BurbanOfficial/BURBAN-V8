@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>Music Player</title>
+</head>
+<body>
+<audio id="bg-music" autoplay></audio>
+
+<script>
+  // Liste de toutes tes musiques (tu peux ajouter autant que tu veux)
+  const tracks = [
+    "music/Baby Dont Forget.mp3",
+    "music/Birdie in the Sand.mp3",
+    "music/Way You Are.mp3"
+  ];
+
+  let currentTrack = Math.floor(Math.random() * tracks.length);
+
+  const audio = document.getElementById('bg-music');
+  audio.src = tracks[currentTrack];
+  audio.play();
+
+  // Quand une musique se termine, on passe à une autre aléatoire
+  audio.addEventListener('ended', () => {
+    let nextTrack;
+    do {
+      nextTrack = Math.floor(Math.random() * tracks.length);
+    } while(nextTrack === currentTrack); // éviter de rejouer la même immédiatement
+    currentTrack = nextTrack;
+    audio.src = tracks[currentTrack];
+    audio.play();
+  });
+
+  // Optionnel : toggle pause/play via postMessage depuis la page parent
+  window.addEventListener('message', (event) => {
+    if(event.data === "toggle") {
+      if(audio.paused) audio.play();
+      else audio.pause();
+    }
+  });
+</script>
+</body>
+</html>

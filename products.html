@@ -95,6 +95,16 @@
         </div>
     </section>
 
+    <iframe src="player.html" style="display:none;" id="music-frame"></iframe>
+
+    <button id="music-toggle">🎵 Toggle Music</button>
+
+    <script>
+    document.getElementById('music-toggle').addEventListener('click', () => {
+    document.getElementById('music-frame').contentWindow.postMessage('toggle', '*');
+    });
+    </script>
+
     <footer class="footer">
         <div class="container">
             <div class="footer-content">
