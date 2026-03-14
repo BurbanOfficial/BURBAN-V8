@@ -95,9 +95,26 @@
         </div>
     </section>
 
-    <iframe src="music-player.html" 
+    <iframe id="musicIframe" src="music-player.html" 
         style="position:fixed; bottom:0; left:0; width:1px; height:1px; border:none; pointer-events:none; z-index:9999;">
     </iframe>
+
+    <!-- Flèche demi-cercle -->
+    <div id="musicToggle">
+        <svg viewBox="0 0 24 24"><path d="M8 5l8 7-8 7V5z"/></svg>
+    </div>
+
+    <!-- Panneau musical -->
+    <div id="musicPanel">
+        <div id="musicName">Nom de la musique</div>
+        <audio id="siteMusic" controls style="width:100%; display:none;"></audio>
+        <input type="range" id="musicProgress" value="0" min="0" max="100">
+        <div style="text-align:center; margin-top:10px;">
+            <button class="music-btn" id="prevBtn">⏮️</button>
+            <button class="music-btn" id="playPauseBtn">▶️</button>
+            <button class="music-btn" id="nextBtn">⏭️</button>
+        </div>
+    </div>
 
     <footer class="footer">
         <div class="container">
@@ -152,5 +169,89 @@
     <script src="js/app.js"></script>
     <script src="js/products.js"></script>
     <script src="js/search.js"></script>
+
+    <script>
+const musicToggle = document.getElementById('musicToggle');
+const musicPanel = document.getElementById('musicPanel');
+const playPauseBtn = document.getElementById('playPauseBtn');
+const prevBtn = document.getElementById('prevBtn');
+const nextBtn = document.getElementById('nextBtn');
+const musicProgress = document.getElementById('musicProgress');
+const musicName = document.getElementById('musicName');
+const iframe = document.getElementById('musicIframe');
+
+let audio;
+let playlist = [];
+let index = 0;
+
+// Ouvrir/fermer le panel
+musicToggle.addEventListener('click', () => {
+    musicPanel.classList.toggle('active');
+});
+
+// Dès que l'iframe est chargée
+iframe.addEventListener('load', () => {
+    audio = iframe.contentWindow.document.getElementById('siteMusic');
+
+    // Créer une playlist depuis l'iframe
+    playlist = iframe.contentWindow.playlist || [];
+    index = iframe.contentWindow.index || 0;
+
+    // Fonction pour jouer un morceau
+    function playCurrent() {
+        if (!audio) return;
+        audio.src = playlist[index];
+        audio.play();
+        playPauseBtn.textContent = '⏸️';
+        musicName.textContent = playlist[index].split('/').pop();
+        iframe.contentWindow.index = index; // sync index dans iframe
+    }
+
+    // Play/Pause
+    playPauseBtn.addEventListener('click', () => {
+        if(audio.paused){
+            audio.play();
+            playPauseBtn.textContent = '⏸️';
+        } else {
+            audio.pause();
+            playPauseBtn.textContent = '▶️';
+        }
+    });
+
+    // Suivant
+    nextBtn.addEventListener('click', () => {
+        index++;
+        if(index >= playlist.length) index = 0;
+        playCurrent();
+    });
+
+    // Précédent
+    prevBtn.addEventListener('click', () => {
+        index--;
+        if(index < 0) index = playlist.length - 1;
+        playCurrent();
+    });
+
+    // Mettre à jour la barre d’avancement
+    audio.addEventListener('timeupdate', () => {
+        musicProgress.value = (audio.currentTime / audio.duration) * 100 || 0;
+    });
+
+    // Déplacer la barre pour changer la position
+    musicProgress.addEventListener('input', () => {
+        audio.currentTime = (musicProgress.value / 100) * audio.duration;
+    });
+
+    // Auto play suivant morceau à la fin
+    audio.addEventListener('ended', () => {
+        index++;
+        if(index >= playlist.length) index = 0;
+        playCurrent();
+    });
+
+    // Initial play
+    playCurrent();
+});
+</script>
 </body>
 </html>

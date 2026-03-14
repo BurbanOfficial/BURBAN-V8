@@ -9,14 +9,14 @@
 <audio id="siteMusic" autoplay></audio>
 
 <script>
-const playlist = [
+// Playlist originale
+window.playlist = [
   "music/Baby Dont Forget.mp3",
   "music/Birdie in the Sand.mp3",
   "music/Way You Are.mp3"
 ];
 
-let shuffledPlaylist = [];
-let index = 0;
+window.index = 0;
 
 // Mélange la playlist
 function shuffle(array) {
@@ -29,28 +29,24 @@ function shuffle(array) {
 }
 
 // Initialise le player
-function initPlaylist() {
-  shuffledPlaylist = shuffle(playlist);
-  index = 0;
-}
+window.shuffledPlaylist = shuffle(window.playlist);
 
 // Joue le morceau actuel
 function playMusic() {
-  if (index >= shuffledPlaylist.length) {
-    initPlaylist(); // remélange si tout a été joué
+  if (window.index >= window.shuffledPlaylist.length) {
+    window.index = 0;
   }
   const music = document.getElementById("siteMusic");
-  music.src = shuffledPlaylist[index];
+  music.src = window.shuffledPlaylist[window.index];
   music.play();
 }
 
 // Passe au morceau suivant à la fin
 document.getElementById("siteMusic").addEventListener("ended", () => {
-  index++;
+  window.index++;
   playMusic();
 });
 
-initPlaylist();
 playMusic();
 </script>
 
