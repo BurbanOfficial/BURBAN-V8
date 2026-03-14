@@ -313,15 +313,9 @@ const playlist = [
 ];
 
 const music = document.getElementById("siteMusic");
-const modal = document.getElementById("musicModal");
-const yesBtn = document.getElementById("musicYes");
-const noBtn = document.getElementById("musicNo");
 
 let shuffledPlaylist = [];
 let index = 0;
-
-const STORAGE_KEY = "musicPreference";
-const EXPIRATION = 24 * 60 * 60 * 1000; // 24h
 
 // Mélanger playlist
 function shuffle(array) {
@@ -335,74 +329,52 @@ function shuffle(array) {
 
 function initPlaylist(){
     shuffledPlaylist = shuffle(playlist);
-    index = 0;
 }
 
+// jouer musique
 function playMusic(){
-    if(index >= shuffledPlaylist.length){
-        initPlaylist();
-    }
-
     music.src = shuffledPlaylist[index];
+
+    const savedTime = sessionStorage.getItem("musicTime");
+
+    music.addEventListener("loadedmetadata", () => {
+        if(savedTime){
+            music.currentTime = savedTime;
+        }
+    });
+
     music.play();
 }
 
+// musique suivante
 music.addEventListener("ended", () => {
+
     index++;
+
+    if(index >= shuffledPlaylist.length){
+        shuffledPlaylist = shuffle(playlist);
+        index = 0;
+    }
+
     playMusic();
 });
 
-// Vérifier la préférence stockée
-function checkPreference(){
+// sauvegarder position avant quitter page
+window.addEventListener("beforeunload", () => {
 
-    const data = JSON.parse(localStorage.getItem(STORAGE_KEY));
+    sessionStorage.setItem("musicTime", music.currentTime);
+    sessionStorage.setItem("musicIndex", index);
 
-    if(!data){
-        modal.classList.add("active");
-        return;
-    }
+});
 
-    const now = Date.now();
+// restaurer index
+const savedIndex = sessionStorage.getItem("musicIndex");
 
-    if(now - data.time > EXPIRATION){
-        localStorage.removeItem(STORAGE_KEY);
-        modal.classList.add("active");
-        return;
-    }
-
-    if(data.choice === "yes"){
-        initPlaylist();
-        playMusic();
-    }
+if(savedIndex){
+    index = parseInt(savedIndex);
 }
 
-// Bouton oui
-yesBtn.addEventListener("click", () => {
-
-    localStorage.setItem(STORAGE_KEY, JSON.stringify({
-        choice: "yes",
-        time: Date.now()
-    }));
-
-    modal.classList.remove("active");
-
-    initPlaylist();
-    playMusic();
-});
-
-// Bouton non
-noBtn.addEventListener("click", () => {
-
-    localStorage.setItem(STORAGE_KEY, JSON.stringify({
-        choice: "no",
-        time: Date.now()
-    }));
-
-    modal.classList.remove("active");
-
-});
-
-checkPreference();
+initPlaylist();
 
 </script>
 </body>
