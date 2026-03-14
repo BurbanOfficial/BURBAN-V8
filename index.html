@@ -4,6 +4,20 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>BURBAN - Streetwear Minimaliste</title>
+
+    <!-- Favicon classique -->
+    <link rel="icon" type="image/png" sizes="32x32" href="images/favicon.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="images/favicon.png">
+
+    <!-- Apple (iPhone / iPad) -->
+    <link rel="apple-touch-icon" sizes="180x180" href="images/favicon.png">
+
+    <!-- Android / Chrome -->
+    <link rel="icon" type="image/png" sizes="192x192" href="images/favicon.png">
+
+    <!-- Icône haute qualité -->
+    <link rel="icon" type="image/png" sizes="512x512" href="images/favicon.png">
+
     <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="css/loader.css">
 </head>
@@ -11,7 +25,6 @@
     <!-- Loader -->
     <div id="loader" class="loader">
         <div class="loader-content">
-            <img src="https://i.imgur.com/Kl9kTBg.png" alt="BURBAN" class="loader-logo">
             <div class="loader-dots">
                 <div class="loader-dot"></div>
                 <div class="loader-dot"></div>
@@ -38,7 +51,7 @@
     <!-- Navigation -->
     <nav class="nav">
         <div class="nav-container">
-            <a href="index.html" class="logo"><img src="https://i.imgur.com/Kl9kTBg.png" alt="BURBAN"></a>
+            <a href="index.html" class="logo"><img src="https://i.imgur.com/iZFkTAN.png" alt="BURBAN"></a>
             <div class="mobile-icons">
                 <button class="mobile-icon-link" id="searchBtnMobile">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
@@ -194,6 +207,19 @@
         </div>
     </section>
 
+<!-- Music Choice Modal -->
+<div id="musicModal" class="custom-modal">
+    <div class="custom-modal-content">
+        <p>Souhaitez-vous faire vos achats avec de la musique ?</p>
+        <div style="display:flex; gap:12px; justify-content:center;">
+            <button id="musicYes" class="btn-primary">Oui</button>
+            <button id="musicNo" class="btn-secondary">Non</button>
+        </div>
+    </div>
+</div>
+
+<audio id="siteMusic"></audio>
+
     <!-- Footer -->
     <footer class="footer" style="margin: 0; padding: 60px 0 24px 0;">
         <div class="container">
@@ -216,9 +242,13 @@
                     <a href="burbanpartners.html">#burbanpartners</a>
                 </div>
             </div>
-            <p class="footer-copy">&copy; 2024 BURBAN. Tous droits réservés.</p>
+            <p class="footer-copy">&copy; <span id="year"></span> BURBAN. Tous droits réservés.</p>
         </div>
     </footer>
+
+    <script>
+    document.getElementById("year").textContent = new Date().getFullYear();
+    </script>
 
     <script type="module">
         import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
@@ -273,5 +303,107 @@
             nav.style.borderBottom = '1px solid transparent';
         }
     </script>
+    
+    <script>
+
+const playlist = [
+"music/Baby Dont Forget.mp3",
+"music/Birdie in the Sand.mp3",
+"music/Way You Are.mp3"
+];
+
+const music = document.getElementById("siteMusic");
+const modal = document.getElementById("musicModal");
+const yesBtn = document.getElementById("musicYes");
+const noBtn = document.getElementById("musicNo");
+
+let shuffledPlaylist = [];
+let index = 0;
+
+const STORAGE_KEY = "musicPreference";
+const EXPIRATION = 24 * 60 * 60 * 1000; // 24h
+
+// Mélanger playlist
+function shuffle(array) {
+    let arr = [...array];
+    for (let i = arr.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+    return arr;
+}
+
+function initPlaylist(){
+    shuffledPlaylist = shuffle(playlist);
+    index = 0;
+}
+
+function playMusic(){
+    if(index >= shuffledPlaylist.length){
+        initPlaylist();
+    }
+
+    music.src = shuffledPlaylist[index];
+    music.play();
+}
+
+music.addEventListener("ended", () => {
+    index++;
+    playMusic();
+});
+
+// Vérifier la préférence stockée
+function checkPreference(){
+
+    const data = JSON.parse(localStorage.getItem(STORAGE_KEY));
+
+    if(!data){
+        modal.classList.add("active");
+        return;
+    }
+
+    const now = Date.now();
+
+    if(now - data.time > EXPIRATION){
+        localStorage.removeItem(STORAGE_KEY);
+        modal.classList.add("active");
+        return;
+    }
+
+    if(data.choice === "yes"){
+        initPlaylist();
+        playMusic();
+    }
+}
+
+// Bouton oui
+yesBtn.addEventListener("click", () => {
+
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({
+        choice: "yes",
+        time: Date.now()
+    }));
+
+    modal.classList.remove("active");
+
+    initPlaylist();
+    playMusic();
+});
+
+// Bouton non
+noBtn.addEventListener("click", () => {
+
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({
+        choice: "no",
+        time: Date.now()
+    }));
+
+    modal.classList.remove("active");
+
+});
+
+checkPreference();
+
+</script>
 </body>
 </html>
