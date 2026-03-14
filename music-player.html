@@ -3,51 +3,134 @@
 <head>
 <meta charset="UTF-8">
 <title>BURBAN Music Player</title>
-</head>
-<body style="margin:0; padding:0; background:none;">
+<style>
+body {
+  margin:0; padding:0;
+  font-family: sans-serif;
+  background: #111;
+  color: #fff;
+  overflow:hidden;
+}
 
-<audio id="siteMusic" autoplay></audio>
+/* Flèche toggle */
+#musicToggle {
+  position: fixed;
+  top: 50%;
+  right: 0;
+  transform: translateY(-50%);
+  width: 50px;
+  height: 80px;
+  background: #000;
+  border-radius: 25px 0 0 25px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10000;
+}
+#musicToggle:hover { background:#222; }
+#musicToggle svg { width:20px; height:20px; fill:#fff; }
+
+/* Panel musical */
+#musicPanel {
+  position: fixed;
+  top: 50%;
+  right: -250px; /* caché par défaut */
+  transform: translateY(-50%);
+  width: 250px;
+  background: rgba(0,0,0,0.95);
+  padding: 20px;
+  border-radius: 10px 0 0 10px;
+  transition: right 0.3s;
+}
+#musicPanel.active { right:0; }
+
+#musicName { text-align:center; font-weight:500; margin-bottom:10px; }
+#musicProgress { width:100%; margin:10px 0; }
+.music-btn { background:none; border:none; color:#fff; cursor:pointer; font-size:18px; margin:0 5px; }
+#musicControls { text-align:center; margin-top:10px; }
+</style>
+</head>
+<body>
+
+<!-- Toggle -->
+<div id="musicToggle">
+  <svg viewBox="0 0 24 24"><path d="M8 5l8 7-8 7V5z"/></svg>
+</div>
+
+<!-- Panel musical -->
+<div id="musicPanel">
+  <div id="musicName">Nom de la musique</div>
+  <audio id="siteMusic" autoplay></audio>
+  <input type="range" id="musicProgress" value="0" min="0" max="100">
+  <div id="musicControls">
+    <button id="prevBtn">⏮️</button>
+    <button id="playPauseBtn">▶️</button>
+    <button id="nextBtn">⏭️</button>
+  </div>
+</div>
 
 <script>
-// Playlist originale
-window.playlist = [
-  "music/Baby Dont Forget.mp3",
-  "music/Birdie in the Sand.mp3",
-  "music/Way You Are.mp3"
+// Playlist
+const playlist = [
+  { src: "music/Baby Dont Forget.mp3", name: "Baby Don't Forget" },
+  { src: "music/Birdie in the Sand.mp3", name: "Birdie in the Sand" },
+  { src: "music/Way You Are.mp3", name: "Way You Are" }
 ];
 
-window.index = 0;
+let shuffledPlaylist = [];
+let index = 0;
+const audio = document.getElementById("siteMusic");
+const musicName = document.getElementById("musicName");
+const progress = document.getElementById("musicProgress");
 
-// Mélange la playlist
-function shuffle(array) {
-  let arr = [...array];
-  for (let i = arr.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [arr[i], arr[j]] = [arr[j], arr[i]];
+// Mélange
+function shuffle(array){
+  let arr=[...array];
+  for(let i=arr.length-1;i>0;i--){
+    const j=Math.floor(Math.random()*(i+1));
+    [arr[i],arr[j]]=[arr[j],arr[i]];
   }
   return arr;
 }
 
-// Initialise le player
-window.shuffledPlaylist = shuffle(window.playlist);
+// Init
+function initPlaylist(){ shuffledPlaylist=shuffle(playlist); index=0; }
 
-// Joue le morceau actuel
-function playMusic() {
-  if (window.index >= window.shuffledPlaylist.length) {
-    window.index = 0;
-  }
-  const music = document.getElementById("siteMusic");
-  music.src = window.shuffledPlaylist[window.index];
-  music.play();
+// Jouer
+function playMusic(){
+  if(index>=shuffledPlaylist.length) initPlaylist();
+  audio.src = shuffledPlaylist[index].src;
+  musicName.textContent = shuffledPlaylist[index].name;
+  audio.play();
+  playPauseBtn.textContent="⏸️";
 }
 
-// Passe au morceau suivant à la fin
-document.getElementById("siteMusic").addEventListener("ended", () => {
-  window.index++;
-  playMusic();
+// Controls
+const playPauseBtn=document.getElementById("playPauseBtn");
+playPauseBtn.addEventListener("click",()=>{
+  if(audio.paused){audio.play();playPauseBtn.textContent="⏸️";}
+  else{audio.pause();playPauseBtn.textContent="▶️";}
 });
 
+document.getElementById("nextBtn").addEventListener("click",()=>{index++; playMusic();});
+document.getElementById("prevBtn").addEventListener("click",()=>{index=(index-1+shuffledPlaylist.length)%shuffledPlaylist.length; playMusic();});
+
+// Progress
+audio.addEventListener("timeupdate",()=>{
+  if(!isNaN(audio.duration)) progress.value=(audio.currentTime/audio.duration)*100;
+});
+progress.addEventListener("input",()=>{ if(!isNaN(audio.duration)) audio.currentTime=(progress.value/100)*audio.duration; });
+
+// End
+audio.addEventListener("ended",()=>{ index++; playMusic(); });
+initPlaylist();
 playMusic();
+
+// Toggle panel
+const toggle=document.getElementById("musicToggle");
+const panel=document.getElementById("musicPanel");
+toggle.addEventListener("click",()=>{ panel.classList.toggle("active"); });
 </script>
 
 </body>
