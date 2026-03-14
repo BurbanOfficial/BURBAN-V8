@@ -53,51 +53,48 @@ document.addEventListener('DOMContentLoaded', () => {
         
         // Phone formatting
         const phoneFormats = {
-            '+213': { placeholder: '551 23 45 67', format: (v) => v.replace(/\D/g, '').replace(/(\d{3})(\d{2})(\d{2})(\d{2})/, '$1 $2 $3 $4') },
-            '+49': { placeholder: '151 23456789', format: (v) => v.replace(/\D/g, '').replace(/(\d{3})(\d{8})/, '$1 $2') },
-            '+966': { placeholder: '50 123 4567', format: (v) => v.replace(/\D/g, '').replace(/(\d{2})(\d{3})(\d{4})/, '$1 $2 $3') },
-            '+61': { placeholder: '412 345 678', format: (v) => v.replace(/\D/g, '').replace(/(\d{3})(\d{3})(\d{3})/, '$1 $2 $3') },
-            '+43': { placeholder: '664 123456', format: (v) => v.replace(/\D/g, '').replace(/(\d{3})(\d{6})/, '$1 $2') },
-            '+32': { placeholder: '470 12 34 56', format: (v) => v.replace(/\D/g, '').replace(/(\d{3})(\d{2})(\d{2})(\d{2})/, '$1 $2 $3 $4') },
-            '+55': { placeholder: '(11) 91234-5678', format: (v) => v.replace(/\D/g, '').replace(/(\d{2})(\d{5})(\d{4})/, '($1) $2-$3') },
-            '+1': { placeholder: '(555) 123-4567', format: (v) => v.replace(/\D/g, '').replace(/(\d{3})(\d{3})(\d{4})/, '($1) $2-$3') },
-            '+86': { placeholder: '138 0013 8000', format: (v) => v.replace(/\D/g, '').replace(/(\d{3})(\d{4})(\d{4})/, '$1 $2 $3') },
-            '+82': { placeholder: '010-1234-5678', format: (v) => v.replace(/\D/g, '').replace(/(\d{3})(\d{4})(\d{4})/, '$1-$2-$3') },
-            '+45': { placeholder: '20 12 34 56', format: (v) => v.replace(/\D/g, '').replace(/(\d{2})(\d{2})(\d{2})(\d{2})/, '$1 $2 $3 $4') },
-            '+20': { placeholder: '100 123 4567', format: (v) => v.replace(/\D/g, '').replace(/(\d{3})(\d{3})(\d{4})/, '$1 $2 $3') },
-            '+971': { placeholder: '50 123 4567', format: (v) => v.replace(/\D/g, '').replace(/(\d{2})(\d{3})(\d{4})/, '$1 $2 $3') },
-            '+34': { placeholder: '612 34 56 78', format: (v) => v.replace(/\D/g, '').replace(/(\d{3})(\d{2})(\d{2})(\d{2})/, '$1 $2 $3 $4') },
-            '+358': { placeholder: '041 234 5678', format: (v) => v.replace(/\D/g, '').replace(/(\d{3})(\d{3})(\d{4})/, '$1 $2 $3') },
-            '+33': { placeholder: '6 12 34 56 78', format: (v) => v.replace(/\D/g, '').replace(/(\d{1})(\d{2})(\d{2})(\d{2})(\d{2})/, '$1 $2 $3 $4 $5') },
-            '+30': { placeholder: '691 234 5678', format: (v) => v.replace(/\D/g, '').replace(/(\d{3})(\d{3})(\d{4})/, '$1 $2 $3') },
-            '+36': { placeholder: '20 123 4567', format: (v) => v.replace(/\D/g, '').replace(/(\d{2})(\d{3})(\d{4})/, '$1 $2 $3') },
-            '+91': { placeholder: '81234 56789', format: (v) => v.replace(/\D/g, '').replace(/(\d{5})(\d{5})/, '$1 $2') },
-            '+62': { placeholder: '812-3456-7890', format: (v) => v.replace(/\D/g, '').replace(/(\d{3})(\d{4})(\d{4})/, '$1-$2-$3') },
-            '+353': { placeholder: '085 123 4567', format: (v) => v.replace(/\D/g, '').replace(/(\d{3})(\d{3})(\d{4})/, '$1 $2 $3') },
-            '+39': { placeholder: '312 345 6789', format: (v) => v.replace(/\D/g, '').replace(/(\d{3})(\d{3})(\d{4})/, '$1 $2 $3') },
-            '+81': { placeholder: '90-1234-5678', format: (v) => v.replace(/\D/g, '').replace(/(\d{2})(\d{4})(\d{4})/, '$1-$2-$3') },
-            '+352': { placeholder: '628 123 456', format: (v) => v.replace(/\D/g, '').replace(/(\d{3})(\d{3})(\d{3})/, '$1 $2 $3') },
-            '+60': { placeholder: '12-345 6789', format: (v) => v.replace(/\D/g, '').replace(/(\d{2})(\d{3})(\d{4})/, '$1-$2 $3') },
-            '+212': { placeholder: '650-123456', format: (v) => v.replace(/\D/g, '').replace(/(\d{3})(\d{6})/, '$1-$2') },
-            '+52': { placeholder: '222 123 4567', format: (v) => v.replace(/\D/g, '').replace(/(\d{3})(\d{3})(\d{4})/, '$1 $2 $3') },
-            '+47': { placeholder: '406 12 345', format: (v) => v.replace(/\D/g, '').replace(/(\d{3})(\d{2})(\d{3})/, '$1 $2 $3') },
-            '+64': { placeholder: '021 123 4567', format: (v) => v.replace(/\D/g, '').replace(/(\d{3})(\d{3})(\d{4})/, '$1 $2 $3') },
-            '+31': { placeholder: '6 12345678', format: (v) => v.replace(/\D/g, '').replace(/(\d{1})(\d{8})/, '$1 $2') },
-            '+63': { placeholder: '905 123 4567', format: (v) => v.replace(/\D/g, '').replace(/(\d{3})(\d{3})(\d{4})/, '$1 $2 $3') },
-            '+48': { placeholder: '512 345 678', format: (v) => v.replace(/\D/g, '').replace(/(\d{3})(\d{3})(\d{3})/, '$1 $2 $3') },
-            '+351': { placeholder: '912 345 678', format: (v) => v.replace(/\D/g, '').replace(/(\d{3})(\d{3})(\d{3})/, '$1 $2 $3') },
-            '+420': { placeholder: '601 123 456', format: (v) => v.replace(/\D/g, '').replace(/(\d{3})(\d{3})(\d{3})/, '$1 $2 $3') },
-            '+40': { placeholder: '712 345 678', format: (v) => v.replace(/\D/g, '').replace(/(\d{3})(\d{3})(\d{3})/, '$1 $2 $3') },
-            '+44': { placeholder: '7400 123456', format: (v) => v.replace(/\D/g, '').replace(/(\d{4})(\d{6})/, '$1 $2') },
-            '+7': { placeholder: '912 345-67-89', format: (v) => v.replace(/\D/g, '').replace(/(\d{3})(\d{3})(\d{2})(\d{2})/, '$1 $2-$3-$4') },
-            '+65': { placeholder: '8123 4567', format: (v) => v.replace(/\D/g, '').replace(/(\d{4})(\d{4})/, '$1 $2') },
-            '+46': { placeholder: '70-123 45 67', format: (v) => v.replace(/\D/g, '').replace(/(\d{2})(\d{3})(\d{2})(\d{2})/, '$1-$2 $3 $4') },
-            '+41': { placeholder: '78 123 45 67', format: (v) => v.replace(/\D/g, '').replace(/(\d{2})(\d{3})(\d{2})(\d{2})/, '$1 $2 $3 $4') },
-            '+66': { placeholder: '081 234 5678', format: (v) => v.replace(/\D/g, '').replace(/(\d{3})(\d{3})(\d{4})/, '$1 $2 $3') },
-            '+216': { placeholder: '20 123 456', format: (v) => v.replace(/\D/g, '').replace(/(\d{2})(\d{3})(\d{3})/, '$1 $2 $3') },
-            '+90': { placeholder: '501 234 5678', format: (v) => v.replace(/\D/g, '').replace(/(\d{3})(\d{3})(\d{4})/, '$1 $2 $3') },
-            '+84': { placeholder: '091 234 5678', format: (v) => v.replace(/\D/g, '').replace(/(\d{3})(\d{3})(\d{4})/, '$1 $2 $3') },
-            '+27': { placeholder: '071 123 4567', format: (v) => v.replace(/\D/g, '').replace(/(\d{3})(\d{3})(\d{4})/, '$1 $2 $3') },
+            '+49': { placeholder: '151 23456789', format: (v) => v.replace(/\D/g, '').replace(/(\d{3})(\d{8})/, '$1 $2') }, // Allemagne
+            '+355': { placeholder: '67 123 4567', format: (v) => v.replace(/\D/g, '').replace(/(\d{2})(\d{3})(\d{4})/, '$1 $2 $3') }, // Albanie
+            '+376': { placeholder: '312 345', format: (v) => v.replace(/\D/g, '').replace(/(\d{3})(\d{3})/, '$1 $2') }, // Andorre
+            '+43': { placeholder: '664 123456', format: (v) => v.replace(/\D/g, '').replace(/(\d{3})(\d{6})/, '$1 $2') }, // Autriche
+            '+32': { placeholder: '470 12 34 56', format: (v) => v.replace(/\D/g, '').replace(/(\d{3})(\d{2})(\d{2})(\d{2})/, '$1 $2 $3 $4') }, // Belgique
+            '+387': { placeholder: '61 123 456', format: (v) => v.replace(/\D/g, '').replace(/(\d{2})(\d{3})(\d{3})/, '$1 $2 $3') }, // Bosnie
+            '+359': { placeholder: '87 123 4567', format: (v) => v.replace(/\D/g, '').replace(/(\d{2})(\d{3})(\d{4})/, '$1 $2 $3') }, // Bulgarie
+            '+357': { placeholder: '99 123456', format: (v) => v.replace(/\D/g, '').replace(/(\d{2})(\d{6})/, '$1 $2') }, // Chypre
+            '+385': { placeholder: '91 123 4567', format: (v) => v.replace(/\D/g, '').replace(/(\d{2})(\d{3})(\d{4})/, '$1 $2 $3') }, // Croatie
+            '+45': { placeholder: '20 12 34 56', format: (v) => v.replace(/\D/g, '').replace(/(\d{2})(\d{2})(\d{2})(\d{2})/, '$1 $2 $3 $4') }, // Danemark
+            '+34': { placeholder: '612 34 56 78', format: (v) => v.replace(/\D/g, '').replace(/(\d{3})(\d{2})(\d{2})(\d{2})/, '$1 $2 $3 $4') }, // Espagne
+            '+372': { placeholder: '5123 4567', format: (v) => v.replace(/\D/g, '').replace(/(\d{4})(\d{4})/, '$1 $2') }, // Estonie
+            '+358': { placeholder: '041 234 5678', format: (v) => v.replace(/\D/g, '').replace(/(\d{3})(\d{3})(\d{4})/, '$1 $2 $3') }, // Finlande
+            '+33': { placeholder: '6 12 34 56 78', format: (v) => v.replace(/\D/g, '').slice(0, 9).replace(/(\d{1})(\d{2})(\d{2})(\d{2})(\d{2})/, '$1 $2 $3 $4 $5') }, // France
+            '+30': { placeholder: '691 234 5678', format: (v) => v.replace(/\D/g, '').replace(/(\d{3})(\d{3})(\d{4})/, '$1 $2 $3') }, // Grèce
+            '+36': { placeholder: '20 123 4567', format: (v) => v.replace(/\D/g, '').replace(/(\d{2})(\d{3})(\d{4})/, '$1 $2 $3') }, // Hongrie
+            '+353': { placeholder: '085 123 4567', format: (v) => v.replace(/\D/g, '').replace(/(\d{3})(\d{3})(\d{4})/, '$1 $2 $3') }, // Irlande
+            '+354': { placeholder: '123 4567', format: (v) => v.replace(/\D/g, '').replace(/(\d{3})(\d{4})/, '$1 $2') }, // Islande
+            '+39': { placeholder: '312 345 6789', format: (v) => v.replace(/\D/g, '').replace(/(\d{3})(\d{3})(\d{4})/, '$1 $2 $3') }, // Italie
+            '+371': { placeholder: '21 234 567', format: (v) => v.replace(/\D/g, '').replace(/(\d{2})(\d{3})(\d{3})/, '$1 $2 $3') }, // Lettonie
+            '+423': { placeholder: '71 234 56 78', format: (v) => v.replace(/\D/g, '').replace(/(\d{2})(\d{3})(\d{2})(\d{2})/, '$1 $2 $3 $4') }, // Liechtenstein
+            '+370': { placeholder: '612 34567', format: (v) => v.replace(/\D/g, '').replace(/(\d{3})(\d{5})/, '$1 $2') }, // Lituanie
+            '+352': { placeholder: '628 123 456', format: (v) => v.replace(/\D/g, '').replace(/(\d{3})(\d{3})(\d{3})/, '$1 $2 $3') }, // Luxembourg
+            '+389': { placeholder: '70 123 456', format: (v) => v.replace(/\D/g, '').replace(/(\d{2})(\d{3})(\d{3})/, '$1 $2 $3') }, // Macédoine
+            '+356': { placeholder: '9912 3456', format: (v) => v.replace(/\D/g, '').replace(/(\d{4})(\d{4})/, '$1 $2') }, // Malte
+            '+373': { placeholder: '61 234 567', format: (v) => v.replace(/\D/g, '').replace(/(\d{2})(\d{3})(\d{3})/, '$1 $2 $3') }, // Moldavie
+            '+377': { placeholder: '6 12 34 56 78', format: (v) => v.replace(/\D/g, '').replace(/(\d{1})(\d{2})(\d{2})(\d{2})(\d{2})/, '$1 $2 $3 $4 $5') }, // Monaco
+            '+382': { placeholder: '67 123 456', format: (v) => v.replace(/\D/g, '').replace(/(\d{2})(\d{3})(\d{3})/, '$1 $2 $3') }, // Monténégro
+            '+47': { placeholder: '406 12 345', format: (v) => v.replace(/\D/g, '').replace(/(\d{3})(\d{2})(\d{3})/, '$1 $2 $3') }, // Norvège
+            '+31': { placeholder: '6 12345678', format: (v) => v.replace(/\D/g, '').replace(/(\d{1})(\d{8})/, '$1 $2') }, // Pays-Bas
+            '+48': { placeholder: '512 345 678', format: (v) => v.replace(/\D/g, '').replace(/(\d{3})(\d{3})(\d{3})/, '$1 $2 $3') }, // Pologne
+            '+351': { placeholder: '912 345 678', format: (v) => v.replace(/\D/g, '').replace(/(\d{3})(\d{3})(\d{3})/, '$1 $2 $3') }, // Portugal
+            '+420': { placeholder: '601 123 456', format: (v) => v.replace(/\D/g, '').replace(/(\d{3})(\d{3})(\d{3})/, '$1 $2 $3') }, // Rép. Tchèque
+            '+40': { placeholder: '712 345 678', format: (v) => v.replace(/\D/g, '').replace(/(\d{3})(\d{3})(\d{3})/, '$1 $2 $3') }, // Roumanie
+            '+44': { placeholder: '7400 123456', format: (v) => v.replace(/\D/g, '').replace(/(\d{4})(\d{6})/, '$1 $2') }, // Royaume-Uni
+            '+378': { placeholder: '0549 123456', format: (v) => v.replace(/\D/g, '').replace(/(\d{4})(\d{6})/, '$1 $2') }, // Saint-Marin
+            '+381': { placeholder: '61 123 4567', format: (v) => v.replace(/\D/g, '').replace(/(\d{2})(\d{3})(\d{4})/, '$1 $2 $3') }, // Serbie
+            '+421': { placeholder: '901 123 456', format: (v) => v.replace(/\D/g, '').replace(/(\d{3})(\d{3})(\d{3})/, '$1 $2 $3') }, // Slovaquie
+            '+386': { placeholder: '41 123 456', format: (v) => v.replace(/\D/g, '').replace(/(\d{2})(\d{3})(\d{3})/, '$1 $2 $3') }, // Slovénie
+            '+46': { placeholder: '70-123 45 67', format: (v) => v.replace(/\D/g, '').replace(/(\d{2})(\d{3})(\d{2})(\d{2})/, '$1-$2 $3 $4') }, // Suède
+            '+41': { placeholder: '78 123 45 67', format: (v) => v.replace(/\D/g, '').replace(/(\d{2})(\d{3})(\d{2})(\d{2})/, '$1 $2 $3 $4') }, // Suisse
+            '+379': { placeholder: '06 698 12345', format: (v) => v.replace(/\D/g, '').replace(/(\d{2})(\d{3})(\d{5})/, '$1 $2 $3') }, // Vatican
         };
         
         const phoneCodeSelect = document.getElementById('regPhoneCode');
@@ -150,11 +147,10 @@ document.addEventListener('DOMContentLoaded', () => {
             miniLoader.innerHTML = `
                 <div style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 10000;">
                     <div style="display: flex; flex-direction: column; align-items: center; gap: 20px;">
-                        <img src="https://i.imgur.com/Kl9kTBg.png" style="width: 60px; filter: brightness(0) invert(1);">
                         <div style="display: flex; gap: 6px;">
-                            <div style="width: 8px; height: 8px; background-image: url('https://i.imgur.com/2vSFewG.png'); background-size: contain; filter: brightness(0) invert(1); animation: dotPulse 1.5s ease-in-out infinite;"></div>
-                            <div style="width: 8px; height: 8px; background-image: url('https://i.imgur.com/2vSFewG.png'); background-size: contain; filter: brightness(0) invert(1); animation: dotPulse 1.5s ease-in-out infinite; animation-delay: 0.2s;"></div>
-                            <div style="width: 8px; height: 8px; background-image: url('https://i.imgur.com/2vSFewG.png'); background-size: contain; filter: brightness(0) invert(1); animation: dotPulse 1.5s ease-in-out infinite; animation-delay: 0.4s;"></div>
+                            <div style="width: 25px; height: 25px; background-image: url('https://i.imgur.com/IhsY0gi.png'); background-size: contain; filter: brightness(0) invert(1); animation: dotPulse 1.5s ease-in-out infinite;"></div>
+                            <div style="width: 25px; height: 25px; background-image: url('https://i.imgur.com/IhsY0gi.png'); background-size: contain; filter: brightness(0) invert(1); animation: dotPulse 1.5s ease-in-out infinite; animation-delay: 0.2s;"></div>
+                            <div style="width: 25px; height: 25px; background-image: url('https://i.imgur.com/IhsY0gi.png'); background-size: contain; filter: brightness(0) invert(1); animation: dotPulse 1.5s ease-in-out infinite; animation-delay: 0.4s;"></div>
                         </div>
                     </div>
                 </div>
@@ -183,11 +179,10 @@ document.addEventListener('DOMContentLoaded', () => {
         loginLoader.innerHTML = `
             <div style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); display: flex; align-items: center; justify-content: center; z-index: 10000;">
                 <div style="display: flex; flex-direction: column; align-items: center; gap: 20px;">
-                    <img src="https://i.imgur.com/Kl9kTBg.png" style="width: 60px; filter: brightness(0) invert(1);">
                     <div style="display: flex; gap: 6px;">
-                        <div style="width: 8px; height: 8px; background-image: url('https://i.imgur.com/2vSFewG.png'); background-size: contain; filter: brightness(0) invert(1); animation: dotPulse 1.5s ease-in-out infinite;"></div>
-                        <div style="width: 8px; height: 8px; background-image: url('https://i.imgur.com/2vSFewG.png'); background-size: contain; filter: brightness(0) invert(1); animation: dotPulse 1.5s ease-in-out infinite; animation-delay: 0.2s;"></div>
-                        <div style="width: 8px; height: 8px; background-image: url('https://i.imgur.com/2vSFewG.png'); background-size: contain; filter: brightness(0) invert(1); animation: dotPulse 1.5s ease-in-out infinite; animation-delay: 0.4s;"></div>
+                        <div style="width: 25px; height: 25px; background-image: url('https://i.imgur.com/IhsY0gi.png'); background-size: contain; filter: brightness(0) invert(1); animation: dotPulse 1.5s ease-in-out infinite;"></div>
+                        <div style="width: 25px; height: 25px; background-image: url('https://i.imgur.com/IhsY0gi.png'); background-size: contain; filter: brightness(0) invert(1); animation: dotPulse 1.5s ease-in-out infinite; animation-delay: 0.2s;"></div>
+                        <div style="width: 25px; height: 25px; background-image: url('https://i.imgur.com/IhsY0gi.png'); background-size: contain; filter: brightness(0) invert(1); animation: dotPulse 1.5s ease-in-out infinite; animation-delay: 0.4s;"></div>
                     </div>
                 </div>
             </div>
