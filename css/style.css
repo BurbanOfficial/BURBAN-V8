@@ -2207,26 +2207,3 @@ select option:disabled {
         height: 150px;
     }
 }
-
-/* Music Modal */
-#music-modal {
-    display: none; /* L'affiche par défaut */
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0,0,0,0.7);
-    justify-content: center;
-    align-items: center;
-    z-index: 9999;
-}
-
-#music-modal > div {
-    background: white;
-    padding: 30px;
-    border-radius: 10px;
-    text-align: center;
-    max-width: 400px;
-}
-
