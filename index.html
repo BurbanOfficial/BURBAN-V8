@@ -4,14 +4,28 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>BURBAN - Streetwear Minimaliste</title>
+
+    <!-- Favicon classique -->
+    <link rel="icon" type="image/png" sizes="32x32" href="images/favicon.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="images/favicon.png">
+
+    <!-- Apple (iPhone / iPad) -->
+    <link rel="apple-touch-icon" sizes="180x180" href="images/favicon.png">
+
+    <!-- Android / Chrome -->
+    <link rel="icon" type="image/png" sizes="192x192" href="images/favicon.png">
+
+    <!-- Icône haute qualité -->
+    <link rel="icon" type="image/png" sizes="512x512" href="images/favicon.png">
+
     <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="css/loader.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
     <!-- Loader -->
     <div id="loader" class="loader">
         <div class="loader-content">
-            <img src="https://i.imgur.com/Kl9kTBg.png" alt="BURBAN" class="loader-logo">
             <div class="loader-dots">
                 <div class="loader-dot"></div>
                 <div class="loader-dot"></div>
@@ -24,13 +38,13 @@
     <div class="usp-bar">
         <div class="usp-container">
             <div class="usp-item">
-                <span>✓</span> Retour sous 30 jours
+                <span><i class="fa-regular fa-circle-check"></i></span> Retour sous 30 jours
             </div>
             <div class="usp-item">
-                <span>✓</span> Livraison gratuite dès 50€
+                <span><i class="fa-regular fa-circle-check"></i></span> Livraison gratuite dès 50€
             </div>
             <div class="usp-item">
-                <span>✓</span> Paiement sécurisé
+                <span><i class="fa-regular fa-circle-check"></i></span> Paiement sécurisé
             </div>
         </div>
     </div>
@@ -38,7 +52,7 @@
     <!-- Navigation -->
     <nav class="nav">
         <div class="nav-container">
-            <a href="index.html" class="logo"><img src="https://i.imgur.com/Kl9kTBg.png" alt="BURBAN"></a>
+            <a href="index.html" class="logo"><img src="https://i.imgur.com/iZFkTAN.png" alt="BURBAN"></a>
             <div class="mobile-icons">
                 <button class="mobile-icon-link" id="searchBtnMobile">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
@@ -101,13 +115,13 @@
     <section class="hero">
         <div class="hero-content">
             <h1 class="hero-title">Minimalisme<br>Urbain</h1>
-            <p class="hero-subtitle">Collection Automne/Hiver 2024</p>
-            <a href="products.html" class="btn-primary">Découvrir</a>
+            <p class="hero-subtitle">Collection Automne/Hiver 2025</p>
+            <a href="products.html" class="btn-banner">Découvrir</a>
         </div>
     </section>
 
     <!-- Featured Products -->
-    <section class="featured">
+    <section class="featured-indexhtml">
         <div class="container">
             <h2 class="section-title">Nos recommandations</h2>
             <div id="featuredProducts" style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 40px;"></div>
@@ -115,16 +129,18 @@
     </section>
 
     <!-- Banner -->
-    <section class="banner" style="background: var(--light-gray); padding: 80px 0; text-align: center;">
-        <div class="container">
-            <h2 style="font-size: 48px; font-weight: 300; margin-bottom: 16px;">Collection Exclusive</h2>
-            <p style="color: var(--gray); margin-bottom: 32px;">Découvrez nos pièces les plus populaires</p>
-            <a href="products.html" class="btn-primary">Voir tout</a>
+    <section class="banner">
+        <div class="banner-content">
+            <div class="container">
+                <h2 style="font-size: 48px; font-weight: 300; margin-bottom: 16px;">Collection Exclusive</h2>
+                <p style="color: var(--gray); margin-bottom: 32px;">Découvrez nos pièces les plus populaires</p>
+                <a href="products.html" class="btn-banner">Voir tout</a>
+            </div>
         </div>
     </section>
 
     <!-- Best Sellers -->
-    <section class="featured">
+    <section class="featured-indexhtml">
         <div class="container">
             <h2 class="section-title">Nos Best Sellers</h2>
             <div style="position: relative;">
@@ -139,7 +155,7 @@
     <section id="membershipBanner" class="membership-banner" style="background: linear-gradient(135deg, #000 0%, #1a1a1a 100%); color: var(--white); padding: 80px 20px 80px 20px; text-align: center; position: relative; overflow: hidden; margin: 0; display: block;">
         <div class="container" style="position: relative; z-index: 2;">
             <div style="display: inline-block; background: rgba(255,255,255,0.1); padding: 8px 20px; border-radius: 30px; margin-bottom: 24px; font-size: 14px; letter-spacing: 1px;">OFFRE EXCLUSIVE</div>
-            <h2 style="font-size: 48px; font-weight: 300; margin-bottom: 20px; line-height: 1.2;">Rejoins le club BURBAN</h2>
+            <h2 style="font-size: 48px; font-weight: 300; margin-bottom: 20px; line-height: 1.2;">Rejoins le club <img src="https://i.imgur.com/IundqWv.png" alt="BURBAN" style="height: 90px; width: auto; display: inline-block; vertical-align: middle; margin: 0 8px;"></h2>
             <p style="font-size: 20px; margin-bottom: 12px; font-weight: 500;">🎁 200 points offerts à l'inscription</p>
             <p style="font-size: 16px; margin-bottom: 40px; opacity: 0.8;">Accède à des avantages exclusifs, des réductions et des lancements en avant-première</p>
             <a href="account.html" class="btn-primary" style="background: var(--white); color: var(--black); padding: 16px 48px; font-size: 16px; font-weight: 500; transition: transform 0.3s;">Créer mon compte gratuitement</a>
@@ -153,40 +169,22 @@
         <div class="container">
             <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 40px;">
                 <div style="text-align: center;">
-                    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="margin: 0 auto 16px;">
-                        <rect x="1" y="3" width="15" height="13"/>
-                        <polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/>
-                        <circle cx="5.5" cy="18.5" r="2.5"/>
-                        <circle cx="18.5" cy="18.5" r="2.5"/>
-                    </svg>
+                    <i class="fa-solid fa-truck-fast" style="font-size: 48px; display: block; margin: 0 auto 16px;"></i>
                     <h4 style="font-size: 14px; font-weight: 500; margin-bottom: 8px;">Livraison offerte</h4>
                     <p style="font-size: 13px; color: var(--gray);">Dès 50€ d'achats</p>
                 </div>
                 <div style="text-align: center;">
-                    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="margin: 0 auto 16px;">
-                        <polyline points="23 4 23 10 17 10"/>
-                        <polyline points="1 20 1 14 7 14"/>
-                        <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>
-                        <circle cx="12" cy="12" r="2"/>
-                    </svg>
+                    <i class="fa-solid fa-arrow-right-arrow-left" style="font-size: 48px; display: block; margin: 0 auto 16px;"></i>
                     <h4 style="font-size: 14px; font-weight: 500; margin-bottom: 8px;">Retours et échanges</h4>
                     <p style="font-size: 13px; color: var(--gray);">Sous 30 jours</p>
                 </div>
                 <div style="text-align: center;">
-                    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="margin: 0 auto 16px;">
-                        <rect x="1" y="4" width="22" height="16" rx="2" ry="2"/>
-                        <line x1="1" y1="10" x2="23" y2="10"/>
-                        <circle cx="12" cy="16" r="2"/>
-                        <path d="M12 14v-1"/>
-                    </svg>
+                    <i class="fa-brands fa-stripe" style="font-size: 48px; display: block; margin: 0 auto 16px;"></i>
                     <h4 style="font-size: 14px; font-weight: 500; margin-bottom: 8px;">Paiement sécurisé</h4>
                     <p style="font-size: 13px; color: var(--gray);">Transactions protégées</p>
                 </div>
                 <div style="text-align: center;">
-                    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="margin: 0 auto 16px;">
-                        <path d="M3 18v-6a9 9 0 0 1 18 0v6"/>
-                        <path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"/>
-                    </svg>
+                    <i class="fa-solid fa-headset" style="font-size: 48px; display: block; margin: 0 auto 16px;"></i>
                     <h4 style="font-size: 14px; font-weight: 500; margin-bottom: 8px;">Service client</h4>
                     <p style="font-size: 13px; color: var(--gray);">7j/7 disponible</p>
                 </div>
@@ -205,8 +203,8 @@
                 <div class="footer-col">
                     <h4>Liens</h4>
                     <a href="products.html">Collection</a>
-                    <a href="#">À propos</a>
-                    <a href="#">Contact</a>
+                    <a href="account.html">Mon compte fidélité</a>
+                    <a href="contact.html">Contacter le support</a>
                 </div>
                 <div class="footer-col">
                     <h4>Légal</h4>
@@ -216,9 +214,13 @@
                     <a href="burbanpartners.html">#burbanpartners</a>
                 </div>
             </div>
-            <p class="footer-copy">&copy; 2024 BURBAN. Tous droits réservés.</p>
+            <p class="footer-copy">&copy; <span id="year"></span> BURBAN. Tous droits réservés.</p>
         </div>
     </footer>
+
+    <script>
+    document.getElementById("year").textContent = new Date().getFullYear();
+    </script>
 
     <script type="module">
         import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';

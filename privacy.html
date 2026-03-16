@@ -4,20 +4,110 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Politique de confidentialité - BURBAN</title>
+
+    <!-- Favicon classique -->
+    <link rel="icon" type="image/png" sizes="32x32" href="images/favicon.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="images/favicon.png">
+
+    <!-- Apple (iPhone / iPad) -->
+    <link rel="apple-touch-icon" sizes="180x180" href="images/favicon.png">
+
+    <!-- Android / Chrome -->
+    <link rel="icon" type="image/png" sizes="192x192" href="images/favicon.png">
+
+    <!-- Icône haute qualité -->
+    <link rel="icon" type="image/png" sizes="512x512" href="images/favicon.png">
+
     <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/loader.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
-    <div class="usp-bar">
-        <div class="usp-container">
-            <div class="usp-item"><span>✓</span> Retour sous 30 jours</div>
-            <div class="usp-item"><span>✓</span> Livraison gratuite dès 50€</div>
-            <div class="usp-item"><span>✓</span> Paiement sécurisé</div>
+    <!-- Loader -->
+    <div id="loader" class="loader">
+        <div class="loader-content">
+            <div class="loader-dots">
+                <div class="loader-dot"></div>
+                <div class="loader-dot"></div>
+                <div class="loader-dot"></div>
+            </div>
         </div>
     </div>
 
+    <!-- USP Bar -->
+    <div class="usp-bar">
+        <div class="usp-container">
+            <div class="usp-item">
+                <span><i class="fa-regular fa-circle-check"></i></span> Retour sous 30 jours
+            </div>
+            <div class="usp-item">
+                <span><i class="fa-regular fa-circle-check"></i></span> Livraison gratuite dès 50€
+            </div>
+            <div class="usp-item">
+                <span><i class="fa-regular fa-circle-check"></i></span> Paiement sécurisé
+            </div>
+        </div>
+    </div>
+
+    <!-- Navigation -->
     <nav class="nav">
         <div class="nav-container">
-            <a href="index.html" class="logo"><img src="https://i.imgur.com/Kl9kTBg.png" alt="BURBAN"></a>
+            <a href="index.html" class="logo"><img src="https://i.imgur.com/iZFkTAN.png" alt="BURBAN"></a>
+            <div class="mobile-icons">
+                <button class="mobile-icon-link" id="searchBtnMobile">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                        <circle cx="11" cy="11" r="8"/>
+                        <path d="m21 21-4.35-4.35"/>
+                    </svg>
+                </button>
+                <a href="account.html" class="mobile-icon-link">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                        <circle cx="12" cy="7" r="4"/>
+                    </svg>
+                </a>
+                <a href="cart.html" class="mobile-icon-link cart-mobile">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/>
+                        <line x1="3" y1="6" x2="21" y2="6"/>
+                        <path d="M16 10a4 4 0 0 1-8 0"/>
+                    </svg>
+                    <span class="cart-count">0</span>
+                </a>
+                <button class="hamburger">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                        <line class="line line1" x1="3" y1="6" x2="21" y2="6"/>
+                        <line class="line line2" x1="3" y1="12" x2="21" y2="12"/>
+                        <line class="line line3" x1="3" y1="18" x2="21" y2="18"/>
+                    </svg>
+                </button>
+            </div>
+            <div class="nav-links">
+                <a href="products.html?category=men" data-text="Men"><span class="link-text">Men</span></a>
+                <a href="products.html?category=women" data-text="Women"><span class="link-text">Women</span></a>
+                <a href="contact.html" data-text="Contact Us"><span class="link-text">Contact Us</span></a>
+                <span class="nav-separator"></span>
+                <button class="search-btn" id="searchBtn">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                        <circle cx="11" cy="11" r="8"/>
+                        <path d="m21 21-4.35-4.35"/>
+                    </svg>
+                </button>
+                <a href="account.html" id="accountLink" class="icon-link">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                        <circle cx="12" cy="7" r="4"/>
+                    </svg>
+                </a>
+                <a href="cart.html" class="cart-link icon-link">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/>
+                        <line x1="3" y1="6" x2="21" y2="6"/>
+                        <path d="M16 10a4 4 0 0 1-8 0"/>
+                    </svg>
+                    <span class="cart-count">0</span>
+                </a>
+            </div>
         </div>
     </nav>
 
@@ -25,8 +115,16 @@
         <div class="container-small">
             <h1>Politique de confidentialité</h1>
             <p class="contact-intro">Dernière mise à jour : Janvier 2024</p>
+            <a href="https://example.com/privacy-policy.pdf" class="btn-download-pdf" download>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                    <polyline points="7 10 12 15 17 10"/>
+                    <line x1="12" y1="15" x2="12" y2="3"/>
+                </svg>
+                Télécharger en PDF
+            </a>
 
-            <h4>1. Collecte des données</h4>
+            <h4><br>1. Collecte des données</h4>
             <p>Nous collectons les données suivantes : nom, prénom, email, adresse de livraison, historique d'achats.</p>
 
             <h4>2. Utilisation des données</h4>
@@ -52,12 +150,48 @@
         </div>
     </section>
 
-    <footer class="footer">
+    <!-- Footer -->
+    <footer class="footer" style="margin: 0; padding: 60px 0 24px 0;">
         <div class="container">
-            <p class="footer-copy">&copy; 2024 BURBAN. Tous droits réservés.</p>
+            <div class="footer-content">
+                <div class="footer-col">
+                    <h3>BURBAN</h3>
+                    <p>Streetwear minimaliste</p>
+                </div>
+                <div class="footer-col">
+                    <h4>Liens</h4>
+                    <a href="products.html">Collection</a>
+                    <a href="account.html">Mon compte fidélité</a>
+                    <a href="contact.html">Contacter le support</a>
+                </div>
+                <div class="footer-col">
+                    <h4>Légal</h4>
+                    <a href="cgv.html">CGV</a>
+                    <a href="cgu.html">CGU</a>
+                    <a href="privacy.html">Confidentialité</a>
+                    <a href="burbanpartners.html">#burbanpartners</a>
+                </div>
+            </div>
+            <p class="footer-copy">&copy; <span id="year"></span> BURBAN. Tous droits réservés.</p>
         </div>
     </footer>
 
+    <script>
+    document.getElementById("year").textContent = new Date().getFullYear();
+    </script>
+
+    <!-- Search Modal -->
+    <div class="search-modal" id="searchModal">
+        <div class="search-modal-content">
+            <button class="search-close" id="searchClose">&times;</button>
+            <input type="text" id="searchInput" placeholder="Rechercher un produit..." autofocus>
+            <div id="searchResults"></div>
+        </div>
+    </div>
+
     <script src="js/app.js"></script>
+    <script src="js/loader.js"></script>
+    <script src="js/home.js"></script>
+    <script src="js/search.js"></script>
 </body>
 </html>

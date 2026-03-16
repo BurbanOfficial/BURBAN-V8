@@ -4,6 +4,20 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Paiement - BURBAN</title>
+
+    <!-- Favicon classique -->
+    <link rel="icon" type="image/png" sizes="32x32" href="images/favicon.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="images/favicon.png">
+
+    <!-- Apple (iPhone / iPad) -->
+    <link rel="apple-touch-icon" sizes="180x180" href="images/favicon.png">
+
+    <!-- Android / Chrome -->
+    <link rel="icon" type="image/png" sizes="192x192" href="images/favicon.png">
+
+    <!-- Icône haute qualité -->
+    <link rel="icon" type="image/png" sizes="512x512" href="images/favicon.png">
+    
     <link rel="stylesheet" href="css/style.css">
     <script src="https://js.stripe.com/v3/"></script>
 </head>
@@ -291,8 +305,8 @@
                 <div class="footer-col">
                     <h4>Liens</h4>
                     <a href="products.html">Collection</a>
-                    <a href="#">À propos</a>
-                    <a href="#">Contact</a>
+                    <a href="account.html">Mon compte fidélité</a>
+                    <a href="contact.html">Contacter le support</a>
                 </div>
                 <div class="footer-col">
                     <h4>Légal</h4>
@@ -302,9 +316,13 @@
                     <a href="burbanpartners.html">#burbanpartners</a>
                 </div>
             </div>
-            <p class="footer-copy">&copy; 2024 BURBAN. Tous droits réservés.</p>
+            <p class="footer-copy">&copy; <span id="year"></span> BURBAN. Tous droits réservés.</p>
         </div>
     </footer>
+
+    <script>
+    document.getElementById("year").textContent = new Date().getFullYear();
+    </script>
 
     <script type="module">
         import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';

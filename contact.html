@@ -4,8 +4,23 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Contact Us - BURBAN</title>
+    
+    <!-- Favicon classique -->
+    <link rel="icon" type="image/png" sizes="32x32" href="images/favicon.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="images/favicon.png">
+
+    <!-- Apple (iPhone / iPad) -->
+    <link rel="apple-touch-icon" sizes="180x180" href="images/favicon.png">
+
+    <!-- Android / Chrome -->
+    <link rel="icon" type="image/png" sizes="192x192" href="images/favicon.png">
+
+    <!-- Icône haute qualité -->
+    <link rel="icon" type="image/png" sizes="512x512" href="images/favicon.png">
+
     <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="css/loader.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
     <!-- Loader -->
@@ -23,13 +38,13 @@
     <div class="usp-bar">
         <div class="usp-container">
             <div class="usp-item">
-                <span>✓</span> Retour sous 30 jours
+                <span><i class="fa-regular fa-circle-check"></i></span> Retour sous 30 jours
             </div>
             <div class="usp-item">
-                <span>✓</span> Livraison gratuite dès 50€
+                <span><i class="fa-regular fa-circle-check"></i></span> Livraison gratuite dès 50€
             </div>
             <div class="usp-item">
-                <span>✓</span> Paiement sécurisé
+                <span><i class="fa-regular fa-circle-check"></i></span> Paiement sécurisé
             </div>
         </div>
     </div>
@@ -120,7 +135,8 @@
         </div>
     </section>
 
-    <footer class="footer">
+    <!-- Footer -->
+    <footer class="footer" style="margin: 0; padding: 60px 0 24px 0;">
         <div class="container">
             <div class="footer-content">
                 <div class="footer-col">
@@ -130,8 +146,8 @@
                 <div class="footer-col">
                     <h4>Liens</h4>
                     <a href="products.html">Collection</a>
-                    <a href="#">À propos</a>
-                    <a href="contact.html">Contact</a>
+                    <a href="account.html">Mon compte fidélité</a>
+                    <a href="contact.html">Contacter le support</a>
                 </div>
                 <div class="footer-col">
                     <h4>Légal</h4>
@@ -141,9 +157,13 @@
                     <a href="burbanpartners.html">#burbanpartners</a>
                 </div>
             </div>
-            <p class="footer-copy">&copy; 2024 BURBAN. Tous droits réservés.</p>
+            <p class="footer-copy">&copy; <span id="year"></span> BURBAN. Tous droits réservés.</p>
         </div>
     </footer>
+
+    <script>
+    document.getElementById("year").textContent = new Date().getFullYear();
+    </script>
 
     <!-- Search Modal -->
     <div class="search-modal" id="searchModal">
