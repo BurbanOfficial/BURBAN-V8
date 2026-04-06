@@ -295,33 +295,65 @@
     </section>
 
     <!-- Footer -->
-    <footer class="footer" style="margin: 0; padding: 60px 0 24px 0;">
+    <footer class="site-footer">
         <div class="container">
-            <div class="footer-content">
-                <div class="footer-col">
-                    <h3>BURBAN</h3>
-                    <p>Streetwear minimaliste</p>
+            <div class="footer-top">
+                <div class="footer-brand">
+                    <img src="https://i.imgur.com/iZFkTAN.png" alt="BURBAN" style="height: 40px; width: auto; margin-bottom: 20px; filter: brightness(0) invert(1);">
+                    <p>L'essence du minimalisme urbain. Conçu pour le mouvement, pensé pour le style.</p>
+                    <div class="social-links">
+                        <a href="https://www.instagram.com/burban.official/" aria-label="Instagram"><i class="fa-brands fa-instagram"></i></a>
+                        <a href="https://www.tiktok.com/@burban.official" aria-label="TikTok"><i class="fa-brands fa-tiktok"></i></a>
+                        <a href="https://www.facebook.com/share/18Re7H7a7Q/" aria-label="Facebook"><i class="fa-brands fa-facebook-f"></i></a>
+                        <a href="https://www.whatsapp.com/channel/0029VamoSXlDJ6GxgWLAmz17" aria-label="WhatsApp"><i class="fa-brands fa-whatsapp"></i></a>
+                    </div>
                 </div>
-                <div class="footer-col">
-                    <h4>Liens</h4>
-                    <a href="products.html">Collection</a>
-                    <a href="account.html">Mon compte fidélité</a>
-                    <a href="contact.html">Contacter le support</a>
+
+                <div class="footer-links">
+                    <h4>Boutique</h4>
+                    <ul>
+                        <li><a href="products.html?category=men">Homme</a></li>
+                        <li><a href="products.html?category=women">Femme</a></li>
+                        <li><a href="account.html">Club Fidélité</a></li>
+                        <li><a href="contact.html">Nous contacter</a></li>
+                    </ul>
                 </div>
-                <div class="footer-col">
-                    <h4>Légal</h4>
-                    <a href="cgv.html">CGV</a>
-                    <a href="cgu.html">CGU</a>
-                    <a href="privacy.html">Confidentialité</a>
-                    <a href="burbanpartners.html">#burbanpartners</a>
+
+                <div class="footer-links">
+                    <h4>Informations</h4>
+                    <ul>
+                        <li><a href="cgv.html">CGV</a></li>
+                        <li><a href="cgu.html">CGU</a></li>
+                        <li><a href="privacy.html">Confidentialité</a></li>
+                        <li><a href="burbanpartners.html">#burbanpartners</a></li>
+                    </ul>
+                </div>
+
+                <div class="footer-newsletter">
+                    <h4>Newsletter</h4>
+                    <p>Ne manquez rien ! Inscrivez-vous à notre newsletter et recevez 200 points.</p>
+                    <form class="newsletter-form" onsubmit="event.preventDefault(); alert('Merci pour votre inscription !');">
+                        <input type="email" placeholder="votre@email.com" required>
+                        <button type="submit" aria-label="S'inscrire"><i class="fa-solid fa-arrow-right"></i></button>
+                    </form>
                 </div>
             </div>
-            <p class="footer-copy">&copy; <span id="year"></span> BURBAN. Tous droits réservés.</p>
+
+            <div class="footer-bottom">
+                <p>&copy; <span id="year"></span> BURBAN. Tous droits réservés.</p>
+                <div class="payment-methods">
+                    <i class="fa-brands fa-cc-visa" title="Visa"></i>
+                    <i class="fa-brands fa-cc-mastercard" title="Mastercard"></i>
+                    <i class="fa-brands fa-cc-amex" title="American Express"></i>
+                    <i class="fa-brands fa-cc-apple-pay" title="Apple Pay"></i>
+                    <i class="fa-brands fa-google-pay" title="Google Pay"></i>
+                </div>
+            </div>
         </div>
     </footer>
 
     <script>
-    document.getElementById("year").textContent = new Date().getFullYear();
+        document.getElementById("year").textContent = new Date().getFullYear();
     </script>
 
     <script type="module">
