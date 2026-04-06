@@ -181,7 +181,7 @@ window.cancelOrderAdmin = async function(orderNumber) {
                 if (pointsEarned > 0) {
                     updates.push({
                         points: -pointsEarned,
-                        description: 'Annulation de commande (admin)',
+                        description: 'Annulation de commande par Burban',
                         date: new Date().toISOString()
                     });
                 }

@@ -621,7 +621,7 @@ async function loadOrders(orderNumbers = []) {
                     ${order.status !== 'cancelled' ? `
                     <div style="padding: 24px; border-top: 1px solid var(--border); display: flex; gap: 12px;">
                         ${order.trackingUrl ? `<a href="${order.trackingUrl}" target="_blank" class="btn-primary" style="flex: 1; text-align: center;">Suivre mon colis</a>` : ''}
-                        ${order.status === 'processing' ? `<button onclick="cancelOrderConfirm('${order.orderNumber}')" class="btn-secondary" style="flex: 1; background: white; border: 1px solid var(--border); color: var(--black); transition: all 0.2s;" onmouseover="this.style.background='#ef4444'; this.style.color='white'; this.style.borderColor='#ef4444'" onmouseout="this.style.background='white'; this.style.color='var(--black)'; this.style.borderColor='var(--border)'">Annuler</button>` : ''}
+                        ${order.status === 'processing' ? `<button onclick="cancelOrderConfirm('${order.orderNumber}')" class="btn-cancel" style="flex: 1; background: white; border: 1px solid var(--border); color: var(--black); transition: all 0.2s;" onmouseover="this.style.background='#ef4444'; this.style.color='white'; this.style.borderColor='#ef4444'" onmouseout="this.style.background='white'; this.style.color='var(--black)'; this.style.borderColor='var(--border)'">Annuler</button>` : ''}
                     </div>
                     ` : ''}
                 </div>
