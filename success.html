@@ -140,6 +140,7 @@
                     orderNumber,
                     userId: user.uid,
                     userEmail: user.email || tempOrder.shippingAddress?.email,
+                    paymentIntentId: urlParams.get('payment_intent') || null,
                     items: tempOrder.items,
                     total: tempOrder.total,
                     discount: tempOrder.discount,

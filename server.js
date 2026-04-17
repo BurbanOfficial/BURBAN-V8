@@ -6,7 +6,7 @@ const FormData = require('form-data');
 const Mailgun = require('mailgun.js');
 
 const MAILGUN_DOMAIN = 'mg.burbanofficial.com';
-const MAILGUN_FROM = `BURBAN <noreply@${MAILGUN_DOMAIN}>`;
+const MAILGUN_FROM = `BURBAN <noreply@mg.burbanofficial.com>`;
 const mg = new Mailgun(FormData).client({
     username: 'api',
     key: process.env.MAILGUN_API_KEY || '60cb5ddcede1d9c2ed35283c7432c647-8a3819a9-08d21130',
@@ -113,9 +113,18 @@ app.get('/payment-details/:paymentIntentId', async (req, res) => {
 
 app.post('/refund-order', async (req, res) => {
     try {
-        const { orderNumber } = req.body;
-        const paymentIntents = await stripe.paymentIntents.list({ limit: 100 });
-        const paymentIntent = paymentIntents.data.find(pi => pi.metadata.orderNumber === orderNumber);
+        const { orderNumber, paymentIntentId } = req.body;
+        
+        let paymentIntent;
+        
+        if (paymentIntentId) {
+            // Utiliser directement le paymentIntentId si disponible
+            paymentIntent = await stripe.paymentIntents.retrieve(paymentIntentId);
+        } else {
+            // Fallback : chercher par orderNumber dans les metadata
+            const paymentIntents = await stripe.paymentIntents.list({ limit: 100 });
+            paymentIntent = paymentIntents.data.find(pi => pi.metadata.orderNumber === orderNumber);
+        }
         
         if (!paymentIntent) {
             return res.json({ success: false, error: 'Paiement introuvable' });
