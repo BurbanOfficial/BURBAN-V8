@@ -440,7 +440,7 @@ document.getElementById('addSizeGuideBtn')?.addEventListener('click', () => {
     document.getElementById('sizeGuideModal').classList.add('active');
 });
 
-document.getElementById('sizeGuideForm')?.addEventListener('submit', (e) => {
+document.getElementById('sizeGuideForm')?.addEventListener('submit', async (e) => {
     e.preventDefault();
     const guides = JSON.parse(localStorage.getItem('sizeGuides')) || [];
     const id = document.getElementById('sizeGuideId').value;
@@ -462,6 +462,16 @@ document.getElementById('sizeGuideForm')?.addEventListener('submit', (e) => {
     }
     
     localStorage.setItem('sizeGuides', JSON.stringify(guides));
+    
+    if (window.firebaseReady) {
+        try {
+            const { doc, setDoc } = window.firebaseModules;
+            await setDoc(doc(window.firebaseDb, 'sizeGuides', `${guide.id}`), guide);
+        } catch (error) {
+            console.error('Erreur Firestore sizeGuide:', error);
+        }
+    }
+    
     document.getElementById('sizeGuideModal').classList.remove('active');
     loadSizeGuides();
 });
@@ -481,11 +491,21 @@ function editSizeGuide(id) {
     }
 }
 
-function deleteSizeGuide(id) {
+async function deleteSizeGuide(id) {
     if (confirm('Supprimer ce guide des tailles ?')) {
         let guides = JSON.parse(localStorage.getItem('sizeGuides')) || [];
         guides = guides.filter(g => g.id !== id);
         localStorage.setItem('sizeGuides', JSON.stringify(guides));
+        
+        if (window.firebaseReady) {
+            try {
+                const { doc, deleteDoc } = window.firebaseModules;
+                await deleteDoc(doc(window.firebaseDb, 'sizeGuides', `${id}`));
+            } catch (error) {
+                console.error('Erreur Firestore deleteSizeGuide:', error);
+            }
+        }
+        
         loadSizeGuides();
     }
 }

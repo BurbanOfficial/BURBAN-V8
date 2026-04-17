@@ -425,12 +425,16 @@ async function showSizeGuide(sizeGuideId) {
         try {
             const { doc, getDoc } = window.firebaseModules;
             const snap = await getDoc(doc(window.firebaseDb, 'sizeGuides', `${sizeGuideId}`));
-            if (snap.exists()) guide = snap.data();
-        } catch (e) {}
+            if (snap.exists()) {
+                guide = snap.data();
+            }
+        } catch (e) {
+            console.error('Erreur chargement guide Firestore:', e);
+        }
     }
     if (!guide) {
         const guides = JSON.parse(localStorage.getItem('sizeGuides')) || [];
-        guide = guides.find(g => g.id === sizeGuideId);
+        guide = guides.find(g => g.id == sizeGuideId);
     }
     
     // Identifier les colonnes numériques (dimensions) pour la conversion
