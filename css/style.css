@@ -446,6 +446,28 @@ select:focus {
     gap: 8px;
 }
 
+.btn-sizeguide {
+    padding: 14px 32px;
+    font-size: 14px;
+    font-weight: 500;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center; /* centre horizontalement */
+    gap: 8px;
+    background: var(--white);
+    color: var(--black);
+    border: 1px solid var(--black);
+    position: relative;
+    overflow: hidden;
+    transition: color 0.4s ease;
+    z-index: 0;
+}
+
+.btn-sizeguide:hover {
+    background-color: var(--black);
+    color: var(--white)
+}
+
 /* Banners Buttons*/
 .btn-banner {
     padding: 14px 32px;
