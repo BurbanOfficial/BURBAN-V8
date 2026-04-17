@@ -337,37 +337,6 @@ document.getElementById('addProductBtn').addEventListener('click', () => {
     document.getElementById('productModal').classList.add('active');
 });
 
-// Product Form
-document.getElementById('productForm').addEventListener('submit', (e) => {
-    e.preventDefault();
-    
-    const products = JSON.parse(localStorage.getItem('adminProducts')) || window.products || [];
-    const id = document.getElementById('productId').value;
-    
-    const product = {
-        id: id ? parseInt(id) : Date.now(),
-        name: document.getElementById('productName').value,
-        price: parseFloat(document.getElementById('productPrice').value),
-        description: document.getElementById('productDescription').value,
-        category: document.getElementById('productCategory').value,
-        gender: document.getElementById('productGender').value,
-        image: document.getElementById('productImage').value,
-        sizes: document.getElementById('productSizes').value.split(',').map(s => s.trim()),
-        colors: document.getElementById('productColors').value.split(',').map(c => c.trim())
-    };
-    
-    if (id) {
-        const index = products.findIndex(p => p.id === parseInt(id));
-        products[index] = product;
-    } else {
-        products.push(product);
-    }
-    
-    localStorage.setItem('adminProducts', JSON.stringify(products));
-    window.products = products;
-    loadProducts();
-    document.getElementById('productModal').classList.remove('active');
-});
 
 function editProduct(id) {
     const role = sessionStorage.getItem('userRole');

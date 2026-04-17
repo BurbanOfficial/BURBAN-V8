@@ -475,7 +475,9 @@ document.getElementById('sizeGuideForm')?.addEventListener('submit', async (e) =
     if (window.firebaseDb) {
         try {
             const { doc, setDoc } = window.firebaseModules;
-            await setDoc(doc(window.firebaseDb, 'sizeGuides', `${guide.id}`), guide);
+            // Firestore n'accepte pas les tableaux imbriqués : sérialiser les rows
+            const guideForFirestore = { ...guide, rows: JSON.stringify(guide.rows) };
+            await setDoc(doc(window.firebaseDb, 'sizeGuides', `${guide.id}`), guideForFirestore);
             console.log('Guide sauvegardé dans Firestore:', guide.id);
         } catch (error) {
             console.error('Erreur Firestore sizeGuide:', error);
@@ -738,7 +740,12 @@ async function loadSizeGuidesFromFirestore() {
         const { collection, getDocs } = window.firebaseModules;
         const snapshot = await getDocs(collection(window.firebaseDb, 'sizeGuides'));
         if (!snapshot.empty) {
-            const guides = snapshot.docs.map(d => d.data());
+            const guides = snapshot.docs.map(d => {
+                const data = d.data();
+                // Désérialiser les rows si stockées en JSON string
+                if (typeof data.rows === 'string') data.rows = JSON.parse(data.rows);
+                return data;
+            });
             localStorage.setItem('sizeGuides', JSON.stringify(guides));
         }
         loadSizeGuides();

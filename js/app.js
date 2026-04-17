@@ -427,6 +427,7 @@ async function showSizeGuide(sizeGuideId) {
             const snap = await getDoc(doc(window.firebaseDb, 'sizeGuides', `${sizeGuideId}`));
             if (snap.exists()) {
                 guide = snap.data();
+                if (typeof guide.rows === 'string') guide.rows = JSON.parse(guide.rows);
             }
         } catch (e) {
             console.error('Erreur chargement guide Firestore:', e);
