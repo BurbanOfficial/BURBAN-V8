@@ -11,11 +11,15 @@ function loadCategories() {
         localStorage.setItem('adminCategories', JSON.stringify(categories));
     }
     
-    // Mettre à jour le select
-    const select = document.getElementById('productCategory');
-    if (select) {
-        select.innerHTML = '<option value="">Catégorie</option>' + 
-            categories.map(cat => `<option value="${cat.slug}">${cat.name}</option>`).join('');
+    // Mettre à jour les checkboxes
+    const checkboxContainer = document.getElementById('productCategoryCheckboxes');
+    if (checkboxContainer) {
+        checkboxContainer.innerHTML = categories.map(cat => `
+            <label style="display: flex; align-items: center; gap: 6px; font-size: 14px; cursor: pointer;">
+                <input type="checkbox" name="productCategory" value="${cat.slug}" style="width: auto;">
+                ${cat.name}
+            </label>
+        `).join('');
     }
     
     // Mettre à jour le tableau
@@ -23,7 +27,10 @@ function loadCategories() {
     if (tbody) {
         const products = JSON.parse(localStorage.getItem('adminProducts')) || [];
         tbody.innerHTML = categories.map(cat => {
-            const count = products.filter(p => p.category === cat.slug).length;
+            const count = products.filter(p => {
+                const cats = Array.isArray(p.categories) ? p.categories : (p.category ? [p.category] : []);
+                return cats.includes(cat.slug);
+            }).length;
             return `
                 <tr>
                     <td>${cat.name}</td>
@@ -79,19 +86,22 @@ document.getElementById('productForm')?.addEventListener('submit', (e) => {
     const id = document.getElementById('productId').value;
     
     // Galerie d'images
-    const images = [
-        document.getElementById('productImage1').value,
-        document.getElementById('productImage2').value,
-        document.getElementById('productImage3').value,
-        document.getElementById('productImage4').value
-    ].filter(img => img);
+    const images = [];
     
     // Images par couleur
-    const colors = document.getElementById('productColors').value.split(',').map(c => c.trim());
+    const colors = document.getElementById('productColors').value.split(',').map(c => c.trim()).filter(c => c);
     const imagesByColor = {};
     colors.forEach(color => {
-        imagesByColor[color] = images;
+        const colorKey = color.replace('#', 'color_');
+        const colorImages = [1,2,3,4].map(i => {
+            const el = document.getElementById(`img_${colorKey}_${i}`);
+            return el ? el.value.trim() : '';
+        }).filter(img => img);
+        imagesByColor[color] = colorImages.length ? colorImages : images;
     });
+    
+    // Catégories (multi-select via checkboxes)
+    const selectedCategories = Array.from(document.querySelectorAll('input[name="productCategory"]:checked')).map(cb => cb.value);
     
     const promoActive = document.getElementById('productPromoActive').checked;
     const existingProduct = id ? products.find(p => p.id === parseInt(id)) : null;
@@ -102,10 +112,11 @@ document.getElementById('productForm')?.addEventListener('submit', (e) => {
         name: document.getElementById('productName').value,
         price: parseFloat(document.getElementById('productPrice').value),
         description: document.getElementById('productDescription').value,
-        category: document.getElementById('productCategory').value,
+        categories: selectedCategories,
+        category: selectedCategories[0] || '',
         gender: document.getElementById('productGender').value,
-        image: images[0],
-        images: images,
+        image: Object.values(imagesByColor)[0]?.[0] || images[0],
+        images: Object.values(imagesByColor)[0] || images,
         imagesByColor: imagesByColor,
         sizes: sizes,
         colors: colors,
@@ -209,7 +220,7 @@ function loadProducts() {
                 <td><img src="${product.image || product.images?.[0]}" alt="${product.name}"></td>
                 <td>${product.name}${!isVisible ? ' <small>(Non publié)</small>' : ''}</td>
                 <td>${product.price.toFixed(2)} €</td>
-                <td>${product.category}</td>
+                <td>${(Array.isArray(product.categories) ? product.categories : (product.category ? [product.category] : [])).join(', ') || '-'}</td>
                 <td>${stockText}</td>
                 <td>
                     ${role === 'customer_support' ? '<span style="color: var(--gray);">Lecture seule</span>' : `
@@ -263,15 +274,16 @@ function editProduct(id) {
         document.getElementById('productName').value = product.name;
         document.getElementById('productPrice').value = product.price;
         document.getElementById('productDescription').value = product.description;
-        document.getElementById('productCategory').value = product.category;
         document.getElementById('productGender').value = product.gender;
         
-        // Images
-        const images = product.images || [product.image];
-        document.getElementById('productImage1').value = images[0] || '';
-        document.getElementById('productImage2').value = images[1] || '';
-        document.getElementById('productImage3').value = images[2] || '';
-        document.getElementById('productImage4').value = images[3] || '';
+        // Catégories
+        const productCats = Array.isArray(product.categories) ? product.categories : (product.category ? [product.category] : []);
+        document.querySelectorAll('input[name="productCategory"]').forEach(cb => {
+            cb.checked = productCats.includes(cb.value);
+        });
+        
+        // Images par couleur
+        renderColorGallery(product.colors || [], product.imagesByColor || {});
         
         document.getElementById('productSizes').value = product.sizes.join(', ');
         document.getElementById('productColors').value = product.colors.join(', ');
@@ -616,11 +628,35 @@ async function checkAndNotifyStockIncrease(product) {
     }
 }
 
+// Rendu de la galerie d'images par couleur
+function renderColorGallery(colors, imagesByColor) {
+    const container = document.getElementById('colorGalleryContainer');
+    if (!container) return;
+    if (!colors.length) {
+        container.innerHTML = '<p style="font-size: 13px; color: var(--gray);">Renseignez d\'abord les couleurs ci-dessous.</p>';
+        return;
+    }
+    container.innerHTML = colors.map(color => {
+        const colorKey = color.replace('#', 'color_');
+        const imgs = (imagesByColor && imagesByColor[color]) || [];
+        return `
+            <div style="margin-bottom: 16px;">
+                <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
+                    <span style="width: 16px; height: 16px; border-radius: 50%; background: ${color}; border: 1px solid var(--border); display: inline-block;"></span>
+                    <strong style="font-size: 13px;">${getColorName(color)}</strong>
+                </div>
+                ${[1,2,3,4].map(i => `<input type="text" id="img_${colorKey}_${i}" placeholder="Image ${i}${i === 1 ? ' (principale)' : ''}" value="${imgs[i-1] || ''}" style="margin-bottom: 6px;">`).join('')}
+            </div>
+        `;
+    }).join('');
+}
+
 // Mettre à jour les couleurs/tailles pour générer les variantes
 setTimeout(() => {
     document.getElementById('productColors')?.addEventListener('blur', () => {
         const colors = document.getElementById('productColors').value.split(',').map(c => c.trim()).filter(c => c);
         const sizes = document.getElementById('productSizes').value.split(',').map(s => s.trim()).filter(s => s);
+        if (colors.length) renderColorGallery(colors, {});
         if (colors.length && sizes.length) {
             loadStockVariants({ colors, sizes, stockByVariant: {} });
         }
@@ -636,7 +672,7 @@ setTimeout(() => {
 }, 500);
 
 // Charger les catégories au démarrage
-if (document.getElementById('productCategory')) {
+if (document.getElementById('productCategoryCheckboxes')) {
     loadCategories();
     loadSizeGuides();
     
@@ -644,7 +680,40 @@ if (document.getElementById('productCategory')) {
     const waitForFirebase = setInterval(() => {
         if (window.firebaseReady) {
             clearInterval(waitForFirebase);
+            loadCategoriesFromFirestore();
+            loadSizeGuidesFromFirestore();
             loadProductsFromFirestore();
         }
     }, 100);
+}
+
+async function loadCategoriesFromFirestore() {
+    if (!window.firebaseReady) return;
+    try {
+        const { doc, getDoc } = window.firebaseModules;
+        const snap = await getDoc(doc(window.firebaseDb, 'categories', 'list'));
+        if (snap.exists() && snap.data().categories) {
+            localStorage.setItem('adminCategories', JSON.stringify(snap.data().categories));
+        }
+        loadCategories();
+    } catch (error) {
+        console.error('Erreur chargement catégories Firestore:', error);
+        loadCategories();
+    }
+}
+
+async function loadSizeGuidesFromFirestore() {
+    if (!window.firebaseReady) return;
+    try {
+        const { collection, getDocs } = window.firebaseModules;
+        const snapshot = await getDocs(collection(window.firebaseDb, 'sizeGuides'));
+        if (!snapshot.empty) {
+            const guides = snapshot.docs.map(d => d.data());
+            localStorage.setItem('sizeGuides', JSON.stringify(guides));
+        }
+        loadSizeGuides();
+    } catch (error) {
+        console.error('Erreur chargement guides Firestore:', error);
+        loadSizeGuides();
+    }
 }

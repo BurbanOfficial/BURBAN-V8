@@ -418,76 +418,118 @@ function showImageZoom(imageSrc, images = [imageSrc]) {
     document.body.appendChild(modal);
 }
 
-function showSizeGuide(sizeGuideId) {
-    const guides = JSON.parse(localStorage.getItem('sizeGuides')) || [];
-    const guide = guides.find(g => g.id === sizeGuideId);
+async function showSizeGuide(sizeGuideId) {
+    // Charger depuis Firestore en priorité
+    let guide = null;
+    if (window.firebaseReady && window.firebaseModules) {
+        try {
+            const { doc, getDoc } = window.firebaseModules;
+            const snap = await getDoc(doc(window.firebaseDb, 'sizeGuides', `${sizeGuideId}`));
+            if (snap.exists()) guide = snap.data();
+        } catch (e) {}
+    }
+    if (!guide) {
+        const guides = JSON.parse(localStorage.getItem('sizeGuides')) || [];
+        guide = guides.find(g => g.id === sizeGuideId);
+    }
     
-    let content;
+    // Identifier les colonnes numériques (dimensions) pour la conversion
+    // Une cellule est numérique si elle contient uniquement des chiffres, tirets et points
+    function isNumeric(val) {
+        return /^[\d.,\-]+$/.test(String(val).trim());
+    }
     
-    if (guide && guide.columns && guide.rows) {
-        content = `
-            <table style="width: 100%; border-collapse: collapse; margin-bottom: 24px; text-align: left;">
+    function convertCell(val, toInch) {
+        if (!toInch) return val;
+        // Gère les plages "94-98"
+        return String(val).replace(/[\d.]+/g, n => (parseFloat(n) / 2.54).toFixed(1));
+    }
+    
+    function buildTable(guide, toInch) {
+        if (!guide || !guide.columns || !guide.rows) return buildDefaultTable(toInch);
+        
+        // Détecter quelles colonnes sont numériques (hors première colonne Taille)
+        const numericCols = guide.columns.map((col, i) => {
+            if (i === 0) return false;
+            return guide.rows.some(row => isNumeric(row[i]));
+        });
+        
+        const headers = guide.columns.map((col, i) => {
+            if (!numericCols[i]) return col;
+            // Remplacer (cm) par (in) si besoin
+            return toInch ? col.replace(/\(cm\)/gi, '(in)') : col.replace(/\(in\)/gi, '(cm)');
+        });
+        
+        return `
+            <table style="width: 100%; border-collapse: collapse; margin-bottom: 16px; text-align: left;">
                 <thead>
                     <tr style="border-bottom: 1px solid var(--border);">
-                        ${guide.columns.map(col => `<th style="padding: 12px;">${col}</th>`).join('')}
+                        ${headers.map(col => `<th style="padding: 12px;">${col}</th>`).join('')}
                     </tr>
                 </thead>
                 <tbody>
                     ${guide.rows.map((row, index) => `
                         <tr style="${index < guide.rows.length - 1 ? 'border-bottom: 1px solid var(--border);' : ''}">
-                            ${row.map(cell => `<td style="padding: 12px;">${cell}</td>`).join('')}
+                            ${row.map((cell, i) => `<td style="padding: 12px;">${numericCols[i] ? convertCell(cell, toInch) : cell}</td>`).join('')}
                         </tr>
                     `).join('')}
                 </tbody>
             </table>
         `;
-    } else {
-        content = `
-            <table style="width: 100%; border-collapse: collapse; margin-bottom: 24px; text-align: left;">
+    }
+    
+    function buildDefaultTable(toInch) {
+        const unit = toInch ? 'in' : 'cm';
+        const rows = [
+            ['S', '94-98', '68'],
+            ['M', '98-102', '70'],
+            ['L', '102-106', '72'],
+            ['XL', '106-110', '74']
+        ];
+        return `
+            <table style="width: 100%; border-collapse: collapse; margin-bottom: 16px; text-align: left;">
                 <thead>
                     <tr style="border-bottom: 1px solid var(--border);">
                         <th style="padding: 12px;">Taille</th>
-                        <th style="padding: 12px;">Poitrine (cm)</th>
-                        <th style="padding: 12px;">Longueur (cm)</th>
+                        <th style="padding: 12px;">Poitrine (${unit})</th>
+                        <th style="padding: 12px;">Longueur (${unit})</th>
                     </tr>
                 </thead>
                 <tbody>
-                    <tr style="border-bottom: 1px solid var(--border);">
-                        <td style="padding: 12px;">S</td>
-                        <td style="padding: 12px;">94-98</td>
-                        <td style="padding: 12px;">68</td>
-                    </tr>
-                    <tr style="border-bottom: 1px solid var(--border);">
-                        <td style="padding: 12px;">M</td>
-                        <td style="padding: 12px;">98-102</td>
-                        <td style="padding: 12px;">70</td>
-                    </tr>
-                    <tr style="border-bottom: 1px solid var(--border);">
-                        <td style="padding: 12px;">L</td>
-                        <td style="padding: 12px;">102-106</td>
-                        <td style="padding: 12px;">72</td>
-                    </tr>
-                    <tr>
-                        <td style="padding: 12px;">XL</td>
-                        <td style="padding: 12px;">106-110</td>
-                        <td style="padding: 12px;">74</td>
-                    </tr>
+                    ${rows.map((row, i) => `
+                        <tr style="${i < rows.length - 1 ? 'border-bottom: 1px solid var(--border);' : ''}">
+                            <td style="padding: 12px;">${row[0]}</td>
+                            <td style="padding: 12px;">${toInch ? row[1].replace(/[\d.]+/g, n => (parseFloat(n)/2.54).toFixed(1)) : row[1]}</td>
+                            <td style="padding: 12px;">${toInch ? (parseFloat(row[2])/2.54).toFixed(1) : row[2]}</td>
+                        </tr>
+                    `).join('')}
                 </tbody>
             </table>
         `;
     }
+    
+    let isInch = false;
     
     document.body.classList.add('modal-open');
     const modal = document.createElement('div');
     modal.className = 'custom-modal active';
     modal.innerHTML = `
         <div class="custom-modal-content" style="max-width: 600px;">
-            <h3 style="font-size: 20px; font-weight: 400; margin-bottom: 24px;">Tableau des tailles</h3>
-            ${content}
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px;">
+                <h3 style="font-size: 20px; font-weight: 400; margin: 0;">Tableau des tailles</h3>
+                <button id="unitToggleBtn" class="btn-sizeguide" style="font-size: 13px; padding: 6px 14px;">Afficher en pouces (in)</button>
+            </div>
+            <div id="sizeGuideTableContainer">${buildTable(guide, false)}</div>
             <button class="btn-primary" onclick="document.body.classList.remove('modal-open'); this.closest('.custom-modal').remove()">Fermer</button>
         </div>
     `;
     document.body.appendChild(modal);
+    
+    modal.querySelector('#unitToggleBtn').addEventListener('click', function() {
+        isInch = !isInch;
+        modal.querySelector('#sizeGuideTableContainer').innerHTML = buildTable(guide, isInch);
+        this.textContent = isInch ? 'Afficher en cm' : 'Afficher en pouces (in)';
+    });
 }
 
 // Initialize

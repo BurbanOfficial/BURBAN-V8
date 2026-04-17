@@ -10,7 +10,10 @@ function displayProducts() {
         filtered = filtered.filter(p => p.gender === currentGender);
     }
     if (currentCategory !== 'all') {
-        filtered = filtered.filter(p => p.category === currentCategory);
+        filtered = filtered.filter(p => {
+            const cats = Array.isArray(p.categories) ? p.categories : (p.category ? [p.category] : []);
+            return cats.includes(currentCategory);
+        });
     }
     
     const now = new Date();
@@ -69,8 +72,20 @@ document.addEventListener('DOMContentLoaded', async () => {
         currentGender = gender;
     }
     
-    // Load categories from localStorage
-    let categories = JSON.parse(localStorage.getItem('adminCategories'));
+    // Charger les catégories depuis Firestore
+    let categories;
+    try {
+        const { doc, getDoc } = window.firebaseModules;
+        const snap = await getDoc(doc(window.firebaseDb, 'categories', 'list'));
+        if (snap.exists() && snap.data().categories) {
+            categories = snap.data().categories;
+            localStorage.setItem('adminCategories', JSON.stringify(categories));
+        }
+    } catch (e) {}
+    
+    if (!categories) {
+        categories = JSON.parse(localStorage.getItem('adminCategories'));
+    }
     if (!categories) {
         categories = [
             { id: 1, name: 'T-shirts', slug: 't-shirts' },
