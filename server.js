@@ -2,6 +2,16 @@ const express = require('express');
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 const cors = require('cors');
 const https = require('https');
+const FormData = require('form-data');
+const Mailgun = require('mailgun.js');
+
+const MAILGUN_DOMAIN = 'mg.burbanofficial.com';
+const MAILGUN_FROM = `BURBAN <noreply@${MAILGUN_DOMAIN}>`;
+const mg = new Mailgun(FormData).client({
+    username: 'api',
+    key: process.env.MAILGUN_API_KEY || '60cb5ddcede1d9c2ed35283c7432c647-8a3819a9-08d21130',
+    url: 'https://api.eu.mailgun.net'
+});
 
 const app = express();
 
@@ -129,6 +139,58 @@ app.post('/update-payment-intent/:paymentIntentId', async (req, res) => {
         });
         res.json({ success: true });
     } catch (error) {
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
+// Notification retour en stock via Mailgun
+app.post('/send-stock-notification', async (req, res) => {
+    const { email, productName, productImage, productPrice, productId, color, size } = req.body;
+    if (!email || !productName) return res.status(400).json({ success: false, error: 'email et productName requis' });
+
+    const productUrl = `https://burban-v8.onrender.com/product-detail.html?id=${productId}`;
+    const html = `<!DOCTYPE html>
+<html lang="fr"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
+<body style="margin:0;padding:0;background:#f5f5f5;font-family:Arial,sans-serif;">
+<table width="100%" cellpadding="0" cellspacing="0" style="background:#f5f5f5;padding:40px 0;"><tr><td align="center">
+<table width="600" cellpadding="0" cellspacing="0" style="background:#fff;max-width:600px;width:100%;">
+  <tr><td style="background:#000;padding:28px;text-align:center;">
+    <img src="https://i.imgur.com/iZFkTAN.png" alt="BURBAN" style="height:32px;">
+  </td></tr>
+  <tr><td style="padding:40px;">
+    <h1 style="font-size:22px;font-weight:400;margin:0 0 8px;color:#000;">De retour en stock !</h1>
+    <p style="font-size:15px;color:#666;margin:0 0 32px;">L'article que vous attendiez est &agrave; nouveau disponible.</p>
+    ${productImage ? `<div style="text-align:center;margin-bottom:32px;"><a href="${productUrl}"><img src="${productImage}" alt="${productName}" style="max-width:100%;max-height:380px;object-fit:cover;"></a></div>` : ''}
+    <table width="100%" cellpadding="0" cellspacing="0" style="border-top:1px solid #e0e0e0;border-bottom:1px solid #e0e0e0;padding:24px 0;margin-bottom:32px;">
+      <tr><td>
+        <p style="font-size:18px;font-weight:500;margin:0 0 8px;color:#000;">${productName}</p>
+        ${color ? `<p style="font-size:14px;color:#666;margin:0 0 4px;">Couleur&nbsp;: ${color}</p>` : ''}
+        ${size ? `<p style="font-size:14px;color:#666;margin:0 0 4px;">Taille&nbsp;: ${size}</p>` : ''}
+        ${productPrice ? `<p style="font-size:20px;font-weight:500;margin:12px 0 0;color:#000;">${parseFloat(productPrice).toFixed(2)} &euro;</p>` : ''}
+      </td></tr>
+    </table>
+    <div style="text-align:center;margin-bottom:32px;">
+      <a href="${productUrl}" style="display:inline-block;background:#000;color:#fff;text-decoration:none;padding:16px 40px;font-size:13px;letter-spacing:1px;">COMMANDER MAINTENANT</a>
+    </div>
+    <p style="font-size:13px;color:#999;margin:0;">Les stocks sont limit&eacute;s, ne tardez pas !</p>
+  </td></tr>
+  <tr><td style="background:#f5f5f5;padding:20px;text-align:center;border-top:1px solid #e0e0e0;">
+    <p style="font-size:12px;color:#999;margin:0;">&copy; ${new Date().getFullYear()} BURBAN. Tous droits r&eacute;serv&eacute;s.</p>
+  </td></tr>
+</table>
+</td></tr></table>
+</body></html>`;
+
+    try {
+        await mg.messages.create(MAILGUN_DOMAIN, {
+            from: MAILGUN_FROM,
+            to: [email],
+            subject: `${productName} est de retour en stock !`,
+            html
+        });
+        res.json({ success: true });
+    } catch (error) {
+        console.error('Erreur Mailgun:', error.message);
         res.status(500).json({ success: false, error: error.message });
     }
 });
