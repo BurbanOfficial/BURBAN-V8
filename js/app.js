@@ -163,6 +163,39 @@ let products = getProducts();
 // Cart Management
 let cart = JSON.parse(localStorage.getItem('cart')) || [];
 
+async function saveCartToFirestore() {
+    if (!window.firebaseReady || !window.firebaseAuth?.currentUser) return;
+    try {
+        const { doc, setDoc } = window.firebaseModules;
+        await setDoc(doc(window.firebaseDb, 'users', window.firebaseAuth.currentUser.uid), { cart }, { merge: true });
+    } catch (e) {
+        console.error('Erreur sauvegarde panier:', e);
+    }
+}
+
+async function loadCartFromFirestore(uid) {
+    try {
+        const { doc, getDoc } = window.firebaseModules;
+        const snap = await getDoc(doc(window.firebaseDb, 'users', uid));
+        return snap.exists() ? (snap.data().cart || []) : [];
+    } catch (e) {
+        return [];
+    }
+}
+
+function mergeCarts(savedCart, localCart) {
+    const merged = [...savedCart];
+    localCart.forEach(localItem => {
+        const exists = merged.some(item =>
+            item.id === localItem.id &&
+            item.size === localItem.size &&
+            item.color === localItem.color
+        );
+        if (!exists) merged.push(localItem);
+    });
+    return merged;
+}
+
 function updateCartCount() {
     const count = cart.reduce((sum, item) => sum + (parseInt(item.quantity) || 0), 0);
     document.querySelectorAll('.cart-count').forEach(el => {
@@ -193,6 +226,7 @@ function addToCart(productId, size, color = null) {
     
     localStorage.setItem('cart', JSON.stringify(cart));
     updateCartCount();
+    saveCartToFirestore();
 }
 
 function removeFromCart(productId, size, color = null) {
@@ -201,6 +235,7 @@ function removeFromCart(productId, size, color = null) {
     });
     localStorage.setItem('cart', JSON.stringify(cart));
     updateCartCount();
+    saveCartToFirestore();
 }
 
 function updateQuantity(productId, size, quantity, color = null) {
@@ -219,6 +254,7 @@ function updateQuantity(productId, size, quantity, color = null) {
         cart[itemIndex].quantity = quantity;
         localStorage.setItem('cart', JSON.stringify(cart));
         updateCartCount();
+        saveCartToFirestore();
     }
 }
 
@@ -541,6 +577,27 @@ async function showSizeGuide(sizeGuideId) {
 document.addEventListener('DOMContentLoaded', () => {
     updateCartCount();
     
+    // Écouter l'état de connexion Firebase pour synchroniser le panier
+    const waitForAuth = setInterval(() => {
+        if (window.firebaseReady && window.firebaseAuth && window.firebaseModules?.onAuthStateChanged) {
+            clearInterval(waitForAuth);
+            const { onAuthStateChanged } = window.firebaseModules;
+            onAuthStateChanged(window.firebaseAuth, async (user) => {
+                if (user) {
+                    // Connexion : fusionner panier local + panier Firestore
+                    const localCart = [...cart];
+                    const savedCart = await loadCartFromFirestore(user.uid);
+                    const merged = mergeCarts(savedCart, localCart);
+                    cart = merged;
+                    localStorage.setItem('cart', JSON.stringify(cart));
+                    updateCartCount();
+                    await saveCartToFirestore();
+                }
+                // Déconnexion : on garde le localStorage tel quel (vidé par account.js)
+            });
+        }
+    }, 100);
+
     // Update account link
     const accountLink = document.getElementById('accountLink');
     if (accountLink) {
