@@ -146,7 +146,7 @@ document.getElementById('productForm')?.addEventListener('submit', (e) => {
     
     // Envoyer les notifications si le stock a augmenté
     if (id) {
-        checkAndNotifyStockIncrease(product);
+        checkAndNotifyStockIncrease(product, existingProduct);
     }
     
     loadProducts();
@@ -592,7 +592,7 @@ function getColorName(hex) {
     return colors[hex?.toUpperCase()] || hex;
 }
 
-async function checkAndNotifyStockIncrease(product) {
+async function checkAndNotifyStockIncrease(product, previousProduct) {
     if (!window.firebaseReady || !window.firebaseModules) return;
     
     try {
@@ -606,33 +606,36 @@ async function checkAndNotifyStockIncrease(product) {
         const variants = notifications.variants || {};
         const variantsToDelete = [];
         
-        // Vérifier chaque variante
         for (const [variantKey, subscribers] of Object.entries(variants)) {
-            const stock = product.stockByVariant?.[variantKey] || 0;
+            const newStock = product.stockByVariant?.[variantKey] || 0;
+            const oldStock = previousProduct?.stockByVariant?.[variantKey] || 0;
             
-            if (stock > 0 && subscribers && subscribers.length > 0) {
+            // N'envoyer que si le stock passe de 0 à > 0
+            if (oldStock === 0 && newStock > 0 && subscribers && subscribers.length > 0) {
                 const [color, size] = variantKey.split('-');
                 let successCount = 0;
                 
-                // Envoyer les emails via Cloud Function
+                // Envoyer les emails via Mailgun
                 for (const sub of subscribers) {
                     try {
-                        const response = await fetch('https://us-central1-burban-fidelity.cloudfunctions.net/sendStockNotification', {
+                        const response = await fetch('https://burban-v8.onrender.com/send-stock-notification', {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
                             body: JSON.stringify({
-                                data: {
-                                    email: sub.email,
-                                    productName: product.name,
-                                    color: getColorName(color),
-                                    size: size
-                                }
+                                email: sub.email,
+                                productName: product.name,
+                                productImage: product.image || product.images?.[0] || '',
+                                productPrice: product.price,
+                                productId: product.id,
+                                color: getColorName(color),
+                                size: size
                             })
                         });
-                        
                         if (response.ok) {
                             successCount++;
                             console.log(`Email envoyé à: ${sub.email}`);
+                        } else {
+                            console.error(`Erreur Mailgun pour ${sub.email}:`, await response.text());
                         }
                     } catch (error) {
                         console.error(`Erreur envoi email à ${sub.email}:`, error);
