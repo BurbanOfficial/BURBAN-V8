@@ -310,9 +310,10 @@
                 <input type="number" id="productPrice" placeholder="Prix (€)" step="0.01" min="0" required>
                 <textarea id="productDescription" placeholder="Description" rows="3" required></textarea>
                 
-                <select id="productCategory" required>
-                    <option value="">Catégorie</option>
-                </select>
+                <div id="productCategoryContainer" style="border: 1px solid var(--border); padding: 12px; margin-bottom: 8px;">
+                    <p style="font-size: 13px; color: var(--gray); margin: 0 0 8px;">Catégories</p>
+                    <div id="productCategoryCheckboxes" style="display: flex; flex-wrap: wrap; gap: 8px;"></div>
+                </div>
                 
                 <select id="productGender" required>
                     <option value="">Genre</option>
@@ -320,11 +321,8 @@
                     <option value="women">Femme</option>
                 </select>
                 
-                <h4 style="margin: 16px 0 8px; font-size: 14px; font-weight: 500;">Galerie d'images</h4>
-                <input type="text" id="productImage1" placeholder="Image 1 (principale)" required>
-                <input type="text" id="productImage2" placeholder="Image 2">
-                <input type="text" id="productImage3" placeholder="Image 3">
-                <input type="text" id="productImage4" placeholder="Image 4">
+                <h4 style="margin: 16px 0 8px; font-size: 14px; font-weight: 500;">Galerie d'images par couleur</h4>
+                <div id="colorGalleryContainer"><p style="font-size: 13px; color: var(--gray);">Renseignez d'abord les couleurs ci-dessous.</p></div>
                 
                 <input type="text" id="productSizes" placeholder="Tailles (séparées par des virgules)" value="S,M,L,XL" required>
                 <input type="text" id="productColors" placeholder="Couleurs hex (séparées par des virgules)" value="#000000,#FFFFFF" required>
@@ -465,7 +463,7 @@
                 <input type="text" id="sizeGuideName" placeholder="Nom du guide (ex: T-shirts Homme)" required>
                 
                 <div style="margin: 16px 0;">
-                    <label style="font-size: 14px; font-weight: 500; margin-bottom: 8px; display: block;">Colonnes (séparées par des virgules)</label>
+                    <label style="font-size: 14px; font-weight: 500; margin-bottom: 8px; display: block;">Colonnes (séparées par des virgules) — dimensions en cm</label>
                     <input type="text" id="sizeGuideColumns" placeholder="Taille, Poitrine (cm), Longueur (cm)" required>
                 </div>
                 
