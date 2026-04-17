@@ -716,14 +716,31 @@ window.confirmCancelOrder = async function(orderNumber) {
             cancelledAt: new Date().toISOString()
         });
         
-        // Remboursement automatique
+        // Remboursement automatique + email annulation
         try {
             const response = await fetch('https://burban-v8.onrender.com/refund-order', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ orderNumber })
+                body: JSON.stringify({ orderNumber, paymentIntentId: order.paymentIntentId || null })
             });
             const result = await response.json();
+            
+            // Envoyer email annulation
+            const addr = order.shippingAddress || {};
+            await fetch('https://burban-v8.onrender.com/send-order-email', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    type: 'cancelled',
+                    email: addr.email || order.userEmail,
+                    customerName: `${addr.firstName || ''} ${addr.lastName || ''}`.trim(),
+                    orderNumber: order.orderNumber,
+                    items: order.items,
+                    total: order.total,
+                    shippingAddress: addr
+                })
+            });
+            
             if (result.success) {
                 showMessage(`Commande annulée. Remboursement de ${result.amount.toFixed(2)} € en cours (5-10 jours).`);
             } else {
