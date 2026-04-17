@@ -463,10 +463,20 @@ document.getElementById('sizeGuideForm')?.addEventListener('submit', async (e) =
     
     localStorage.setItem('sizeGuides', JSON.stringify(guides));
     
-    if (window.firebaseReady) {
+    // Attendre Firebase si pas encore prêt
+    await new Promise(resolve => {
+        if (window.firebaseReady && window.firebaseDb) return resolve();
+        const check = setInterval(() => {
+            if (window.firebaseReady && window.firebaseDb) { clearInterval(check); resolve(); }
+        }, 100);
+        setTimeout(() => { clearInterval(check); resolve(); }, 5000);
+    });
+    
+    if (window.firebaseDb) {
         try {
             const { doc, setDoc } = window.firebaseModules;
             await setDoc(doc(window.firebaseDb, 'sizeGuides', `${guide.id}`), guide);
+            console.log('Guide sauvegardé dans Firestore:', guide.id);
         } catch (error) {
             console.error('Erreur Firestore sizeGuide:', error);
         }
