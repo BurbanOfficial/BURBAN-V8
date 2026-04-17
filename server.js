@@ -143,6 +143,137 @@ app.post('/update-payment-intent/:paymentIntentId', async (req, res) => {
     }
 });
 
+// Endpoint emails transactionnels via Mailgun
+app.post('/send-order-email', async (req, res) => {
+    const { type, email, customerName, orderNumber, orderDate, items, total, shippingAddress, trackingLink } = req.body;
+    if (!email || !type) return res.status(400).json({ success: false, error: 'email et type requis' });
+
+    const itemsText = (items || []).map(item =>
+        `${item.name}${item.color ? ' - ' + item.color : ''} | Taille ${item.size} x${item.quantity} — ${(item.price * item.quantity).toFixed(2)} €`
+    ).join('\n');
+
+    const addr = shippingAddress || {};
+    const now = new Date().toLocaleDateString('fr-FR');
+
+    const templates = {
+        confirmation: {
+            subject: `Commande confirmée — ${orderNumber}`,
+            html: `<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
+<body style="margin:0;padding:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#fff;">
+<table width="100%" cellpadding="0" cellspacing="0" style="max-width:600px;margin:0 auto;padding:40px 20px;">
+  <tr><td align="center" style="padding-bottom:40px;"><img src="https://i.imgur.com/iZFkTAN.png" alt="BURBAN" style="height:60px;"></td></tr>
+  <tr><td style="padding:0 20px;">
+    <h1 style="margin:0 0 16px;font-size:24px;font-weight:600;color:#000;">Commande confirmée</h1>
+    <p style="margin:0 0 24px;color:#666;line-height:1.6;">Bonjour ${customerName},</p>
+    <p style="margin:0 0 32px;color:#666;line-height:1.6;">Merci pour votre commande. Nous avons bien reçu votre paiement.</p>
+    <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:32px;border:1px solid #e5e5e5;">
+      <tr><td style="padding:16px;border-bottom:1px solid #e5e5e5;"><strong style="color:#000;">Numéro de commande</strong><br><span style="color:#666;">${orderNumber}</span></td></tr>
+      <tr><td style="padding:16px;"><strong style="color:#000;">Date de commande</strong><br><span style="color:#666;">${orderDate || now}</span></td></tr>
+    </table>
+    <h2 style="margin:0 0 16px;font-size:18px;font-weight:600;color:#000;">Articles</h2>
+    <div style="white-space:pre-line;padding:16px;background:#f5f5f5;margin-bottom:24px;color:#000;line-height:1.8;">${itemsText}</div>
+    <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:32px;">
+      <tr><td style="padding:16px 0;text-align:right;border-top:2px solid #000;"><strong style="font-size:18px;color:#000;">Total : ${parseFloat(total).toFixed(2)} €</strong></td></tr>
+    </table>
+    <h2 style="margin:0 0 16px;font-size:18px;font-weight:600;color:#000;">Adresse de livraison</h2>
+    <div style="padding:16px;background:#f5f5f5;margin-bottom:32px;"><p style="margin:0;color:#000;line-height:1.6;">${addr.firstName || ''} ${addr.lastName || ''}<br>${addr.address || ''}<br>${addr.postal || ''} ${addr.city || ''}<br>${addr.country || ''}</p></div>
+    <h2 style="margin:0 0 16px;font-size:18px;font-weight:600;color:#000;">Adresse de facturation</h2>
+    <div style="padding:16px;background:#f5f5f5;margin-bottom:32px;"><p style="margin:0;color:#000;line-height:1.6;">${addr.firstName || ''} ${addr.lastName || ''}<br>${addr.address || ''}<br>${addr.postal || ''} ${addr.city || ''}<br>${addr.country || ''}</p></div>
+    <table width="100%" cellpadding="0" cellspacing="0" style="margin:32px 0;"><tr><td align="center"><a href="https://burbanofficial.github.io/BURBAN-V8/account.html" style="display:inline-block;padding:14px 32px;background:#000;color:#fff;text-decoration:none;font-weight:500;">Suivre ma commande</a></td></tr></table>
+    <p style="margin:32px 0 0;color:#999;font-size:14px;text-align:center;line-height:1.6;">Des questions ? Contactez-nous à support@burbanofficial.com</p><br>
+  </td></tr>
+  <tr><td style="padding:40px 20px 0;text-align:center;border-top:1px solid #e5e5e5;"><p style="margin:0 0 8px;color:#666;font-size:14px;">BURBAN</p><p style="margin:0;color:#999;font-size:12px;">&copy; ${new Date().getFullYear()} BURBAN. Tous droits réservés.</p></td></tr>
+</table></body></html>`
+        },
+        shipped: {
+            subject: `Votre commande ${orderNumber} est en route !`,
+            html: `<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
+<body style="margin:0;padding:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#fff;">
+<table width="100%" cellpadding="0" cellspacing="0" style="max-width:600px;margin:0 auto;padding:40px 20px;">
+  <tr><td align="center" style="padding-bottom:40px;"><img src="https://i.imgur.com/iZFkTAN.png" alt="BURBAN" style="height:60px;"></td></tr>
+  <tr><td style="padding:0 20px;">
+    <h1 style="margin:0 0 16px;font-size:24px;font-weight:600;color:#000;">Commande envoyée</h1>
+    <p style="margin:0 0 24px;color:#666;line-height:1.6;">Bonjour ${customerName},</p>
+    <p style="margin:0 0 32px;color:#666;line-height:1.6;">Excellente nouvelle ! Votre commande a été confiée à notre transporteur et est actuellement en route vers votre adresse de livraison.</p>
+    <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:32px;border:1px solid #e5e5e5;">
+      <tr><td style="padding:16px;border-bottom:1px solid #e5e5e5;"><strong style="color:#000;">Numéro de commande</strong><br><span style="color:#666;">${orderNumber}</span></td></tr>
+      <tr><td style="padding:16px;"><strong style="color:#000;">Date d'expédition</strong><br><span style="color:#666;">${now}</span></td></tr>
+    </table>
+    <h2 style="margin:0 0 16px;font-size:18px;font-weight:600;color:#000;">Articles expédiés</h2>
+    <div style="white-space:pre-line;padding:16px;background:#f5f5f5;margin-bottom:24px;color:#000;line-height:1.8;">${itemsText}</div>
+    <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:32px;"><tr><td style="padding:16px 0;text-align:right;border-top:2px solid #000;"><strong style="font-size:18px;color:#000;">Total : ${parseFloat(total).toFixed(2)} €</strong></td></tr></table>
+    <h2 style="margin:0 0 16px;font-size:18px;font-weight:600;color:#000;">Adresse de livraison</h2>
+    <div style="padding:16px;background:#f5f5f5;margin-bottom:32px;"><p style="margin:0;color:#000;line-height:1.6;">${addr.firstName || ''} ${addr.lastName || ''}<br>${addr.address || ''}<br>${addr.postal || ''} ${addr.city || ''}<br>${addr.country || ''}</p></div>
+    <table width="100%" cellpadding="0" cellspacing="0" style="margin:32px 0;"><tr><td align="center"><a href="${trackingLink || '#'}" style="display:inline-block;padding:14px 32px;background:#000;color:#fff;text-decoration:none;font-weight:500;">Suivre mon colis</a></td></tr></table>
+    <p style="margin:32px 0 0;color:#999;font-size:14px;text-align:center;line-height:1.6;">Des questions ? Contactez-nous à support@burbanofficial.com</p><br>
+  </td></tr>
+  <tr><td style="padding:40px 20px 0;text-align:center;border-top:1px solid #e5e5e5;"><p style="margin:0 0 8px;color:#666;font-size:14px;">BURBAN</p><p style="margin:0;color:#999;font-size:12px;">&copy; ${new Date().getFullYear()} BURBAN. Tous droits réservés.</p></td></tr>
+</table></body></html>`
+        },
+        delivered: {
+            subject: `Votre commande ${orderNumber} a été livrée`,
+            html: `<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
+<body style="margin:0;padding:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#fff;">
+<table width="100%" cellpadding="0" cellspacing="0" style="max-width:600px;margin:0 auto;padding:40px 20px;">
+  <tr><td align="center" style="padding-bottom:40px;"><img src="https://i.imgur.com/iZFkTAN.png" alt="BURBAN" style="height:60px;"></td></tr>
+  <tr><td style="padding:0 20px;">
+    <h1 style="margin:0 0 16px;font-size:24px;font-weight:600;color:#000;">Commande livrée</h1>
+    <p style="margin:0 0 24px;color:#666;line-height:1.6;">Bonjour ${customerName},</p>
+    <p style="margin:0 0 32px;color:#666;line-height:1.6;">Votre commande a été livrée avec succès ! Nous espérons que vos nouveaux articles vous donneront entière satisfaction.</p>
+    <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:32px;border:1px solid #e5e5e5;">
+      <tr><td style="padding:16px;border-bottom:1px solid #e5e5e5;"><strong style="color:#000;">Numéro de commande</strong><br><span style="color:#666;">${orderNumber}</span></td></tr>
+      <tr><td style="padding:16px;"><strong style="color:#000;">Date de livraison</strong><br><span style="color:#666;">${now}</span></td></tr>
+    </table>
+    <h2 style="margin:0 0 16px;font-size:18px;font-weight:600;color:#000;">Récapitulatif de vos articles</h2>
+    <div style="white-space:pre-line;padding:16px;background:#f5f5f5;margin-bottom:32px;color:#000;line-height:1.8;">${itemsText}</div>
+    <table width="100%" cellpadding="0" cellspacing="0" style="margin:32px 0;"><tr><td align="center"><a href="https://burbanofficial.github.io/BURBAN-V8/account.html" style="display:inline-block;padding:14px 32px;background:#000;color:#fff;text-decoration:none;font-weight:500;">Voir les détails de ma commande</a></td></tr></table>
+    <p style="margin:32px 0 0;color:#999;font-size:14px;text-align:center;line-height:1.6;">Un problème avec votre livraison ou besoin d'effectuer un retour ?<br>Contactez-nous à support@burbanofficial.com</p><br>
+  </td></tr>
+  <tr><td style="padding:40px 20px 0;text-align:center;border-top:1px solid #e5e5e5;"><p style="margin:0 0 8px;color:#666;font-size:14px;">BURBAN</p><p style="margin:0;color:#999;font-size:12px;">&copy; ${new Date().getFullYear()} BURBAN. Tous droits réservés.</p></td></tr>
+</table></body></html>`
+        },
+        cancelled: {
+            subject: `Votre commande ${orderNumber} a été annulée`,
+            html: `<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
+<body style="margin:0;padding:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#fff;">
+<table width="100%" cellpadding="0" cellspacing="0" style="max-width:600px;margin:0 auto;padding:40px 20px;">
+  <tr><td align="center" style="padding-bottom:40px;"><img src="https://i.imgur.com/iZFkTAN.png" alt="BURBAN" style="height:60px;"></td></tr>
+  <tr><td style="padding:0 20px;">
+    <h1 style="margin:0 0 16px;font-size:24px;font-weight:600;color:#000;">Commande annulée</h1>
+    <p style="margin:0 0 24px;color:#666;line-height:1.6;">Bonjour ${customerName},</p>
+    <p style="margin:0 0 32px;color:#666;line-height:1.6;">Votre commande a bien été annulée. Si vous aviez déjà été débité(e), le remboursement intégral a été initié et apparaîtra sur votre moyen de paiement sous quelques jours ouvrés.</p>
+    <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:32px;border:1px solid #e5e5e5;">
+      <tr><td style="padding:16px;border-bottom:1px solid #e5e5e5;"><strong style="color:#000;">Numéro de commande</strong><br><span style="color:#666;">${orderNumber}</span></td></tr>
+      <tr><td style="padding:16px;"><strong style="color:#000;">Date d'annulation</strong><br><span style="color:#666;">${now}</span></td></tr>
+    </table>
+    <h2 style="margin:0 0 16px;font-size:18px;font-weight:600;color:#000;">Articles annulés</h2>
+    <div style="white-space:pre-line;padding:16px;background:#f5f5f5;margin-bottom:24px;color:#000;line-height:1.8;">${itemsText}</div>
+    <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:32px;"><tr><td style="padding:16px 0;text-align:right;border-top:2px solid #000;"><strong style="font-size:18px;color:#000;">Montant remboursé : ${parseFloat(total).toFixed(2)} €</strong></td></tr></table>
+    <table width="100%" cellpadding="0" cellspacing="0" style="margin:32px 0;"><tr><td align="center"><a href="https://burbanofficial.github.io/BURBAN-V8/" style="display:inline-block;padding:14px 32px;background:#000;color:#fff;text-decoration:none;font-weight:500;">Retourner sur la boutique</a></td></tr></table>
+    <p style="margin:32px 0 0;color:#999;font-size:14px;text-align:center;line-height:1.6;">Si vous n'êtes pas à l'origine de cette annulation, contactez-nous à support@burbanofficial.com</p><br>
+  </td></tr>
+  <tr><td style="padding:40px 20px 0;text-align:center;border-top:1px solid #e5e5e5;"><p style="margin:0 0 8px;color:#666;font-size:14px;">BURBAN</p><p style="margin:0;color:#999;font-size:12px;">&copy; ${new Date().getFullYear()} BURBAN. Tous droits réservés.</p></td></tr>
+</table></body></html>`
+        }
+    };
+
+    const tpl = templates[type];
+    if (!tpl) return res.status(400).json({ success: false, error: 'type invalide' });
+
+    try {
+        await mg.messages.create(MAILGUN_DOMAIN, {
+            from: MAILGUN_FROM,
+            to: [email],
+            subject: tpl.subject,
+            html: tpl.html
+        });
+        res.json({ success: true });
+    } catch (error) {
+        console.error('Erreur Mailgun order email:', error.message);
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
 // Notification retour en stock via Mailgun
 app.post('/send-stock-notification', async (req, res) => {
     const { email, productName, productImage, productPrice, productId, color, size } = req.body;
@@ -154,8 +285,8 @@ app.post('/send-stock-notification', async (req, res) => {
 <body style="margin:0;padding:0;background:#f5f5f5;font-family:Arial,sans-serif;">
 <table width="100%" cellpadding="0" cellspacing="0" style="background:#f5f5f5;padding:40px 0;"><tr><td align="center">
 <table width="600" cellpadding="0" cellspacing="0" style="background:#fff;max-width:600px;width:100%;">
-  <tr><td style="background:#000;padding:28px;text-align:center;">
-    <img src="https://i.imgur.com/iZFkTAN.png" alt="BURBAN" style="height:32px;">
+  <tr><td style="background:#fff;padding:40px;text-align:center;">
+    <img src="https://i.imgur.com/iZFkTAN.png" alt="BURBAN" style="height:60px;">
   </td></tr>
   <tr><td style="padding:40px;">
     <h1 style="font-size:22px;font-weight:400;margin:0 0 8px;color:#000;">De retour en stock !</h1>

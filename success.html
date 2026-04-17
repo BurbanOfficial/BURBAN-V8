@@ -139,7 +139,7 @@
                 const orderData = {
                     orderNumber,
                     userId: user.uid,
-                    userEmail: user.email,
+                    userEmail: user.email || tempOrder.shippingAddress?.email,
                     items: tempOrder.items,
                     total: tempOrder.total,
                     discount: tempOrder.discount,
@@ -191,19 +191,26 @@
                 // Vider le panier
                 localStorage.removeItem('cart');
                 
-                // Envoyer email de confirmation
+                // Envoyer email de confirmation via Mailgun
                 const customerEmail = tempOrder.shippingAddress.email || user.email;
                 const customerName = `${tempOrder.shippingAddress.firstName} ${tempOrder.shippingAddress.lastName}`;
-                
-                if (window.mailrelayService) {
-                    await window.mailrelayService.sendOrderConfirmationEmail(customerEmail, {
-                        customerName: customerName,
-                        orderNumber: orderNumber,
-                        orderDate: new Date().toLocaleDateString('fr-FR'),
-                        items: tempOrder.items,
-                        total: tempOrder.total,
-                        shippingAddress: tempOrder.shippingAddress
+                try {
+                    await fetch('https://burban-v8.onrender.com/send-order-email', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            type: 'confirmation',
+                            email: customerEmail,
+                            customerName,
+                            orderNumber,
+                            orderDate: new Date().toLocaleDateString('fr-FR'),
+                            items: tempOrder.items,
+                            total: tempOrder.total,
+                            shippingAddress: tempOrder.shippingAddress
+                        })
                     });
+                } catch (e) {
+                    console.error('Erreur email confirmation:', e);
                 }
                 
                 console.log('Commande finalisée:', orderNumber);
