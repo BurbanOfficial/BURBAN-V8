@@ -215,6 +215,9 @@ window.cancelOrderAdmin = async function(orderNumber) {
         });
         const result = await response.json();
         
+        // Envoyer email annulation
+        await sendOrderEmail(orderNumber, 'cancelled');
+        
         if (result.success) {
             alert(`Commande annulée et remboursée (${result.amount.toFixed(2)} €)`);
         } else {
@@ -225,6 +228,34 @@ window.cancelOrderAdmin = async function(orderNumber) {
     } catch (error) {
         console.error('Erreur:', error);
         alert('Erreur lors de l\'annulation');
+    }
+}
+
+async function sendOrderEmail(orderNumber, type) {
+    try {
+        const { doc, getDoc } = window.firebaseModules;
+        const orderDoc = await getDoc(doc(window.firebaseDb, 'orders', orderNumber));
+        if (!orderDoc.exists()) return;
+        const order = orderDoc.data();
+        const addr = order.shippingAddress || {};
+        const email = addr.email || order.userEmail;
+        if (!email) { console.warn('Pas d\'email pour la commande', orderNumber); return; }
+        await fetch('https://burban-v8.onrender.com/send-order-email', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                type,
+                email,
+                customerName: `${addr.firstName || ''} ${addr.lastName || ''}`.trim(),
+                orderNumber: order.orderNumber,
+                items: order.items,
+                total: order.total,
+                shippingAddress: addr,
+                trackingLink: order.trackingUrl || null
+            })
+        });
+    } catch (e) {
+        console.error('Erreur email commande:', e);
     }
 }
 
@@ -242,6 +273,11 @@ document.getElementById('orderForm')?.addEventListener('submit', async (e) => {
             trackingUrl,
             status
         });
+        
+        // Envoyer email si statut shipped ou delivered
+        if (status === 'shipped' || status === 'delivered') {
+            await sendOrderEmail(orderNumber, status);
+        }
         
         document.getElementById('orderModal').classList.remove('active');
         setTimeout(() => loadOrders(), 500);
